@@ -20,9 +20,9 @@ phases:
       - ls -alh submodules/quickstart-linux-bastion
       - aws s3 sync . s3://quickstart-solodev-eks --delete
       - DATE=$(date +%d%H%M)
-      - chmod 700 ci/bin/cleanStacks.sh bin/stacks.sh
+      - chmod 700 ci/bin/cleanStacks.sh ci/bin/stacks.sh
       # - ./bin/cleanStacks.sh
-      - ./bin/stacks.sh
+      - ./ci/bin/stacks.sh
       - echo "Cleanup!" | rm -f *json
   post_build:
     commands:

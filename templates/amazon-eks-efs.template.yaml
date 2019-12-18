@@ -1,7 +1,5 @@
-# Credit to [David Schott](https://github.com/schottsfired) from CloudBees for creating the original version of this
-# template https://github.com/aws-quickstart/quickstart-cloudbees-core/blob/master/templates/cloudbees-core-efs.template.yaml
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys an EFS file system and efs-provisioner (qs-1pipqrqhi)
+Description: Deploys an EFS file system and efs-provisioner
 Parameters:
   HelmLambdaArn:
     Type: String
@@ -14,8 +12,6 @@ Parameters:
   PrivateSubnet1ID:
     Type: AWS::EC2::Subnet::Id
   PrivateSubnet2ID:
-    Type: AWS::EC2::Subnet::Id
-  PrivateSubnet3ID:
     Type: AWS::EC2::Subnet::Id
   PerformanceMode:
     Type: String
@@ -63,12 +59,6 @@ Resources:
       FileSystemId: !Ref EFSFileSystem
       SecurityGroups: [ !Ref NodeGroupSecurityGroup ]
       SubnetId: !Ref PrivateSubnet2ID
-  MountTargetPrivateSubnet3:
-    Type: AWS::EFS::MountTarget
-    Properties:
-      FileSystemId: !Ref EFSFileSystem
-      SecurityGroups: [ !Ref NodeGroupSecurityGroup ]
-      SubnetId: !Ref PrivateSubnet3ID
   EFSProvisioner:
     Type: 'Custom::Helm'
     Version: '1.0'

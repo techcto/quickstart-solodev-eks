@@ -36,13 +36,13 @@ Parameters:
     Type: String
     Default: "Enabled"
     AllowedValues: ["Enabled", "Disabled"]
-  BastionIAMRoleName:
-    Type: String
+  AdditionalEKSAdminArns:
+    Type: CommaDelimitedList
     Default: ""
 Conditions:
   CreateDeleteBucketContentsRole: !Equals [!Ref 'DeleteLambdaZipsBucketContents', "True"]
   EnableBastionRole: !Equals [!Ref CreateBastionRole, "Enabled"]
-  CustomBastionRole: !Not [!Equals [!Ref 'BastionIAMRoleName', '']]
+  AddUsers: !Not [ !Equals [!Select [ 0, !Ref AdditionalEKSAdminArns ], ""] ]
 Resources:
   DeleteBucketContentsRole:
     Condition: CreateDeleteBucketContentsRole
@@ -107,13 +107,6 @@ Resources:
             - Effect: Allow
               Principal:
                 AWS: !GetAtt BastionRole.Arn
-              Action: sts:AssumeRole
-            - !Ref AWS::NoValue
-          - !If
-            - CustomBastionRole
-            - Effect: Allow
-              Principal:
-                AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${BastionIAMRoleName}'
               Action: sts:AssumeRole
             - !Ref AWS::NoValue
           - Effect: Allow
@@ -227,6 +220,20 @@ Resources:
                   - logs:PutLogEvents
                 Resource:
                   - arn:aws:logs:*:*:*
+  # ControlPlaneAdminRole:
+  #   Condition: AddUsers
+  #   DependsOn: ControlPlaneProvisionRole
+  #   Type: AWS::IAM::Policy
+  #   Properties:
+  #     Roles:
+  #       - !Ref ControlPlaneProvisionRole
+  #     Users: !Split [",", !Ref AdditionalEKSAdminArns]
+  #     PolicyName: 'ControlPlaneAdminRole'
+  #     PolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Effect: Allow
+  #           Action: sts:AssumeRole
   NodeInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -259,6 +266,37 @@ Resources:
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub "arn:aws:s3:::${QSS3BucketName}/${QSS3KeyPrefix}*"
+        - PolicyName: route53Access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "route53:ChangeResourceRecordSets"
+                Resource: "arn:aws:route53:::hostedzone/*"
+              - Effect: Allow
+                Action: 
+                  - "route53:ListHostedZones"
+                  - "route53:ListResourceRecordSets"
+                Resource: "*"
+        - PolicyName: PwxWorkerNodePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:AttachVolume
+                  - ec2:DetachVolume
+                  - ec2:CreateTags
+                  - ec2:CreateVolume
+                  - ec2:DeleteTags
+                  - ec2:DeleteVolume
+                  - ec2:DescribeTags
+                  - ec2:DescribeVolumeAttribute
+                  - ec2:DescribeVolumesModifications
+                  - ec2:DescribeVolumeStatus
+                  - ec2:DescribeVolumes
+                  - ec2:DescribeInstances
+                Resource: "*"
   BastionRole:
     Condition: EnableBastionRole
     Type: "AWS::IAM::Role"
@@ -294,6 +332,11 @@ Resources:
                   - ec2:AssociateAddress
                   - ec2:DescribeAddresses
                   - eks:ListClusters
+                  - iam:GetRole
+                  - iam:CreateRole
+                  - iam:CreatePolicy
+                  - iam:AttachRolePolicy
+                  - iam:CreateOpenIDConnectProvider 
                 Resource: "*"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM

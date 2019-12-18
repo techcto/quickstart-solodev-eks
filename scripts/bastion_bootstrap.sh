@@ -242,16 +242,12 @@ EOF
     echo "Defaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
 
     if [[ "${release}" == "Ubuntu" ]]; then
-        user="ubuntu"
         user_group="ubuntu"
     elif [[ "${release}" == "CentOS" ]]; then
-        user="centos"
         user_group="centos"
     elif [[ "${release}" == "SLES" ]]; then
-        user="ec2-user"
         user_group="users"
     else
-        user="ec2-user"
         user_group="ec2-user"
     fi
 
@@ -271,8 +267,8 @@ EOF
     fi
 
     if [[ "${release}" == "SLES" ]]; then
-        zypper install -y bash-completion
-        echo "0 0 * * * zypper patch -y" > ~/mycron
+        zypper install --non-interactive bash-completion
+        echo "0 0 * * * zypper patch --non-interactive" > ~/mycron
     elif [[ "${release}" == "Ubuntu" ]]; then
         apt-get install -y unattended-upgrades
         apt-get install -y bash-completion
@@ -393,8 +389,8 @@ function prevent_process_snooping() {
 }
 
 function setup_kubeconfig() {
-    mkdir -p /home/${user}/.kube
-    cat > /home/${user}/.kube/config <<EOF
+    mkdir -p /home/${user_group}/.kube
+    cat > /home/${user_group}/.kube/config <<EOF
 apiVersion: v1
 clusters:
 - cluster:
@@ -422,18 +418,27 @@ users:
         - "-r"
         - "${K8S_ROLE_ARN}"
 EOF
-    chown -R ${user}:${user_group} /home/${user}/.kube/
+    chown -R ${user_group} /home/${user_group}/.kube/
 }
 
 function install_kubernetes_client_tools() {
+    echo "Installing Pip"
+    easy_install pip
+    echo "Upgrading AWS CLI"
+    /usr/local/bin/pip3 install awscli --upgrade --user
     mkdir -p /usr/local/bin/
+    echo "Install AWS IAM Auth"
+    # retry_command 20 curl --retry 5 -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/aws-iam-authenticator
     retry_command 20 curl --retry 5 -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator
     chmod +x ./aws-iam-authenticator
     mv ./aws-iam-authenticator /usr/local/bin/
+    echo "Install Kubectl"
+    # retry_command 20 curl --retry 5 -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/kubectl
     retry_command 20 curl --retry 5 -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/kubectl
     chmod +x ./kubectl
     mv ./kubectl /usr/local/bin/
-    echo "source <(kubectl completion bash)" >> ~/.bashrc
+    echo "source <(/usr/local/bin/kubectl completion bash)" >> ~/.bashrc
+    echo "Install Helm"
     retry_command 20 curl --retry 5 -o helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz
     tar -xvf helm.tar.gz
     chmod +x ./linux-amd64/helm
@@ -442,7 +447,7 @@ function install_kubernetes_client_tools() {
     mv ./linux-amd64/tiller /usr/local/bin/
     rm -rf ./linux-amd64/
     touch /var/log/tiller.log
-    chown ${user}:${user_group} /var/log/tiller.log
+    chown ${user_group} /var/log/tiller.log
     cat > /usr/local/bin/helm <<"EOF"
 #!/bin/bash
 /usr/local/bin/tiller -listen 127.0.0.1:44134 -alsologtostderr -storage secret &>> /var/log/tiller.log &
@@ -455,7 +460,7 @@ kill %1
 exit ${EXIT_CODE}
 EOF
     chmod +x /usr/local/bin/helm
-    su ${user} -c "/usr/local/bin/helm init --client-only"
+    su ${user_group} -c "/usr/local/bin/helm init --client-only"
 }
 
 ##################################### End Function Definitions
@@ -563,5 +568,160 @@ prevent_process_snooping
 request_eip
 install_kubernetes_client_tools
 setup_kubeconfig
+KUBECONFIG="/home/${user_group}/.kube/config"
+NAMESPACE="solodev-dcx"
+
+su ${user_group} -c "/usr/local/bin/helm repo add charts 'https://raw.githubusercontent.com/techcto/charts/master/'"
+su ${user_group} -c "/usr/local/bin/helm repo update"
+
+#Network Setup
+initCNI(){
+    echo "Disable AWS CNI"
+    # /usr/local/bin/kubectl --kubeconfig $KUBECONFIG delete ds aws-node -n kube-system --ignore-not-found=true
+    # echo "Reinstall AWS CNI"
+    # kubectl set env ds aws-node -n kube-system AWS_VPC_K8S_CNI_EXTERNALSNAT=true
+    # echo "Install CNI Genie"
+    # /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f https://raw.githubusercontent.com/Huawei-PaaS/CNI-Genie/master/conf/1.8/genie-plugin.yaml
+    #WEAVE
+    initWeave
+}
+
+initWeave(){
+    echo "Install Weave CNI"
+    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(/usr/local/bin/kubectl --kubeconfig $KUBECONFIG version | base64 | tr -d '\n')"
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f weave-net.yaml
+}
+
+initServiceAccount(){
+    kubectl --kubeconfig=$KUBECONFIG create namespace solodev-dcx
+    echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
+    ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
+    echo $ISSUER_URL
+    ISSUER_URL_WITHOUT_PROTOCOL=$(echo $ISSUER_URL | sed 's/https:\/\///g' )
+    ISSUER_HOSTPATH=$(echo $ISSUER_URL_WITHOUT_PROTOCOL | sed "s/\/id.*//" )
+    rm *.crt || echo "No files that match *.crt exist"
+    ROOT_CA_FILENAME=$(openssl s_client -showcerts -connect $ISSUER_HOSTPATH:443 < /dev/null \
+                        | awk '/BEGIN/,/END/{ if(/BEGIN/){a++}; out="cert"a".crt"; print > out } END {print "cert"a".crt"}')
+    ROOT_CA_FINGERPRINT=$(openssl x509 -fingerprint -noout -in $ROOT_CA_FILENAME \
+                        | sed 's/://g' | sed 's/SHA1 Fingerprint=//')
+    aws iam create-open-id-connect-provider \
+                        --url $ISSUER_URL \
+                        --thumbprint-list $ROOT_CA_FINGERPRINT \
+                        --client-id-list sts.amazonaws.com \
+                        --region ${REGION} || echo "A provider for $ISSUER_URL already exists"
+    ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+    PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/$ISSUER_URL_WITHOUT_PROTOCOL"
+    cat > trust-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Principal": {
+            "Federated": "${PROVIDER_ARN}"
+        },
+        "Action": "sts:AssumeRoleWithWebIdentity",
+        "Condition": {
+            "StringEquals": {
+                "${ISSUER_URL_WITHOUT_PROTOCOL}:sub": "system:serviceaccount:${NAMESPACE}:aws-serviceaccount"
+            }
+        }
+    }]
+}
+EOF
+
+    ROLE_NAME=solodev-usage-${K8S_CLUSTER_NAME}
+    aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
+    cat > iam-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "aws-marketplace:RegisterUsage"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}
+EOF
+
+    POLICY_ARN=$(aws iam create-policy --policy-name AWSMarketplacePolicy-${K8S_CLUSTER_NAME} --policy-document file://iam-policy.json --query Policy.Arn | sed 's/"//g')
+    echo ${POLICY_ARN}
+    aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn $POLICY_ARN
+    echo $ROLE_NAME
+    applyServiceAccount $ROLE_NAME
+}
+
+applyServiceAccount(){
+    ROLE_NAME=$1
+    echo "Role="$ROLE_NAME
+    ROLE_ARN=$(aws iam get-role --role-name ${ROLE_NAME} --query Role.Arn --output text)
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG create sa aws-serviceaccount --namespace ${NAMESPACE}
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$ROLE_ARN --namespace ${NAMESPACE}
+    echo "Service Account Created: aws-serviceaccount"
+}
+
+initNetwork(){
+    export PATH=/usr/local/bin/:$PATH
+    su ${user_group} -c "/usr/local/bin/helm install --name nginx-ingress stable/nginx-ingress --set controller.service.annotations.\"service\.beta\.kubernetes\.io/aws-load-balancer-type\"=nlb \
+        --set controller.publishService.enabled=true,controller.stats.enabled=true,controller.metrics.enabled=true,controller.hostNetwork=true,controller.kind=DaemonSet"
+    su ${user_group} -c "/usr/local/bin/helm install --name external-dns stable/external-dns --set logLevel=debug \
+        --set policy=sync --set domainFilters={${DOMAIN}} --set rbac.create=true \
+        --set aws.zoneType=public --set txtOwnerId=${K8S_CLUSTER_NAME}"
+        # --set controller.hostNetwork=true,controller.kind=DaemonSet"
+}
+
+initDashboard(){
+    yum install -y jq
+    DOWNLOAD_URL=$(curl --silent "https://api.github.com/repos/kubernetes-sigs/metrics-server/releases/latest" | jq -r .tarball_url)
+    DOWNLOAD_VERSION=$(grep -o '[^/v]*$' <<< $DOWNLOAD_URL)
+    curl -Ls $DOWNLOAD_URL -o metrics-server-$DOWNLOAD_VERSION.tar.gz
+    mkdir metrics-server-$DOWNLOAD_VERSION
+    tar -xzf metrics-server-$DOWNLOAD_VERSION.tar.gz --directory metrics-server-$DOWNLOAD_VERSION --strip-components 1
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f metrics-server-$DOWNLOAD_VERSION/deploy/1.8+/
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG get deployment metrics-server -n kube-system
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml
+    cat > eks-admin-service-account.yaml << EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eks-admin
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eks-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: eks-admin
+  namespace: kube-system
+EOF
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f eks-admin-service-account.yaml
+    /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
+}
+
+initStorage(){
+    kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/portworx.yaml
+    kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/storage-class.yaml
+}
+
+#Service Account
+initServiceAccount
+
+if [[ "$ProvisionSolodevDCXNetwork" = "Enabled" ]]; then
+    initCNI
+fi
+
+initNetwork
+initStorage
+
+#Dashboard Setup
+initDashboard
 
 echo "Bootstrap complete."

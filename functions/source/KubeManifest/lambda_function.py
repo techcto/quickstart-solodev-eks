@@ -241,6 +241,12 @@ def handler_init(event):
         raise Exception("KubeConfigPath must be a valid s3 URI (eg.: s3://my-bucket/my-key.txt")
     bucket, key, kms_context = get_config_details(event)
     create_kubeconfig(bucket, key, kms_context)
+    if 'CNI' in event['ResourceProperties'].keys():
+        try:
+            outp = run_command("kubectl delete ds aws-node -n kube-system")
+            logger.debug(outp)
+        except Exception as e:
+            cleanCNI = True
     if 'Users' in event['ResourceProperties'].keys():
         username = None
         if 'Username' in event['ResourceProperties']['Users'].keys():

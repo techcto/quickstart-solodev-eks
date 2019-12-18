@@ -1,5 +1,7 @@
-/.idea
-/taskcat_outputs
-/venv
-/ci/dev-config.yml
-.DS_Store
+.vscode
+server.*
+params
+
+eks/bin/*
+eks/bin/!kcmd.sh
+eks/bin/!setService.sh

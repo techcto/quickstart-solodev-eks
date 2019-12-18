@@ -19,6 +19,8 @@ Parameters:
     Type: String
   KubeConfigUploadRoleArn:
     Type: String
+  ControlPlaneProvisionRoleArn:
+    Type: String
   KubeConfigS3Bucket:
     Type: String
   KubeConfigS3Key:
@@ -34,10 +36,15 @@ Parameters:
     Default: ""
   KubernetesVersion:
     Type: String
-    AllowedValues: [ "1.14", "1.13", "1.12", "1.11" ]
+    AllowedValues: [ "1.14", "1.13" ]
     Default: "1.14"
+  ProvisionSolodevDCXNetwork:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
 Conditions:
   AddUsers: !Not [ !Equals [!Select [ 0, !Ref AdditionalEKSAdminArns ], ""] ]
+  EnableSolodevDCXNetwork: !Equals [!Ref 'ProvisionSolodevDCXNetwork', 'Enabled']
 Resources:
   EKS:
     Type: "AWS::EKS::Cluster"
@@ -59,18 +66,6 @@ Resources:
         Arns: [ !Ref NodeInstanceRoleArn ]
         Groups: [ 'system:bootstrappers', 'system:nodes' ]
         Username: 'system:node:{{EC2PrivateDNSName}}'
-  AdditionalAdminUsers:
-    Condition: AddUsers
-    DependsOn: [ EksNodeUser, AddCallerUserToClusterAsAdmin ]
-    Type: "Custom::KubeManifest"
-    Version: '1.0'
-    Properties:
-      ServiceToken: !Ref KubeManifestLambdaArn
-      KubeConfigPath: !Sub "s3://${KubeConfigS3Bucket}/${KubeConfigS3Key}"
-      KubeConfigKmsContext: !Ref KmsContext
-      Users:
-        Arns: !Ref AdditionalEKSAdminArns
-        Groups: [ "system:masters" ]
   KubeConfigToS3:
     Type: "Custom::ConfigToS3"
     Version: '1.0'
@@ -105,6 +100,29 @@ Resources:
         Arns: [!GetAtt CallerArn.Arn]
         Groups: [ "system:masters" ]
       Username: !Ref CallerArn
+  AdditionalAdminUsers:
+    Condition: AddUsers
+    DependsOn: [ EksNodeUser, AddCallerUserToClusterAsAdmin ]
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref KubeManifestLambdaArn
+      KubeConfigPath: !Sub "s3://${KubeConfigS3Bucket}/${KubeConfigS3Key}"
+      KubeConfigKmsContext: !Ref KmsContext
+      Users:
+        Arns: !Ref AdditionalEKSAdminArns
+        Groups: [ "system:masters" ]
+  CNI:
+    Condition: EnableSolodevDCXNetwork
+    DependsOn: KubeConfigToS3
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref KubeManifestLambdaArn
+      KubeConfigPath: !Sub "s3://${KubeConfigS3Bucket}/${KubeConfigS3Key}"
+      KubeConfigKmsContext: !Ref KmsContext
+      CNI:
+        Prep: "true"
 Outputs:
   EksArn:
     Value: !GetAtt EKS.Arn
@@ -116,3 +134,5 @@ Outputs:
     Value: !Ref EKS
   KubeConfigPath:
     Value: !Sub "s3://${KubeConfigS3Bucket}/${KubeConfigS3Key}"
+  ControlPlaneProvisionRoleArn:
+    Value: !Ref ControlPlaneProvisionRoleArn

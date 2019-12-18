@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Deploys an EKS cluster into an existing VPC (qs-1p7nknoi6)
+Description: Deploys an EKS cluster into an existing VPC
 Parameters:
   KeyPairName:
     Type: AWS::EC2::KeyPair::KeyName
@@ -25,91 +25,9 @@ Parameters:
     Type: CommaDelimitedList
   NodeInstanceType:
     Default: t3.medium
-    AllowedValues:
-      - t2.small
-      - t2.medium
-      - t2.large
-      - t2.xlarge
-      - t2.2xlarge
-      - t3.nano
-      - t3.micro
-      - t3.small
-      - t3.medium
-      - t3.large
-      - t3.xlarge
-      - t3.2xlarge
-      - m3.medium
-      - m3.large
-      - m3.xlarge
-      - m3.2xlarge
-      - m4.large
-      - m4.xlarge
-      - m4.2xlarge
-      - m4.4xlarge
-      - m4.10xlarge
-      - m5.large
-      - m5.xlarge
-      - m5.2xlarge
-      - m5.4xlarge
-      - m5.12xlarge
-      - m5.24xlarge
-      - c4.large
-      - c4.xlarge
-      - c4.2xlarge
-      - c4.4xlarge
-      - c4.8xlarge
-      - c5.large
-      - c5.xlarge
-      - c5.2xlarge
-      - c5.4xlarge
-      - c5.9xlarge
-      - c5.18xlarge
-      - i3.large
-      - i3.xlarge
-      - i3.2xlarge
-      - i3.4xlarge
-      - i3.8xlarge
-      - i3.16xlarge
-      - r3.xlarge
-      - r3.2xlarge
-      - r3.4xlarge
-      - r3.8xlarge
-      - r4.large
-      - r4.xlarge
-      - r4.2xlarge
-      - r4.4xlarge
-      - r4.8xlarge
-      - r4.16xlarge
-      - x1.16xlarge
-      - x1.32xlarge
-      - p2.xlarge
-      - p2.8xlarge
-      - p2.16xlarge
-      - p3.2xlarge
-      - p3.8xlarge
-      - p3.16xlarge
-      - r5.large
-      - r5.xlarge
-      - r5.2xlarge
-      - r5.4xlarge
-      - r5.12xlarge
-      - r5.24xlarge
-      - r5d.large
-      - r5d.xlarge
-      - r5d.2xlarge
-      - r5d.4xlarge
-      - r5d.12xlarge
-      - r5d.24xlarge
-      - z1d.large
-      - z1d.xlarge
-      - z1d.2xlarge
-      - z1d.3xlarge
-      - z1d.6xlarge
-      - z1d.12xlarge
-    ConstraintDescription: Must be a valid EC2 instance type
     Type: String
   NumberOfNodes:
-    Default: 3
+    Default: 2
     Type: Number
   MaxNumberOfNodes:
     Default: 3
@@ -129,17 +47,13 @@ Parameters:
     Type: "AWS::EC2::Subnet::Id"
   PublicSubnet2ID:
     Type: "AWS::EC2::Subnet::Id"
-  PublicSubnet3ID:
-    Type: "AWS::EC2::Subnet::Id"
   PrivateSubnet1ID:
     Type: "AWS::EC2::Subnet::Id"
   PrivateSubnet2ID:
     Type: "AWS::EC2::Subnet::Id"
-  PrivateSubnet3ID:
-    Type: "AWS::EC2::Subnet::Id"
   KubernetesVersion:
     Type: String
-    AllowedValues: [ "1.14", "1.13", "1.12", "1.11" ]
+    AllowedValues: [ "1.14", "1.13" ]
     Default: "1.14"
   ProvisionClusterAutoScaler:
     Type: String
@@ -198,6 +112,16 @@ Parameters:
     Type: Number
     MinValue: 0
     Default: 0
+  ProvisionSolodevDCXNetwork:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
+  ZoneName:
+    Type: String
+    Default: ""
+  ZoneId:
+    Type: String
+    Default: ""
 Conditions:
   CreateLambdaZipsBucket: !Equals [!Ref 'LambdaZipsBucketName', '']
   DefaultBastionBootstrap: !Equals [!Ref 'BastionBootstrapScript', '']
@@ -206,6 +130,7 @@ Conditions:
   AdditionalVars: !Not [!Equals [!Ref 'BastionVariables', '']]
   EnableClusterAutoScaler: !Equals [!Ref 'ProvisionClusterAutoScaler', 'Enabled']
   EnableEfs: !Equals [!Ref 'EfsStorageClass', 'Enabled']
+  EnableSolodevDCXNetwork: !Equals [!Ref 'ProvisionSolodevDCXNetwork', 'Enabled']
 Resources:
   BastionEksPermissions:
     Condition: EnableBastion
@@ -228,14 +153,14 @@ Resources:
     Condition: EnableBastion
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/submodules/quickstart-linux-bastion/templates/linux-bastion.template'
       Parameters:
         VPCID: !Ref VPCID
         PublicSubnet1ID: !Ref PublicSubnet1ID
         PublicSubnet2ID: !Ref PublicSubnet2ID
         KeyPairName: !Ref KeyPairName
         QSS3BucketName: !Ref QSS3BucketName
-        QSS3KeyPrefix: !Sub '${QSS3KeyPrefix}submodules/quickstart-linux-bastion/'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         BastionInstanceType: !Ref BastionInstanceType
         RootVolumeSize: !Ref BastionRootVolumeSize
@@ -251,20 +176,21 @@ Resources:
         - >
           K8S_ROLE_ARN=${IamStack.Outputs.ControlPlaneProvisionRoleArn},
           K8S_CLUSTER_NAME=${EKSControlPlane.EKSName},
+          DOMAIN=${ZoneName},
           K8S_CA_DATA=${EKSControlPlane.CAData},
-          K8S_ENDPOINT=${EKSControlPlane.EKSEndpoint}${Joiner}
+          K8S_ENDPOINT=${EKSControlPlane.EKSEndpoint}${Joiner},
+          ProvisionSolodevDCXNetwork=${ProvisionSolodevDCXNetwork}
           ${BastionVariables}
         - Joiner: !If [AdditionalVars, ",", ""]
   NodeGroupStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-nodegroup.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-nodegroup.yaml'
       Parameters:
         KeyPairName: !Ref 'KeyPairName'
         NodeAMIOS: !Ref NodeAMIOS
         PrivateSubnet1ID: !Ref PrivateSubnet1ID
         PrivateSubnet2ID: !Ref PrivateSubnet2ID
-        PrivateSubnet3ID: !Ref PrivateSubnet3ID
         VPCID: !Ref VPCID
         NodeInstanceType: !Ref NodeInstanceType
         NumberOfNodes: !Ref NumberOfNodes
@@ -279,7 +205,6 @@ Resources:
         BootstrapArguments: !Ref BootstrapArguments
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        CleanupSecurityGroupDependenciesLambdaArn: !GetAtt FunctionStack.Outputs.CleanupSecurityGroupDependenciesLambdaArn
   BastionSShToNodes:
     Condition: EnableBastion
     Type: "AWS::EC2::SecurityGroupIngress"
@@ -303,19 +228,19 @@ Resources:
   IamStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-iam.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-iam.yaml'
       Parameters:
         LambdaZipsBucketName: !If [ CreateLambdaZipsBucket, !Ref LambdaZipsBucket, !Ref LambdaZipsBucketName ]
         DeleteLambdaZipsBucketContents: !If [ CreateLambdaZipsBucket, "True", "False" ]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         KubeConfigBucket: !Ref KubeConfigBucket
+        AdditionalEKSAdminArns: !Join [ ",", !Ref AdditionalEKSAdminArns ]
         CreateBastionRole: !If [CustomBastionRole, "Disabled", !If [EnableBastion, "Enabled", "Disabled"]]
-        BastionIAMRoleName: !If [CustomBastionRole, !Ref BastionIAMRoleName , ''] 
   FunctionStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-functions.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-functions.yaml'
       Parameters:
         LambdaZipsBucketName: !If [ CreateLambdaZipsBucket, !Ref LambdaZipsBucket, !Ref LambdaZipsBucketName ]
         QSS3BucketName: !Ref QSS3BucketName
@@ -323,7 +248,7 @@ Resources:
         CopyZipsRoleArn: !GetAtt IamStack.Outputs.CopyZipsRoleArn
         EKSProvisionRoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
         ControlPlaneSecurityGroup: !Ref ControlPlaneSecurityGroup
-        EKSSubnetIds: !Sub "${PrivateSubnet1ID},${PrivateSubnet2ID},${PrivateSubnet3ID}"
+        EKSSubnetIds: !Sub "${PrivateSubnet1ID},${PrivateSubnet2ID}"
         DeleteBucketContentsRoleArn: !GetAtt IamStack.Outputs.DeleteBucketContentsRoleArn
         QuickStartStackMakerRoleArn: !GetAtt IamStack.Outputs.QuickStartStackMakerRoleArn
         DeleteLambdaZipsBucketContents: !If [ CreateLambdaZipsBucket, "True", "False" ]
@@ -336,7 +261,7 @@ Resources:
     Condition: EnableClusterAutoScaler
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-cluster-autoscaler.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-cluster-autoscaler.yaml'
       Parameters:
         HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
         KubeConfigPath: !Sub "s3://${KubeConfigBucket}/.kube/config.enc"
@@ -349,7 +274,7 @@ Resources:
     Condition: EnableEfs
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-efs.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-efs.yaml'
       Parameters:
         HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
         KubeConfigPath: !Sub "s3://${KubeConfigBucket}/.kube/config.enc"
@@ -357,7 +282,6 @@ Resources:
         NodeGroupSecurityGroup: !GetAtt NodeGroupStack.Outputs.EKSNodeSecurityGroup
         PrivateSubnet1ID: !Ref PrivateSubnet1ID
         PrivateSubnet2ID: !Ref PrivateSubnet2ID
-        PrivateSubnet3ID: !Ref PrivateSubnet3ID
         PerformanceMode: !Ref EfsPerformanceMode
         ProvisionedThroughputInMibps: !Ref EfsProvisionedThroughputInMibps
         ThroughputMode: !Ref EfsThroughputMode
@@ -382,11 +306,11 @@ Resources:
     Properties:
       ServiceToken: !GetAtt FunctionStack.Outputs.QuickStartStackMakerLambdaArn
       RoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-controlplane.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-controlplane.yaml'
       ParentStackId: !Ref AWS::StackId
       CfnParameters:
         SecurityGroupIds: !Ref ControlPlaneSecurityGroup
-        SubnetIds: !Join [",", [ !Ref PrivateSubnet1ID, !Ref PrivateSubnet2ID, !Ref PrivateSubnet3ID, !Ref PublicSubnet1ID, !Ref PublicSubnet2ID, !Ref PublicSubnet3ID ]]
+        SubnetIds: !Join [",", [ !Ref PrivateSubnet1ID, !Ref PrivateSubnet2ID, !Ref PublicSubnet1ID, !Ref PublicSubnet2ID ]]
         RoleArn: !GetAtt IamStack.Outputs.ControlPlaneRoleArn
         NodeInstanceRoleArn: !GetAtt IamStack.Outputs.NodeInstanceRoleArn
         KubeManifestLambdaArn: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
@@ -399,6 +323,8 @@ Resources:
         KmsContext: !Ref KubeConfigKmsContext
         CleanupLoadBalancersLambdaArn: !GetAtt FunctionStack.Outputs.CleanupLoadBalancersLambdaArn
         GetCallerArnLambdaArn: !GetAtt FunctionStack.Outputs.GetCallerArnLambdaArn
+        ControlPlaneProvisionRoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
+        ProvisionSolodevDCXNetwork: !Ref ProvisionSolodevDCXNetwork
   KmsKey:
     Type: "AWS::KMS::Key"
     Properties:
@@ -469,5 +395,3 @@ Outputs:
     Value: !GetAtt IamStack.Outputs.NodeInstanceRoleArn
   CleanupSecurityGroupDependenciesLambdaArn:
     Value: !GetAtt FunctionStack.Outputs.CleanupSecurityGroupDependenciesLambdaArn
-  NodeAutoScalingGroup:
-    Value: !GetAtt NodeGroupStack.Outputs.NodeAutoScalingGroup

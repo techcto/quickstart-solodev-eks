@@ -204,9 +204,9 @@ Environment='KUBELET_EXTRA_ARGS=$KUBELET_EXTRA_ARGS'
 EOF
 fi
 
-# if [[ "$SOLODEV_NETWORK" = "true" ]]; then
-
-# fi
+if [[ "$SOLODEV_NETWORK" = "true" ]]; then
+    rm -Rf /etc/cni/net.d/10-aws.conflist /opt/cni/bin/aws-cni
+fi
 
 systemctl daemon-reload
 systemctl enable kubelet

@@ -226,7 +226,7 @@ Parameters:
     Description: The name for EKS node group.
     Type: String
   NodeVolumeSize:
-    Default: 150
+    Default: 20
     Description: "The size for the node's root EBS volumes."
     Type: String
   KubernetesVersion:

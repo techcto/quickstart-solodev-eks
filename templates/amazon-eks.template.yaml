@@ -185,7 +185,7 @@ Resources:
   NodeGroupStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-nodegroup.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-nodegroup.template.yaml'
       Parameters:
         KeyPairName: !Ref 'KeyPairName'
         NodeAMIOS: !Ref NodeAMIOS
@@ -228,7 +228,7 @@ Resources:
   IamStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-iam.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-iam.template.yaml'
       Parameters:
         LambdaZipsBucketName: !If [ CreateLambdaZipsBucket, !Ref LambdaZipsBucket, !Ref LambdaZipsBucketName ]
         DeleteLambdaZipsBucketContents: !If [ CreateLambdaZipsBucket, "True", "False" ]
@@ -240,7 +240,7 @@ Resources:
   FunctionStack:
     Type: "AWS::CloudFormation::Stack"
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-functions.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-functions.template.yaml'
       Parameters:
         LambdaZipsBucketName: !If [ CreateLambdaZipsBucket, !Ref LambdaZipsBucket, !Ref LambdaZipsBucketName ]
         QSS3BucketName: !Ref QSS3BucketName
@@ -261,7 +261,7 @@ Resources:
     Condition: EnableClusterAutoScaler
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-cluster-autoscaler.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-cluster-autoscaler.template.yaml'
       Parameters:
         HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
         KubeConfigPath: !Sub "s3://${KubeConfigBucket}/.kube/config.enc"
@@ -274,7 +274,7 @@ Resources:
     Condition: EnableEfs
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-efs.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-efs.template.yaml'
       Parameters:
         HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
         KubeConfigPath: !Sub "s3://${KubeConfigBucket}/.kube/config.enc"
@@ -306,7 +306,7 @@ Resources:
     Properties:
       ServiceToken: !GetAtt FunctionStack.Outputs.QuickStartStackMakerLambdaArn
       RoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-controlplane.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-eks-controlplane.template.yaml'
       ParentStackId: !Ref AWS::StackId
       CfnParameters:
         SecurityGroupIds: !Ref ControlPlaneSecurityGroup

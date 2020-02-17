@@ -617,14 +617,38 @@ Resources:
       AWS::CloudFormation::Init:
         config:
           files:
+            /tmp/worker/bootstrap.sh:
+              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/bootstrap.sh
+              group: root
+              owner: root
+              mode: '000644'
+              authentication: S3Auth
+            /tmp/worker/docker-daemon.json:
+              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/docker-daemon.json
+              group: root
+              owner: root
+              mode: '000644'
+              authentication: S3Auth
+            /tmp/worker/eni-max-pods.txt:
+              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/eni-max-pods.txt
+              group: root
+              owner: root
+              mode: '000644'
+              authentication: S3Auth
             /tmp/worker/install-worker.sh:
               source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/install-worker.sh
               group: root
               owner: root
               mode: '000755'
               authentication: S3Auth
-            /tmp/worker/bootstrap.sh:
-              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/bootstrap.sh
+            /tmp/worker/kubelet-config.json:
+              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/kubelet-config.json
+              group: root
+              owner: root
+              mode: '000644'
+              authentication: S3Auth
+            /tmp/worker/kubelet-kubeconfig:
+              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/kubelet-kubeconfig
               group: root
               owner: root
               mode: '000644'
@@ -635,9 +659,22 @@ Resources:
               owner: root
               mode: '000644'
               authentication: S3Auth
+            /tmp/worker/logrotate-kube-proxy:
+              source: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}scripts/amazon-eks/logrotate-kube-proxy
+              group: root
+              owner: root
+              mode: '000644'
+              authentication: S3Auth
           commands:
             a-install:
               command: /tmp/worker/install-worker.sh
+              env:
+                BINARY_BUCKET_NAME: amazon-eks
+                BINARY_BUCKET_PATH: !FindInMap
+                  - K8sVersionMap
+                  - !Ref KubernetesVersion
+                  - BinaryPath
+                BINARY_BUCKET_REGION: us-west-2
             b-bootstrap:
               command: !Sub /etc/eks/bootstrap.sh ${EKSControlPlane} ${BootstrapArguments}
     Properties:

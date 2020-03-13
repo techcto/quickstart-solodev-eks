@@ -99,6 +99,10 @@ Parameters:
     Type: String
     Default: ""
 
+  AppVersion:
+    Type: String
+    Default: "9.2.77"
+
 Resources:
   SolodevDCX:
     Type: "Custom::Helm"
@@ -120,7 +124,7 @@ Resources:
           image:
             registry: docker.io
             repository: solodev/cms
-            tag: latest
+            tag: ${AppVersion}
             pullPolicy: IfNotPresent
           domainName: ${DomainName}
           clusterZone: ${ClusterZone}
@@ -148,7 +152,7 @@ Resources:
           image:
             registry: docker.io
             repository: solodev/cms-apache
-            tag: latest
+            tag: ${AppVersion}
             pullPolicy: IfNotPresent
           http:
             port: 80

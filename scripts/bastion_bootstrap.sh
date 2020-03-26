@@ -623,6 +623,7 @@ initServiceAccount(){
 }
 EOF
 
+    #To Review - AWS Marketplace Policy
     ROLE_NAME=solodev-usage-${K8S_CLUSTER_NAME}
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
     cat > iam-policy.json << EOF

@@ -112,16 +112,10 @@ Parameters:
     Type: Number
     MinValue: 0
     Default: 0
-  ProvisionSolodevDCXNetwork:
+  EnableWeave:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
-  ZoneName:
-    Type: String
-    Default: ""
-  ZoneId:
-    Type: String
-    Default: ""
 Conditions:
   CreateLambdaZipsBucket: !Equals [!Ref 'LambdaZipsBucketName', '']
   DefaultBastionBootstrap: !Equals [!Ref 'BastionBootstrapScript', '']
@@ -130,7 +124,6 @@ Conditions:
   AdditionalVars: !Not [!Equals [!Ref 'BastionVariables', '']]
   EnableClusterAutoScaler: !Equals [!Ref 'ProvisionClusterAutoScaler', 'Enabled']
   EnableEfs: !Equals [!Ref 'EfsStorageClass', 'Enabled']
-  EnableSolodevDCXNetwork: !Equals [!Ref 'ProvisionSolodevDCXNetwork', 'Enabled']
 Resources:
   BastionEksPermissions:
     Condition: EnableBastion
@@ -176,10 +169,9 @@ Resources:
         - >
           K8S_ROLE_ARN=${IamStack.Outputs.ControlPlaneProvisionRoleArn},
           K8S_CLUSTER_NAME=${EKSControlPlane.EKSName},
-          DOMAIN=${ZoneName},
           K8S_CA_DATA=${EKSControlPlane.CAData},
           K8S_ENDPOINT=${EKSControlPlane.EKSEndpoint}${Joiner},
-          ProvisionSolodevDCXNetwork=${ProvisionSolodevDCXNetwork}
+          EnableWeave=${EnableWeave}
           ${BastionVariables}
         - Joiner: !If [AdditionalVars, ",", ""]
   NodeGroupStack:
@@ -324,7 +316,7 @@ Resources:
         CleanupLoadBalancersLambdaArn: !GetAtt FunctionStack.Outputs.CleanupLoadBalancersLambdaArn
         GetCallerArnLambdaArn: !GetAtt FunctionStack.Outputs.GetCallerArnLambdaArn
         ControlPlaneProvisionRoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
-        ProvisionSolodevDCXNetwork: !Ref ProvisionSolodevDCXNetwork
+        EnableWeave: !Ref EnableWeave
   KmsKey:
     Type: "AWS::KMS::Key"
     Properties:

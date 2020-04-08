@@ -38,13 +38,13 @@ Parameters:
     Type: String
     AllowedValues: [ "1.14", "1.13" ]
     Default: "1.14"
-  ProvisionSolodevDCXNetwork:
+  EnableWeave:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
 Conditions:
   AddUsers: !Not [ !Equals [!Select [ 0, !Ref AdditionalEKSAdminArns ], ""] ]
-  EnableSolodevDCXNetwork: !Equals [!Ref 'ProvisionSolodevDCXNetwork', 'Enabled']
+  EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
   EKS:
     Type: "AWS::EKS::Cluster"
@@ -113,7 +113,7 @@ Resources:
         Arns: !Ref AdditionalEKSAdminArns
         Groups: [ "system:masters" ]
   CNI:
-    Condition: EnableSolodevDCXNetwork
+    Condition: EnableWeaveCNI
     DependsOn: [ EksNodeUser, KubeConfigToS3 ]
     Type: "Custom::KubeManifest"
     Version: '1.0'

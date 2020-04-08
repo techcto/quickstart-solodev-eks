@@ -272,10 +272,8 @@ Keep the proxy running within your terminal (open another terminal window if you
 	</tr>
 </table>
 
-## Step 9: Launch Optional Add-ons such as Solodev CMS
-With your EKS stack successfully launched, your outputs collected, and you connected to the cluster via the Kubernetes Dashboard, you can proceed to launch Solodev CMS.
-
-<p align="center"><a href="deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+## Step 9: Launch Optional Apps such as Solodev CMS
+With your EKS stack successfully launched, your outputs collected, and you connected to the cluster via the Kubernetes Dashboard, you can proceed to launch additional apps such as Solodev CMS. Return to the <a href="README.md">repository home</a> to view available apps for available for installation.
 
 ---
 © 2020 Solodev. All rights reserved worldwide. And off planet. 

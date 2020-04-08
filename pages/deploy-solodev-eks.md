@@ -1,9 +1,28 @@
-# Deploy EKS Cluster
+# Launch Solodev EKS for Kubernetes via CloudFormation
 
-## Step 1: Launch your CloudFormation Stack
+## Step 1: Subscribe on the AWS Marketplace
+Before launching one of our products, you'll first need to subscribe to Solodev on the <a href="https://aws.amazon.com/marketplace/pp/B07XV951M6">AWS Marketplace.</a> Click the button below to get started: 
+<table>
+	<tr>
+		<td width="60%"><a href="https://aws.amazon.com/marketplace/pp/B07XV951M6"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/AWS_Marketplace_Logo.jpg" /></a></td>
+		<td><a href="https://aws.amazon.com/marketplace/pp/B07XV951M6"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/Subscribe_Large.jpg" /></a></td>
+	</tr>
+</table>
+
+Already have a Solodev license? Call <a href="tel:1.800.859.7656">1-800-859-7656</a> and we’ll activate your subscription for you.<br /><br />
+
+## Step 2: Configure Your VPC and EC2 Key Pair
+Please note that both a <a href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html">VPC</a> and <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html">EC2 Key Pair</a> must be configured within the region you intend to launch your stack.
+
+While not required, <b><i>it is strongly recommended</i></b> to create a new VPC using the <a href="https://github.com/techcto/solodev-aws/blob/master/aws/corp-vpc.yaml">AWS VPC by Solodev CloudFormation Template</a>. Click the button below to launch the AWS VPC by Solodev.
+
+<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-vpc&templateURL=https://solodev-aws-ha.s3.amazonaws.com/aws/corp-vpc.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+
+
+## Step 3: Launch your CloudFormation Stack
 <p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-eks&templateURL=https://solodev-quickstarts.s3.amazonaws.com/eks/templates/solodev-eks.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 
-## Step 2: Fill Out the CloudFormation Stack Wizard
+## Step 4: Fill Out the CloudFormation Stack Wizard
 <strong>Continue with the preselected CloudFormation Template</strong><br />
 The Amazon S3 template URL (used for the CloudFormation configuration) should be preselected. Click "Next" to continue.
 
@@ -164,7 +183,7 @@ Review all CloudFront details and options. Ensure that the "I acknowledge that A
 	</tr>
 </table>
 
-## Step 3: Monitor the CloudFormation Stack Creation Process
+## Step 5: Monitor the CloudFormation Stack Creation Process
 Upon launching your CloudFormation stack, you will be able to monitor the installation logs under the "Events" tab. The CloudFormation template will launch several stacks related to your Solodev instance. If you encounter any failures during this time, please visit the <a href="https://github.com/solodev/AWS-Launch-Pad/wiki/Common-Issues">Common Issues</a> page to begin troubleshooting.
 
 <table>
@@ -173,7 +192,7 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 	</tr>
 </table>
 
-## Step 4: Gather Stack Outputs for Solodev EKS
+## Step 6: Gather Stack Outputs for Solodev EKS
 If your stack builds successfully, you will see the green "CREATE_COMPLETE" message.
 
 Click on the primary stack and view the "Outputs" tab. You will find details pertaining to the cluster's BastionIP, EKSClusterName, HelmLambdaArn, KubeConfigPath, and KubeManifestLambdaArn. Click on the "ControlPlane" stack to see details pertaining to the cluster's CADATA, ControlPlaneProvisionRoleArn, EKSEndpoint, EKSName, EksArn, and KubeConfigPath.
@@ -192,7 +211,7 @@ Save or take note of these output values as you will need them when launching So
 	</tr>
 </table>
 
-## Step 5: Download and Configure kcmd.sh
+## Step 7: Download and Configure kcmd.sh
 Details such as the number of services and pods running on your EKS cluster can be accessed via the <a href="https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/">Kubernetes Dashboard</a>. Solodev has simplified getting this up and running through the use of commands in a custom kcmd shell script.
 
 <b>Prerequisites:</b> These instructions presume you already have installed <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a>, <a href="https://aws.amazon.com/cli/">aws cli</a>, <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html">aws-iam-authenticator</a>, <a href="https://stedolan.github.io/jq/">jq</a> (<a href="https://chocolatey.org/packages/jq">windows install instructions</a>), and <a href="https://github.com/helm/helm">kubernetes-helm</a>.
@@ -228,7 +247,7 @@ With your AWS CLI profile created, modify line 17 to reference the PROFILENAME y
 export AWS_PROFILE=""
 </pre>
 
-## Step 6: Connect to Kubernetes Dashboard
+## Step 8: Connect to Kubernetes Dashboard
 With the kcmd.sh script properly configured, you can initialize a kubeconfig file by running the following command. Run this from the root of the directory that stores your kcmd.sh file.
 
 <pre>
@@ -253,7 +272,7 @@ Keep the proxy running within your terminal (open another terminal window if you
 	</tr>
 </table>
 
-## Step 7: Launch Solodev CMS
+## Step 9: Launch Optional Add-ons such as Solodev CMS
 With your EKS stack successfully launched, your outputs collected, and you connected to the cluster via the Kubernetes Dashboard, you can proceed to launch Solodev CMS.
 
 <p align="center"><a href="deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>

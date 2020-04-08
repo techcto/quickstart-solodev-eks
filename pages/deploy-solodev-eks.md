@@ -116,15 +116,6 @@ The following parameters must be configured to launch your Solodev DCX CloudForm
 
 <table>
 	<tr>
-		<td colspan="2"><strong>Optional CNI configuration</strong></td>
-	<tr>
-		<td width="33%">Enable Weave</td>
-		<td width="600px">Whether or not to enable Weave CNI. Recommended to keep "Disabled".</td>
-	</tr>   		       
-</table>
-
-<table>
-	<tr>
 		<td colspan="2"><strong>AWS Quick Start configuration</strong></td>
 	<tr>
 		<td width="33%">Quick Start S3 bucket name</td>
@@ -163,6 +154,15 @@ The following parameters must be configured to launch your Solodev DCX CloudForm
 		<td>EFS provisioned throughput in Mibps</td>
 		<td>Set to 0 if EfsThroughputMode is set to bursting. Only has an effect when EfsStorageClass is enabled.</td>
 	</tr>        
+</table>
+
+<table>
+	<tr>
+		<td colspan="2"><strong>Optional CNI configuration</strong></td>
+	<tr>
+		<td width="33%">Enable Weave</td>
+		<td width="600px">Whether or not to enable Weave CNI. Recommended to keep "Disabled".</td>
+	</tr>   		       
 </table>
 
 <strong>Specify Options</strong><br />

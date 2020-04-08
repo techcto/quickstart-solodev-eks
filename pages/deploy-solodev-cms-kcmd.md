@@ -68,7 +68,7 @@ Visit the external endpoint retrived in step 4 to load Solodev CMS. Use the the 
 </table>
 
 ---
-© 2019 Solodev. All rights reserved worldwide. And off planet. 
+© 2020 Solodev. All rights reserved worldwide. And off planet. 
 
 Errors or corrections? Email us at help@solodev.com.
 

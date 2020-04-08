@@ -1,12 +1,12 @@
 <a href="#"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/Solodev_Lite_Header.jpg"/></a>
 
-# Solodev DCX Enterprise Edition for Kubernetes
-Designed for enterprise-level demands, Solodev DCX Enterprise Edition for EKS gives you best-of-breed features and advanced capabilities on a secure archtiecture managed by Amazon EKS. Launch Solodev DCX in a new EKS cluster or even deploy to an existing cluster.
+# Solodev CMS Enterprise Edition for Kubernetes
+Designed for enterprise-level demands, Solodev CMS Enterprise Edition for EKS gives you best-of-breed features and advanced capabilities on a secure archtiecture managed by Amazon EKS. Launch Solodev CMS in a new EKS cluster or even deploy to an existing cluster.
 
 ## Overview
-Solodev DCX Enterprise Edition for Kubernetes on AWS uses a set of YAML templates to (1) optionally create a new EKS cluster, and (2) deploy Solodev DCX to an EKS cluster.
+Solodev CMS Enterprise Edition for Kubernetes on AWS uses a set of YAML templates to (1) optionally create a new EKS cluster, and (2) deploy Solodev CMS to an EKS cluster.
 
-Full deployment consists of either deploying a new EKS cluster and Solodev DCX to that cluster or deploying Solodev DCX to a preexisting EKS cluster. All YAML templates are deployed via <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">AWS CloudFormation</a>.
+Full deployment consists of either deploying a new EKS cluster and Solodev CMS to that cluster or deploying Solodev CMS to a preexisting EKS cluster. All YAML templates are deployed via <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">AWS CloudFormation</a>.
 
 ![AWS Diagram](https://raw.githubusercontent.com/solodev/aws/master/pages/images/Solodev_EKS_Architecture.jpg)
 
@@ -73,7 +73,7 @@ To learn more about our add-on support options, call 1-800-859-7656 to speak wit
 Solodev is a professionally managed, enterprise-class solution, and our team of certified engineers are here to support your success. While our self-serve options are easy to launch, you’ve always got a co-pilot at the helm. If you have any questions – or if you already have a Solodev license and need support with your AWS subscription – call <a href="tel:1.800.859.7656">1-800-859-7656</a> and we’ll help you get to the launchpad.
 
 ---
-© 2019 Solodev. All rights reserved worldwide. And off planet. 
+© 2020 Solodev. All rights reserved worldwide. And off planet. 
 
 Errors or corrections? Email us at help@solodev.com.
 

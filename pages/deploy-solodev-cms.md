@@ -129,7 +129,7 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 </table>
 
 ---
-© 2019 Solodev. All rights reserved worldwide. And off planet. 
+© 2020 Solodev. All rights reserved worldwide. And off planet. 
 
 Errors or corrections? Email us at help@solodev.com.
 

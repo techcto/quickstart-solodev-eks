@@ -259,7 +259,7 @@ With your EKS stack successfully launched, your outputs collected, and you conne
 <p align="center"><a href="deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 
 ---
-© 2019 Solodev. All rights reserved worldwide. And off planet. 
+© 2020 Solodev. All rights reserved worldwide. And off planet. 
 
 Errors or corrections? Email us at help@solodev.com.
 

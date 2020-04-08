@@ -1,4 +1,4 @@
-# Launch Solodev EKS for Kubernetes via CloudFormation
+# Launch Solodev Kubernetes for EKS
 
 ## Step 1: Subscribe on the AWS Marketplace
 Before launching one of our products, you'll first need to subscribe to Solodev on the <a href="https://aws.amazon.com/marketplace/pp/B07XV951M6">AWS Marketplace.</a> Click the button below to get started: 
@@ -27,7 +27,7 @@ While not required, <b><i>it is strongly recommended</i></b> to create a new VPC
 The Amazon S3 template URL (used for the CloudFormation configuration) should be preselected. Click "Next" to continue.
 
 <strong>Specify Details</strong><br />
-The following parameters must be configured to launch your Solodev DCX CloudFormation stack:
+The following parameters must be configured to launch your Solodev EKS CloudFormation stack:
 
 <table>
 	<tr>

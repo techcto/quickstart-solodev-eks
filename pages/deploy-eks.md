@@ -1,7 +1,7 @@
 # Deploy EKS Cluster
 
 ## Step 1: Launch your CloudFormation Stack
-<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-eks&templateURL=https://solodev-quickstarts.s3.amazonaws.com/eks/amazon-eks.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-eks&templateURL=https://solodev-quickstarts.s3.amazonaws.com/eks/templates/solodev-eks.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 
 ## Step 2: Fill Out the CloudFormation Stack Wizard
 <strong>Continue with the preselected CloudFormation Template</strong><br />
@@ -97,19 +97,11 @@ The following parameters must be configured to launch your Solodev DCX CloudForm
 
 <table>
 	<tr>
-		<td colspan="2"><strong>Optional Solodev DCX configuration</strong></td>
+		<td colspan="2"><strong>Optional CNI configuration</strong></td>
 	<tr>
-		<td width="33%">ProvisionSolodevDCXNetwork</td>
-		<td width="600px">Whether or not to also deploy the <a href="deploy-solodev-dcx-network.md">Solodev DCX Network</a>. Recommended to keep "Disabled" unless a Solodev developer.</td>
-	</tr>   		
-	<tr>
-		<td>ZoneName</td>
-		<td>(Optional) The Route53 ZoneName that corresponds to the Solodev DCX Network</td>
-	</tr>
-	<tr>
-		<td>ZoneId</td>
-		<td>(Optional) The Route53 ZoneID that corresponds to the Solodev DCX Network</td>
-	</tr>         
+		<td width="33%">Enable Weave</td>
+		<td width="600px">Whether or not to enable Weave CNI. Recommended to keep "Disabled".</td>
+	</tr>   		       
 </table>
 
 <table>
@@ -181,12 +173,12 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 	</tr>
 </table>
 
-## Step 4: Gather Stack Outputs for Solodev DCX
+## Step 4: Gather Stack Outputs for Solodev EKS
 If your stack builds successfully, you will see the green "CREATE_COMPLETE" message.
 
 Click on the primary stack and view the "Outputs" tab. You will find details pertaining to the cluster's BastionIP, EKSClusterName, HelmLambdaArn, KubeConfigPath, and KubeManifestLambdaArn. Click on the "ControlPlane" stack to see details pertaining to the cluster's CADATA, ControlPlaneProvisionRoleArn, EKSEndpoint, EKSName, EksArn, and KubeConfigPath.
 
-Save or take note of these output values as you will need them when launching Solodev DCX on the EKS cluster.
+Save or take note of these output values as you will need them when launching Solodev EKS on the cluster.
 
 <table>
 	<tr>
@@ -205,7 +197,7 @@ Details such as the number of services and pods running on your EKS cluster can 
 
 <b>Prerequisites:</b> These instructions presume you already have installed <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a>, <a href="https://aws.amazon.com/cli/">aws cli</a>, <a href="https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html">aws-iam-authenticator</a>, <a href="https://stedolan.github.io/jq/">jq</a> (<a href="https://chocolatey.org/packages/jq">windows install instructions</a>), and <a href="https://github.com/helm/helm">kubernetes-helm</a>.
 
-Access and download the <a href="https://github.com/techcto/quickstart-solodev-dcx/blob/master/eks/bin/kcmd.sh">Solodev DCX custom kcmd.sh script</a>. Place the shell script inside a directory you will use to access your Kubernetes cluster.
+Access and download the <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/scripts/kcmd.sh">Solodev EKS custom kcmd.sh script</a>. Place the shell script inside a directory you will use to access your Kubernetes cluster.
 
 Modify lines 8-9. The values will correspond to your stack's output.
 
@@ -261,10 +253,10 @@ Keep the proxy running within your terminal (open another terminal window if you
 	</tr>
 </table>
 
-## Step 7: Launch Solodev DCX
-With your EKS stack successfully launched, your outputs collected, and you connected to the cluster via the Kubernetes Dashboard, you can proceed to launch Solodev DCX.
+## Step 7: Launch Solodev CMS
+With your EKS stack successfully launched, your outputs collected, and you connected to the cluster via the Kubernetes Dashboard, you can proceed to launch Solodev CMS.
 
-<p align="center"><a href="deploy-solodev-dcx.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+<p align="center"><a href="deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 
 ---
 © 2019 Solodev. All rights reserved worldwide. And off planet. 

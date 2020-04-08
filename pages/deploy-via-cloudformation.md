@@ -31,13 +31,13 @@ While not required, <b><i>it is strongly recommended</i></b> to create a new VPC
 ## Step 3: Launch your CloudFormation Stack(s)
 Once you’ve configured your <a href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_Introduction.html">VPC</a> and <a href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html">EC2 Key Pair</a>, you can your CloudFormation stack(s).
 
-Please follow the instructions below depending upon your current environment. If you do not have an existing EKS cluster, begin by launching <a href="deploy-eks.md">Amazon EKS by Solodev</a>. Once that is complete, follow the directions to deploy <a href="deploy-solodev-dcx.md">Solodev DCX for Kubernetes</a> to that newly created EKS cluster. Conversely, if you wish to deploy Solodev DCX for Kubernetes to a preexisting EKS cluster, skip directly to <a href="deploy-solodev-dcx.md">those instructions</a>.
+Please follow the instructions below depending upon your current environment. If you do not have an existing EKS cluster, begin by launching <a href="deploy-eks.md">Solodev EKS for Kubernetes</a>. Once that is complete, follow the directions to deploy <a href="deploy-eks.md">Solodev EKS for Kubernetes</a> to that newly created EKS cluster. Conversely, if you wish to deploy Solodev CMS for Kubernetes to a preexisting EKS cluster, skip directly to <a href="deploy-solodev-cms.md">those instructions</a>.
 
 <table>
 	<tr>
 		<td width="25%"><a href="deploy-eks.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/amazon-eks-by-solodev.jpg" /></a></td>
 		<td>
-			<h3>Amazon EKS by Solodev*</h3>
+			<h3>Solodev EKS for Kubernetes*</h3>
 			<p>Launch Amazon Elastic Kubernets Service (EKS) in a new cluster and manage your containers at any scale with Solodev. Launch your applications rapidly and across AWS Regions and Availability Zones, and move from environment to environment regardless of operating system.</p>
 			<p align="right"><a href="deploy-eks.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 		</td>
@@ -46,11 +46,11 @@ Please follow the instructions below depending upon your current environment. If
 
 <table>
 	<tr>
-		<td width="25%"><a href="deploy-solodev-dcx.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-dcx-for-eks.jpg" /></a></td>
+		<td width="25%"><a href="deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-dcx-for-eks.jpg" /></a></td>
 		<td>
-			<h3>Solodev DCX for Kubernetes</h3>
-			<p>Deploy Solodev DCX for Kubernetes ands tart managing and scaling your websites and digital experiences on AWS. Rapidly move from your local environment to the cloud, add or remove containers to meet shifts in traffic, and manage entire fleets of Solodev applications with the power of Amazon EKS.</p>
-			<p align="right"><a href="deploy-solodev-dcx.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+			<h3>Solodev CMS for Kubernetes</h3>
+			<p>Deploy Solodev CMS for Kubernetes ands tart managing and scaling your websites and digital experiences on AWS. Rapidly move from your local environment to the cloud, add or remove containers to meet shifts in traffic, and manage entire fleets of Solodev applications with the power of Amazon EKS.</p>
+			<p align="right"><a href="deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 		</td>
 	</tr>
 </table>
@@ -67,7 +67,7 @@ Solodev Customer Care Includes
 
 To learn more about our add-on support options, call 1-800-859-7656 to speak with one of our Solodev Customer Care Specialists.
 
-<a href="https://www.solodev.com/product/support.stml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/Solodev_Git_Support.jpg"/></a>
+<a href="https://www.solodev.com/features/support.stml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/Solodev_Git_Support.jpg"/></a>
 
 ## Need Help?
 Solodev is a professionally managed, enterprise-class solution, and our team of certified engineers are here to support your success. While our self-serve options are easy to launch, you’ve always got a co-pilot at the helm. If you have any questions – or if you already have a Solodev license and need support with your AWS subscription – call <a href="tel:1.800.859.7656">1-800-859-7656</a> and we’ll help you get to the launchpad.

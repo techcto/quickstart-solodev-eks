@@ -50,9 +50,9 @@ Metadata:
           - EfsThroughputMode
           - EfsProvisionedThroughputInMibps
       - Label:
-          default: Optional Solodev DCX configuration
+          default: Optional CNI configuration
         Parameters:
-          - ProvisionSolodevDCXNetwork
+          - EnableWeave
     ParameterLabels:
       KeyPairName:
         default: SSH key name
@@ -277,7 +277,7 @@ Parameters:
     MinValue: 0
     Default: 0
     Description: Set to 0 if EfsThroughputMode is set to bursting. Only has an effect when EfsStorageClass is enabled.
-  ProvisionSolodevDCXNetwork:
+  EnableWeave:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
@@ -301,7 +301,7 @@ Rules:
              - ap-south-1
           - !Ref 'AWS::Region'
 Conditions:
-  EnableSolodevDCXNetwork: !Equals [!Ref 'ProvisionSolodevDCXNetwork', 'Enabled']
+  EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
   EKSStack:
     Type: AWS::CloudFormation::Stack
@@ -329,8 +329,8 @@ Resources:
         EfsPerformanceMode: !Ref EfsPerformanceMode
         EfsThroughputMode: !Ref EfsThroughputMode
         EfsProvisionedThroughputInMibps: !Ref EfsProvisionedThroughputInMibps
-        ProvisionSolodevDCXNetwork: !Ref ProvisionSolodevDCXNetwork
-        BootstrapArguments: !If [EnableSolodevDCXNetwork, "--solodev-network 'true'", ""]
+        EnableWeave: !Ref EnableWeave
+        BootstrapArguments: !If [EnableWeaveCNI, "--solodev-network 'true'", ""]
 
 Outputs:
   KubeConfigPath:

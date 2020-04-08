@@ -1,5 +1,5 @@
-# Deploy Solodev DCX on an EKS Cluster via CloudFormation
-The following steps will allow you to deploy Solodev DCX to an existing EKS cluster by launching a new stack via AWS CloudFormation. Additional installation methods are available including <a href="https://github.com/techcto/charts">via Helm Charts</a> or via <a href="deploy-solodev-dcx-kcmd.md">custom kubectl commands</a>.
+# Deploy Solodev CMS on an EKS Cluster via CloudFormation
+The following steps will allow you to deploy Solodev CMS to an existing EKS cluster by launching a new stack via AWS CloudFormation. Additional installation methods are available including <a href="https://github.com/techcto/charts">via Helm Charts</a> or via <a href="deploy-solodev-cms-kcmd.md">custom kubectl commands</a>.
 
 ## Step 1: Subscribe on the AWS Marketplace
 If you have not already done so, you'll first need to subscribe to Solodev on the <a href="https://aws.amazon.com/marketplace/pp/B07XV951M6">AWS Marketplace.</a> Click the button below to get started: 
@@ -10,8 +10,8 @@ If you have not already done so, you'll first need to subscribe to Solodev on th
 	</tr>
 </table>
 
-## Step 2: Gather EKS Stack Outputs for Solodev DCX
-Take note of several of your <a href="deploy-eks.md#step-4-gather-stack-outputs-for-solodev-dcx">EKS stack outputs</a>. You will need these output values when launching Solodev DCX on the EKS cluster.
+## Step 2: Gather EKS Stack Outputs for Solodev CMS
+Take note of several of your <a href="deploy-eks.md#step-4-gather-stack-outputs-for-solodev-cms">EKS stack outputs</a>. You will need these output values when launching Solodev CMS on the EKS cluster.
 
 Click on the primary stack and view the "Outputs" tab. You will find details pertaining to the cluster's BastionIP, EKSClusterName, HelmLambdaArn, KubeConfigPath, and KubeManifestLambdaArn. 
 
@@ -23,7 +23,7 @@ Click on the primary stack and view the "Outputs" tab. You will find details per
 
 
 ## Step 3: Launch your CloudFormation Stack
-<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-dcx&templateURL=https://solodev-quickstarts.s3.amazonaws.com/eks/solodev-dcx-aws.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-cms&templateURL=https://solodev-quickstarts.s3.amazonaws.com/cms/solodev-cms-aws.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 
 ## Step 4: Fill Out the CloudFormation Stack Wizard
 <strong>Continue with the preselected CloudFormation Template</strong><br />
@@ -45,7 +45,7 @@ The following parameters must be configured to launch your Solodev DCX CloudForm
 	</tr>
 	<tr>
 		<td>Stack name</td>
-		<td>The name of your stack (set to "solodev-dcx" by default). Please note, the name must be all lowercase.</td>
+		<td>The name of your stack (set to "solodev-cms" by default). Please note, the name must be all lowercase.</td>
 	</tr>
 </table>
 

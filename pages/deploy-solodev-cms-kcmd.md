@@ -1,5 +1,5 @@
-# Deploy Solodev DCX on an EKS Cluster via Custom kubectl commands
-The following steps will allow you to deploy Solodev DCX to an existing EKS cluster via a custom set of kubectl commands. Additional installation methods are available including <a href="deploy-solodev-dcx.md">via AWS CloudFormation</a> or via <a href="https://github.com/techcto/charts">Helm Charts</a>.
+# Deploy Solodev CMS on an EKS Cluster via Custom kubectl commands
+The following steps will allow you to deploy Solodev CMS to an existing EKS cluster via a custom set of kubectl commands. Additional installation methods are available including <a href="deploy-solodev-cms.md">via AWS CloudFormation</a> or via <a href="https://github.com/techcto/charts">Helm Charts</a>.
 
 These instructions presume you already have installed <a href="https://helm.sh/">Helm</a>, <a href="https://kubernetes.io/">Kubernetes</a>, and the <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Kubernetes command-line tool</a>.
 
@@ -13,19 +13,22 @@ Solodev is a professionally managed, enterprise-class Digital Customer Experienc
 </table>
 
 ## Step 2: Download and Configure kcmd.sh
-Access and download the <a href="https://github.com/techcto/quickstart-solodev-dcx/blob/master/eks/bin/kcmd.sh">Solodev custom kcmd.sh script</a>. Place the shell script inside a directory you will use to access your Kubernetes cluster.
+Access and download the <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/scripts/kcmd.sh">Solodev EKS custom kcmd.sh script</a>. Place the shell script inside a directory you will use to access your Kubernetes cluster.
 
 Modify lines 8-21 with values specific to your environment. Line 15 corresponds to the region you want to launch within. Lines 8-11 correspond to the values of your Kubernetes cluster, which can be retrieved as <a href="https://raw.githubusercontent.com/solodev/AWS-Launch-Pad/master/pages/images/install/outputs-solodev-cms-eks.jpg">stack outputs</a> if the cluster was launched via CloudFormation. Lines 17-21 correspond to the values used to launch Solodev DCX. 
 
 <pre>
 #GET VALUES FROM CLOUDFORMATION OUTPUT OF EKS STACK
-export CAData=""
-export EKSEndpoint=""
 export EKSName=""
 export ControlPlaneProvisionRoleArn=""
 
 #AWS
-export Region="us-east-1"
+export REGION="us-east-1"
+export USER_ARN=""
+export KEY="server.pem"
+export BASTION="1.1.1.1"
+#aws configure --profile profile1
+export AWS_PROFILE="profile1"
 
 #Solodev
 export RELEASE="solodev-dcx-aws"
@@ -35,19 +38,19 @@ export PASSWORD="password"
 export DBPASSWORD="password"
 </pre>
 
-## Step 3: Deploy Solodev DCX on your Kubernetes Cluster
+## Step 3: Deploy Solodev CMS on your Kubernetes Cluster
 From command line and inside the directory that has the kcmd.sh script, run the following to download the necessary Helm Charts and configure a needed config file:
 <pre>
 ./kcmd.sh init
 </pre>
 
-From command line and inside the directory that has the kcmd.sh script, run the following to install Solodev DCX:
+From command line and inside the directory that has the kcmd.sh script, run the following to install Solodev CMS:
 <pre>
-./kcmd.sh install solodev-dcx
+./kcmd.sh install solodev-cms (helm install --namespace solodev-dcx --name CMS1 charts/solodev-dcx)
 </pre>
 
 ## Step 4: Retrieve the External Endpoints of the "ui" Service
-In addition to the other services deployed, Solodev DCX will deploy a "ui" service. This service will output external endpoints that you can use to access Solodev DCX. 
+In addition to the other services deployed, Solodev CMS will deploy a "ui" service. This service will output external endpoints that you can use to access Solodev CMS. 
 
 <table>
 	<tr>
@@ -56,7 +59,7 @@ In addition to the other services deployed, Solodev DCX will deploy a "ui" servi
 </table>
 
 ## Step 5: Login to Solodev 
-Visit the external endpoint retrived in step 4 to load Solodev DCX. Use the the username "solodev" and the PASSWORD specified during step 2 for login credentials.
+Visit the external endpoint retrived in step 4 to load Solodev CMS. Use the the username "solodev" and the PASSWORD specified during step 2 for login credentials.
 
 <table>
 	<tr>

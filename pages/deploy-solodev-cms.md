@@ -85,11 +85,11 @@ The following parameters must be configured to launch your Solodev DCX CloudForm
 		<td colspan="2"><strong>EKS Cluster</strong></td>
 	<tr>
 		<td width="33%">HelmLambdaArn</td>
-		<td width="600px">The HelmLambdaArn found in the <a href="pages/deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">outputs on your EKS stack</a></td>
+		<td width="600px">The HelmLambdaArn found in the <a href="deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">outputs on your EKS stack</a></td>
 	</tr>
 	<tr>
 		<td>KubeConfigPath</td>
-		<td>The KubeConfigPath found in the <a href="pages/deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">outputs on your EKS stack</td>
+		<td>The KubeConfigPath found in the <a href="deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">outputs on your EKS stack</td>
 	</tr> 
 	<tr>
 		<td>KubeConfigKmsContext</td>
@@ -129,7 +129,7 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 </table>
 
 ## Step 6: Accessing the UI endpoint address
-After the creation of the CloudFormation stack is completed, users must locate the CNAME for the UI endpoint address to launch an instance of Solodev. This process involves connecting to the Kubernetes dashboard. Please refer to <a href="pages/deploy-solodev-eks.md#step-8-connect-to-kubernetes-dashboard">Section 8: Connect to Kubernetes Dashboard</a> on the Launch Solodev Kubernetes for EKS page for more information. 
+After the creation of the CloudFormation stack is completed, users must locate the CNAME for the UI endpoint address to launch an instance of Solodev. This process involves connecting to the Kubernetes dashboard. Please refer to <a href="deploy-solodev-eks.md#step-8-connect-to-kubernetes-dashboard">Section 8: Connect to Kubernetes Dashboard</a> on the Launch Solodev Kubernetes for EKS page for more information. 
 
 Once the user connects to the Kubernetes dashboard, click the select box under Namespace:
 

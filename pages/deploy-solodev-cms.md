@@ -135,7 +135,7 @@ Once the user connects to the Kubernetes dashboard, click the select box under N
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/ui-endpoint-eks-1.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/ui-endpoint-eks-1.jpg" /></td>
 	</tr>
 </table>
 
@@ -143,7 +143,7 @@ Choose solodev-dcx:
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/ui-endpoint-eks-2.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/ui-endpoint-eks-2.jpg" /></td>
 	</tr>
 </table>
 
@@ -151,7 +151,7 @@ In the Kubernetes dashboard choose services:
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/ui-endpoint-eks-3.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/ui-endpoint-eks-3.jpg" /></td>
 	</tr>
 </table>
 
@@ -159,7 +159,7 @@ Click the external endpoint CNAME associated with the instance name for port 80:
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/ui-endpoint-eks-4.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/ui-endpoint-eks-4.jpg" /></td>
 	</tr>
 </table>
 
@@ -167,7 +167,7 @@ Login to Solodev:
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/ui-endpoint-eks-5.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/ui-endpoint-eks-5.jpg" /></td>
 	</tr>
 </table>
 

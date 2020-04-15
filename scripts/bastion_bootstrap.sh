@@ -176,19 +176,19 @@ function setup_logs () {
     echo "${FUNCNAME[0]} Started"
 
     if [[ "${release}" == "SLES" ]]; then
-        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm' -O
+        curl 'https://amazoncloudwatch-agent.s3.amazonaws.com/suse/amd64/latest/amazon-cloudwatch-agent.rpm' -O
         zypper install --allow-unsigned-rpm -y ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "CentOS" ]]; then
-        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm' -O
+        curl 'https://amazoncloudwatch-agent.s3.amazonaws.com/centos/amd64/latest/amazon-cloudwatch-agent.rpm' -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     elif [[ "${release}" == "Ubuntu" ]]; then
-        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb' -O
+        curl 'https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb' -O
         dpkg -i -E ./amazon-cloudwatch-agent.deb
         rm ./amazon-cloudwatch-agent.deb
     elif [[ "${release}" == "AMZN" ]]; then
-        curl 'https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm' -O
+        curl 'https://amazoncloudwatch-agent.s3.amazonaws.com/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm' -O
         rpm -U ./amazon-cloudwatch-agent.rpm
         rm ./amazon-cloudwatch-agent.rpm
     fi
@@ -273,10 +273,8 @@ EOF
         apt-get install -y unattended-upgrades
         apt-get install -y bash-completion
         echo "0 0 * * * unattended-upgrades -d" > ~/mycron
-    elif [[ "${release}" == "CentOS" ]]; then
-        yum install -y bash-completion --enablerepo=epel
-        echo "0 0 * * * yum -y update --security" > ~/mycron
     else
+        yum install -y bash-completion --enablerepo=epel
         echo "0 0 * * * yum -y update --security" > ~/mycron
     fi
 
@@ -415,10 +413,9 @@ users:
         - "token"
         - "-i"
         - "${K8S_CLUSTER_NAME}"
-        - "-r"
-        - "${K8S_ROLE_ARN}"
 EOF
-    chown -R ${user_group} /home/${user_group}/.kube/
+    cp -r /home/${user}/.kube/ /root/.kube/
+    chown -R ${user}:${user_group} /home/${user}/.kube/
 }
 
 function install_kubernetes_client_tools() {
@@ -427,19 +424,19 @@ function install_kubernetes_client_tools() {
     echo "Upgrading AWS CLI"
     /usr/local/bin/pip3 install awscli --upgrade --user
     mkdir -p /usr/local/bin/
-    echo "Install AWS IAM Auth"
-    # retry_command 20 curl --retry 5 -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/aws-iam-authenticator
-    retry_command 20 curl --retry 5 -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/aws-iam-authenticator
+    retry_command 20 curl --retry 5 -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
     chmod +x ./aws-iam-authenticator
     mv ./aws-iam-authenticator /usr/local/bin/
-    echo "Install Kubectl"
-    # retry_command 20 curl --retry 5 -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.11.5/2018-12-06/bin/linux/amd64/kubectl
-    retry_command 20 curl --retry 5 -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/kubectl
+    retry_command 20 curl --retry 5 -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/kubectl
     chmod +x ./kubectl
     mv ./kubectl /usr/local/bin/
-    echo "source <(/usr/local/bin/kubectl completion bash)" >> ~/.bashrc
-    echo "Install Helm"
-    retry_command 20 curl --retry 5 -o helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz
+    cat > /etc/profile.d/kubectl.sh <<EOF
+#!/bin/bash
+if [[ ":$PATH:" != *":/usr/local/bin:"* ]]; then     PATH="$PATH:/usr/local/bin";   fi
+source <(kubectl completion bash)
+EOF
+    chmod +x /etc//profile.d/kubectl.sh
+    retry_command 20 curl --retry 5 -o helm.tar.gz https://get.helm.sh/helm-v2.16.1-linux-amd64.tar.gz
     tar -xvf helm.tar.gz
     chmod +x ./linux-amd64/helm
     chmod +x ./linux-amd64/tiller

@@ -6,3 +6,6 @@
 	path = submodules/quickstart-aws-vpc
 	url = https://github.com/aws-quickstart/quickstart-aws-vpc.git
 	branch = master
+[submodule "functions/source/EksClusterResource"]
+	path = functions/source/EksClusterResource
+	url = https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git

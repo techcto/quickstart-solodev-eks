@@ -1,7 +1,7 @@
 <a href="#"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/Solodev_Lite_Header.jpg"/></a>
 
 # Solodev Kubernetes for EKS
-Launch Amazon Elastic Kubernets Service (EKS) in a new cluster and manage your containers at any scale with Solodev. Launch your applications rapidly and across AWS Regions and Availability Zones, and move from environment to environment regardless of operating system.
+This Quick Start helps you to deploy a Kubernetes cluster that uses Amazon Elastic Kubernetes Service (Amazon EKS), enabling you to deploy, manage, and scale containerized applications running on Kubernetes on the Amazon Web Services (AWS) Cloud.
 
 ## Overview
 Solodev Kubernetes for EKS uses a set of YAML templates to create a new EKS cluster. All YAML templates are deployed via <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">AWS CloudFormation</a>.

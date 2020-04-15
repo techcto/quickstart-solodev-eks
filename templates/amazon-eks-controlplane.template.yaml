@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: "Deploys the EKS control plane (qs-1p7nknofn)"
+Metadata:
+  QSLint:
+    Exclusions: [W9002, W9003, W9004, W9006]
 Parameters:
   SecurityGroupIds:
     Type: List<AWS::EC2::SecurityGroup::Id>
@@ -9,76 +12,136 @@ Parameters:
     Type: String
   NodeInstanceRoleArn:
     Type: String
-  KubeManifestLambdaArn:
-    Type: String
-  KubeConfigUploadLambdaArn:
-    Type: String
   CleanupLoadBalancersLambdaArn:
     Type: String
   GetCallerArnLambdaArn:
     Type: String
-  KubeConfigUploadRoleArn:
+  AdditionalEKSAdminUserArn:
     Type: String
+    Default: ""
+  AdditionalEKSAdminRoleArn:
+    Type: String
+    Default: ""
+  KubernetesVersion:
+    Type: String
+    AllowedValues: [ "1.15", "1.14", "1.13" ]
+    Default: "1.15"
   ControlPlaneProvisionRoleArn:
     Type: String
   KubeConfigS3Bucket:
     Type: String
-  KubeConfigS3Key:
+  BastionRole:
     Type: String
-    Default: ".kube/config.enc"
-  KmsKeyArn:
-    Type: String
-  KmsContext:
-    Type: String
-    Default: "EKSQuickStart"
-  AdditionalEKSAdminArns:
-    Type: CommaDelimitedList
     Default: ""
-  KubernetesVersion:
+  FunctionRoleArn:
     Type: String
-    AllowedValues: [ "1.14", "1.13" ]
-    Default: "1.14"
+  EKSPublicAccessCIDRs:
+    Type: List<String>
+    Default: 0.0.0.0/0
+  EKSPublicAccessEndpoint:
+    Type: String
+    AllowedValues: [Enabled, Disabled]
+    Default: Disabled
+  EKSPrivateAccessEndpoint:
+    Type: String
+    AllowedValues: [Enabled, Disabled]
+    Default: Enabled
+  EKSClusterLoggingTypes:
+    Type: List<String>
+    Default: ""
+  EKSEncryptSecrets:
+    Type: String
+    AllowedValues: [Enabled, Disabled]
+    Default: Enabled
+  EKSEncryptSecretsKmsKeyArn:
+    Type: String
+    Default: ""
   EnableWeave:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
 Conditions:
+    Default: ""
+Conditions:
+  AddUser: !Not [ !Equals [ !Ref AdditionalEKSAdminUserArn, "" ] ]
+  AddRole: !Not [ !Equals [ !Ref AdditionalEKSAdminRoleArn, "" ] ]
+  BastionRole: !Not [ !Equals [ !Ref BastionRole, "" ] ]
+  EnablePrivateEndpoint: !Equals [ !Ref EKSPrivateAccessEndpoint, "Enabled" ]
+  EnablePublicEndpoint: !Equals [ !Ref EKSPublicAccessEndpoint, "Enabled" ]
+  CreateKey: !And
+    - !Equals [ !Ref EKSEncryptSecretsKmsKeyArn, "" ]
+    - !Equals [ !Ref EKSEncryptSecrets, Enabled ]
+  EnableEncryption: !Equals [ !Ref EKSEncryptSecrets, Enabled ]
   AddUsers: !Not [ !Equals [!Select [ 0, !Ref AdditionalEKSAdminArns ], ""] ]
   EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
+  KMSKey:
+    Condition: CreateKey
+    Type: "AWS::KMS::Key"
+    Properties:
+      KeyPolicy: {
+        "Version": "2012-10-17",
+        "Id": "key-default-1",
+        "Statement": [
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+          }
+        ]
+      }
   EKS:
-    Type: "AWS::EKS::Cluster"
+    Type: "AWSQS::EKS::Cluster"
     Properties:
       ResourcesVpcConfig:
         SecurityGroupIds: !Ref SecurityGroupIds
         SubnetIds: !Ref SubnetIds
+        PublicAccessCidrs: !Ref EKSPublicAccessCIDRs
+        EndpointPrivateAccess: !If [ EnablePrivateEndpoint, true, false ]
+        EndpointPublicAccess: !If [ EnablePublicEndpoint, true, false ]
+      EnabledClusterLoggingTypes: !Ref EKSClusterLoggingTypes
+      EncryptionConfig: !If
+        - EnableEncryption
+        - - Resources: [ secrets ]
+            Provider:
+              KeyArn: !If [ CreateKey, !GetAtt KMSKey.Arn, !Ref EKSEncryptSecretsKmsKeyArn ]
+        - !Ref AWS::NoValue
       RoleArn: !Ref RoleArn
       Version: !Ref KubernetesVersion
-  EksNodeUser:
-    DependsOn: KubeConfigToS3
-    Type: "Custom::KubeManifest"
-    Version: '1.0'
-    Properties:
-      ServiceToken: !Ref KubeManifestLambdaArn
-      KubeConfigPath: !Sub "s3://${KubeConfigS3Bucket}/${KubeConfigS3Key}"
-      KubeConfigKmsContext: !Ref KmsContext
-      Users:
-        Arns: [ !Ref NodeInstanceRoleArn ]
-        Groups: [ 'system:bootstrappers', 'system:nodes' ]
-        Username: 'system:node:{{EC2PrivateDNSName}}'
-  KubeConfigToS3:
-    Type: "Custom::ConfigToS3"
-    Version: '1.0'
-    Properties:
-      ServiceToken: !Ref KubeConfigUploadLambdaArn
-      RoleArn: !Ref KubeConfigUploadRoleArn
-      EKSCAData: !GetAtt EKS.CertificateAuthorityData
-      EKSEndpoint: !GetAtt EKS.Endpoint
-      EKSArn: !GetAtt EKS.Arn
-      S3BucketName: !Ref KubeConfigS3Bucket
-      S3Key: !Ref KubeConfigS3Key
-      EncryptionContext: !Ref KmsContext
-      KmsKeyArn: !Ref KmsKeyArn
+      KubernetesApiAccess:
+        Roles:
+          - Arn: !Ref NodeInstanceRoleArn
+            Username: 'system:node:{{EC2PrivateDNSName}}'
+            Groups: [ 'system:bootstrappers', 'system:nodes' ]
+          - Arn: !Ref FunctionRoleArn
+            Username: !Ref FunctionRoleArn
+            Groups: [ 'system:masters' ]
+          - !If
+            - BastionRole
+            - Arn: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BastionRole}"
+              Username: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BastionRole}"
+              Groups: [ 'system:masters' ]
+            - !Ref 'AWS::NoValue'
+          - !If
+            - AddRole
+            - Arn: !Ref AdditionalEKSAdminRoleArn
+              Username: !Ref AdditionalEKSAdminRoleArn
+              Groups: [ 'system:masters' ]
+            - !Ref 'AWS::NoValue'
+        Users:
+          - Arn: !GetAtt CallerArn.Arn
+            Username: !GetAtt CallerArn.Arn
+            Groups: [ 'system:masters' ]
+          - !If
+            - AddUser
+            - Arn: !Ref AdditionalEKSAdminUserArn
+              Username: !Ref AdditionalEKSAdminUserArn
+              Groups: [ 'system:masters' ]
+            - !Ref 'AWS::NoValue'
   CleanupLoadBalancers:
     Type: Custom::CleanupLoadBalancers
     Properties:
@@ -112,6 +175,31 @@ Resources:
       Users:
         Arns: !Ref AdditionalEKSAdminArns
         Groups: [ "system:masters" ]
+  EksNodeUser:
+    DependsOn: KubeConfigToS3
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref KubeManifestLambdaArn
+      KubeConfigPath: !Sub "s3://${KubeConfigS3Bucket}/${KubeConfigS3Key}"
+      KubeConfigKmsContext: !Ref KmsContext
+      Users:
+        Arns: [ !Ref NodeInstanceRoleArn ]
+        Groups: [ 'system:bootstrappers', 'system:nodes' ]
+        Username: 'system:node:{{EC2PrivateDNSName}}'
+  KubeConfigToS3:
+    Type: "Custom::ConfigToS3"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref KubeConfigUploadLambdaArn
+      RoleArn: !Ref KubeConfigUploadRoleArn
+      EKSCAData: !GetAtt EKS.CertificateAuthorityData
+      EKSEndpoint: !GetAtt EKS.Endpoint
+      EKSArn: !GetAtt EKS.Arn
+      S3BucketName: !Ref KubeConfigS3Bucket
+      S3Key: !Ref KubeConfigS3Key
+      EncryptionContext: !Ref KmsContext
+      KmsKeyArn: !Ref KmsKeyArn
   CNI:
     Condition: EnableWeaveCNI
     DependsOn: [ EksNodeUser, KubeConfigToS3 ]

@@ -2,14 +2,13 @@ import json
 import boto3
 import subprocess
 import shlex
-import os
 import random
 import re
 from crhelper import CfnResource
 import logging
 import string
-from time import sleep
 from datetime import datetime
+import requests
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +17,8 @@ helper = CfnResource(json_logging=True, log_level='DEBUG')
 try:
     s3_client = boto3.client('s3')
     kms_client = boto3.client('kms')
+    valid_url_schemes = re.compile(r'^(?:http|https|s3)://')
+    s3_scheme = re.compile(r'^s3://.+/.+')
 except Exception as e:
     helper.init_failure(e)
 
@@ -50,33 +51,9 @@ def run_command(command):
         return output
 
 
-def create_kubeconfig(bucket, key, kms_context):
-    try:
-        os.mkdir("/tmp/.kube/")
-    except FileExistsError:
-        pass
-    try:
-        retries = 10
-        while True:
-            try:
-                enc_config = s3_client.get_object(Bucket=bucket, Key=key)['Body'].read()
-                break
-            except Exception as e:
-                logger.error(str(e), exc_info=True)
-                if retries == 0:
-                    raise
-                sleep(10)
-                retries -= 1
-    except Exception as e:
-        raise Exception("Failed to fetch KubeConfig from S3: %s" % str(e))
-    kubeconf = kms_client.decrypt(
-        CiphertextBlob=enc_config,
-        EncryptionContext=kms_context
-    )['Plaintext'].decode('utf8')
-    f = open("/tmp/.kube/config", "w")
-    f.write(kubeconf)
-    f.close()
-    os.environ["KUBECONFIG"] = "/tmp/.kube/config"
+def create_kubeconfig(cluster_name):
+    run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}")
+    run_command(f"kubectl config use-context {cluster_name}")
 
 
 def parse_install_output(output):
@@ -118,16 +95,6 @@ def get_next_index(data, resource_type):
     return index
 
 
-def get_config_details(event):
-    s3_uri_parts = event['ResourceProperties']['KubeConfigPath'].split('/')
-    if len(s3_uri_parts) < 4 or s3_uri_parts[0:2] != ['s3:', '']:
-        raise Exception("Invalid KubeConfigPath, must be in the format s3://bucket-name/path/to/config")
-    bucket = s3_uri_parts[2]
-    key = "/".join(s3_uri_parts[3:])
-    kms_context = {"QSContext": event['ResourceProperties']['KubeConfigKmsContext']}
-    return bucket, key, kms_context
-
-
 def write_values(manifest, path):
     f = open(path, "w")
     f.write(manifest)
@@ -149,10 +116,7 @@ def helm_init(event):
     except KeyError:
         helper.Data.update({"StartTimestamp": str(datetime.now().timestamp())})
     physical_resource_id = None
-    if not event['ResourceProperties']['KubeConfigPath'].startswith("s3://"):
-        raise Exception("KubeConfigPath must be a valid s3 URI (eg.: s3://my-bucket/my-key.txt")
-    bucket, key, kms_context = get_config_details(event)
-    create_kubeconfig(bucket, key, kms_context)
+    create_kubeconfig(event['ResourceProperties']['ClusterName'])
     run_command("helm --home /tmp/.helm init --client-only")
     repo_name = ''
     if 'Chart' in event['ResourceProperties'].keys():
@@ -173,32 +137,64 @@ def helm_init(event):
     return physical_resource_id
 
 
+def http_get(url):
+    try:
+        response = requests.get(url)
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Failed to fetch CustomValueYaml url {url}: {e}")
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Failed to fetch CustomValueYaml url {url}: [{response.status_code}] "
+            f"{response.reason}"
+        )
+    return response.text
+
+
+def s3_get(url):
+    try:
+        return str(s3_client.get_object(
+            Bucket=url.split('/')[2], Key="/".join(url.split('/')[3:])
+        )['Body'].read())
+    except Exception as e:
+       raise RuntimeError(f"Failed to fetch CustomValueYaml {url} from S3. {e}")
+
+
 def build_flags(properties, request_type="Create"):
-    val_file = ""
-    if "ValueYaml" in properties:
-        write_values(properties["ValueYaml"], '/tmp/values.yaml')
-        val_file = "-f /tmp/values.yaml"
+    internal_values = ""
+    if properties.get("ValueYaml"):
+        write_values(properties["ValueYaml"], '/tmp/internalValues.yaml')
+        internal_values = "-f /tmp/internalValues.yaml"
+    custom_values = ""
+    if properties.get("CustomValueYaml"):
+        if not re.match(valid_url_schemes, properties["CustomValueYaml"]):
+            raise ValueError()
+        if re.match(s3_scheme, properties["CustomValueYaml"]):
+            custom_value_yaml = s3_get(properties["CustomValueYaml"])
+        else:
+            custom_value_yaml = http_get(properties["CustomValueYaml"])
+        write_values(custom_value_yaml, '/tmp/customValues.yaml')
+        custom_values = "-f /tmp/customValues.yaml"
     set_vals = ""
-    if "Values" in properties:
+    if properties.get("Values"):
         values = properties['Values']
         set_vals = " ".join(["--set %s=%s" % (k, values[k]) for k in values.keys()])
     version = ""
-    if "Version" in properties:
+    if properties.get("Version"):
         version = "--version %s" % properties['Version']
     name = ""
-    if "Name" in properties and request_type != "Update":
+    if properties.get("Name") and request_type != "Update":
         name = "--name %s" % properties['Name']
-    if "ChartBucket" in properties and "ChartKey" in properties:
+    if properties.get("ChartBucket") and properties.get("ChartKey"):
         properties['Chart'] = '/tmp/chart.tgz'
         chart = s3_client.get_object(Bucket=properties["ChartBucket"], Key=properties["ChartKey"])['Body'].read()
         f = open("/tmp/chart.tgz", "wb")
         f.write(chart)
         f.close()
-    return "%s %s %s %s %s" % (properties['Chart'], val_file, set_vals, version, name)
+    return "%s %s %s %s %s %s" % (properties['Chart'], internal_values, custom_values, set_vals, version, name)
 
 
 def _trim_event_for_poll(event):
-    needed_keys = ['Chart', 'RepoUrl', 'Namespace', 'KubeConfigPath', 'KubeConfigKmsContext', 'TimeoutMinutes']
+    needed_keys = ['Chart', 'RepoUrl', 'Namespace', 'ClusterName', 'TimeoutMinutes']
     trimmable = []
     for prop in event['ResourceProperties'].keys():
         if prop not in needed_keys:

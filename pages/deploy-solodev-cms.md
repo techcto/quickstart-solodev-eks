@@ -1,5 +1,5 @@
 # Deploy Solodev CMS on an EKS Cluster via CloudFormation
-The following steps will allow you to deploy Solodev CMS to an existing EKS cluster by launching a new stack via AWS CloudFormation. Additional installation methods are available including <a href="https://github.com/techcto/charts">via Helm Charts</a> or via <a href="deploy-solodev-cms-kcmd.md">custom kubectl commands</a>.
+The following steps will allow you to deploy Solodev CMS to an existing EKS cluster by launching a new stack via AWS CloudFormation. Additional installation methods are available including <a href="https://github.com/techcto/charts">via Helm Charts</a>.
 
 ## Step 1: Subscribe on the AWS Marketplace
 If you have not already done so, you'll first need to subscribe to Solodev on the <a href="https://aws.amazon.com/marketplace/pp/B07XV951M6">AWS Marketplace.</a> Click the button below to get started: 
@@ -85,19 +85,19 @@ The following parameters must be configured to launch your Solodev DCX CloudForm
 		<td colspan="2"><strong>EKS Cluster</strong></td>
 	<tr>
 		<td width="33%">HelmLambdaArn</td>
-		<td width="600px">The HelmLambdaArn found in the <a href="deploy-eks.md">outputs on your EKS stack</a></td>
+		<td width="600px">The HelmLambdaArn found in the <a href="pages/deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">outputs on your EKS stack</a></td>
 	</tr>
 	<tr>
 		<td>KubeConfigPath</td>
-		<td>The KubeConfigPath found in the <a href="deploy-eks.md">outputs on your EKS stack</td>
+		<td>The KubeConfigPath found in the <a href="pages/deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">outputs on your EKS stack</td>
 	</tr> 
 	<tr>
 		<td>KubeConfigKmsContext</td>
-		<td>The KubeConfigKmsContext found in the <a href="deploy-eks.md">outputs on your EKS stack</td>
+		<td>Defaults to "EKSQuickStart".</td>
 	</tr>
 	<tr>
 		<td>ServiceRoleName</td>
-		<td>The service account name created <a href="deploy-eks.md#step-5-download-and-configure-kcmdsh">after deploying your EKS stack</a></td>
+		<td>Defaults to "aws-serviceaccount".</td>
 	</tr>  	       
 </table>
 
@@ -127,6 +127,19 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 		<td><img src="https://raw.githubusercontent.com/solodev/AWS-Launch-Pad/master/pages/images/install/monitor-solodev-cms-eks-app.jpg" /></td>
 	</tr>
 </table>
+
+## Step 6: Accessing the UI endpoint address
+After the creation of the CloudFormation stack is completed, users must locate the CNAME for the UI endpoint address to launch an instance of Solodev. This process involves connecting to the Kubernetes dashboard. Please refer to <a href="pages/deploy-solodev-eks.md#step-8-connect-to-kubernetes-dashboard">Section 8: Connect to Kubernetes Dashboard</a> on the Launch Solodev Kubernetes for EKS page for more information. 
+
+Once the user connects to the Kubernetes dashboard, click the select box under Namespace:
+
+Choose solodev-dcx:
+
+In the Kubernetes dashboard choose services:
+
+Click the external endpoint CNAME associated with the instance name for port 80:
+
+Login to Solodev:
 
 ---
 © 2020 Solodev. All rights reserved worldwide. And off planet. 

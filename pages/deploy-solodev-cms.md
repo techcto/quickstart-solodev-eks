@@ -11,7 +11,7 @@ If you have not already done so, you'll first need to subscribe to Solodev on th
 </table>
 
 ## Step 2: Gather EKS Stack Outputs for Solodev CMS
-Take note of several of your <a href="deploy-eks.md#step-4-gather-stack-outputs-for-solodev-cms">EKS stack outputs</a>. You will need these output values when launching Solodev CMS on the EKS cluster.
+Take note of several of your <a href="deploy-solodev-eks.md#step-6-gather-stack-outputs-for-solodev-eks">EKS stack outputs</a>. You will need these output values when launching Solodev CMS on the EKS cluster.
 
 Click on the primary stack and view the "Outputs" tab. You will find details pertaining to the cluster's BastionIP, EKSClusterName, HelmLambdaArn, KubeConfigPath, and KubeManifestLambdaArn. 
 

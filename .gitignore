@@ -13,4 +13,3 @@ ci/bin
 /.venv
 .DS_Store
 /.taskcat
-/functions/packages

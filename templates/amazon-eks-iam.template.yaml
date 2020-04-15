@@ -129,17 +129,6 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !GetAtt QuickStartStackMakerRole.Arn
-            Action: sts:AssumeRole
-          - !If
-            - EnableBastionRole
-            - Effect: Allow
-              Principal:
-                AWS: !GetAtt BastionRole.Arn
-              Action: sts:AssumeRole
-            - !Ref AWS::NoValue
-          - Effect: Allow
-            Principal:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:

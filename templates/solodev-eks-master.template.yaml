@@ -504,7 +504,6 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
-        EnableWeave: !Ref EnableWeave
         BootstrapArguments: !If [EnableWeaveCNI, "--solodev-network 'true'", ""]
 Outputs:
   HelmLambdaArn:

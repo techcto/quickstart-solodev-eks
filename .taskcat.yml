@@ -29,47 +29,53 @@ tests:
   defaults:
     parameters:
       AvailabilityZones: $[taskcat_genaz_3]
-  public-endpoint:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_3]
-      EKSPublicAccessEndpoint: Enabled
-    regions:
-      - ap-northeast-2
-  with-bastion:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_3]
-      ProvisionBastionHost: Enabled
-    regions:
-      - eu-north-1
-  cluster-autoscaler:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_3]
-      ClusterAutoScaler: Disabled
-    regions:
-    - eu-central-1
-  efs:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_3]
-      EfsStorageClass: Disabled
-    regions:
-    - us-west-2
-  managed-node-group:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_3]
-      ClusterAutoScaler: Disabled
-      ManagedNodeGroup: 'yes'
-      ManagedNodeGroupAMIType: AL2_x86_64
-    regions:
-    - us-east-1
-  monitoring-prom-graf:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_3]
-      MonitoringStack: Prometheus + Grafana
-    regions:
-    - ap-southeast-2
-  2az:
-    parameters:
-      AvailabilityZones: $[taskcat_genaz_2]
-      NumberOfAZs: "2"
-    regions:
-    - ca-central-1
+  # aws:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #   template: ./templates/amazon-eks-master.template.yaml
+  #   regions:
+  #       - us-east-1
+  # public-endpoint:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #     EKSPublicAccessEndpoint: Enabled
+  #   regions:
+  #     - ap-northeast-2
+  # with-bastion:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #     ProvisionBastionHost: Enabled
+  #   regions:
+  #     - eu-north-1
+  # cluster-autoscaler:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #     ClusterAutoScaler: Disabled
+  #   regions:
+  #   - eu-central-1
+  # efs:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #     EfsStorageClass: Disabled
+  #   regions:
+  #   - us-west-2
+  # managed-node-group:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #     ClusterAutoScaler: Disabled
+  #     ManagedNodeGroup: 'yes'
+  #     ManagedNodeGroupAMIType: AL2_x86_64
+  #   regions:
+  #   - us-east-1
+  # monitoring-prom-graf:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_3]
+  #     MonitoringStack: Prometheus + Grafana
+  #   regions:
+  #   - ap-southeast-2
+  # 2az:
+  #   parameters:
+  #     AvailabilityZones: $[taskcat_genaz_2]
+  #     NumberOfAZs: "2"
+  #   regions:
+  #   - ca-central-1

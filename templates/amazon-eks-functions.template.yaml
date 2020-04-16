@@ -101,7 +101,8 @@ Resources:
               - s3:GetObject
             Resource:
               - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}"
-              - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/${QSS3KeyPrefix}functions/packages/EksClusterResource/awsqs-eks-cluster.zip"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/${QSS3KeyPrefix}functions/packages/EksClusterResource/*"
   KubectlLayer:
     DependsOn: CopyZips
     Type: AWS::Lambda::LayerVersion

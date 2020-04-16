@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Deploys IAM roles and policies required for the AWS EKS Quick Start (qs-1p7nknohl)
+Metadata:
+  QSLint:
+    Exclusions: [W9002, W9003, W9004, W9006]
 Parameters:
   LambdaZipsBucketName:
     Description: Bucket Name where the lambda zip files should be placed
@@ -27,11 +30,6 @@ Parameters:
     Type: String
     AllowedValues: [ "True", "False" ]
     Default: "False"
-  KubeConfigBucket:
-    Type: String
-  KubeConfigKey:
-    Type: String
-    Default: ".kube/config.enc"
   CreateBastionRole:
     Type: String
     Default: "Enabled"

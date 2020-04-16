@@ -1,3 +1,6 @@
+general:
+  auth:
+    default: dev
 project:
   name: quickstart-amazon-eks
   owner: quickstart-eng@amazon.com
@@ -13,7 +16,7 @@ project:
   - ap-northeast-1
   - ap-southeast-1
   - ap-southeast-2
-  template: templates/amazon-eks-master.template.yaml
+  template: templates/solodev-eks.yaml
   parameters:
     RemoteAccessCIDR: 10.0.0.0/16
     QSS3BucketName: $[taskcat_autobucket]
@@ -41,13 +44,13 @@ tests:
   cluster-autoscaler:
     parameters:
       AvailabilityZones: $[taskcat_genaz_3]
-      ClusterAutoScaler: Enabled
+      ClusterAutoScaler: Disabled
     regions:
     - eu-central-1
   efs:
     parameters:
       AvailabilityZones: $[taskcat_genaz_3]
-      EfsStorageClass: Enabled
+      EfsStorageClass: Disabled
     regions:
     - us-west-2
   managed-node-group:

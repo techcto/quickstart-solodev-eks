@@ -3,6 +3,7 @@
 args=("$@")
 
 init(){
+    git submodule init
     git remote add upstream https://github.com/aws-quickstart/quickstart-amazon-eks.git
     git submodule add https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git ./functions/source/EksClusterResource
 }

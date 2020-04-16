@@ -459,10 +459,12 @@ Outputs:
     Value: !If [ CreateDeleteBucketContentsRole, !GetAtt DeleteBucketContentsRole.Arn, "" ]
   CopyZipsRoleArn:
     Value: !GetAtt CopyZipsRole.Arn
+  QuickStartStackMakerRoleArn:
+    Value: !GetAtt QuickStartStackMakerRole.Arn
   ControlPlaneRoleArn:
     Value: !GetAtt ControlPlaneRole.Arn
-  KubernetesAdminRoleArn:
-    Value: !GetAtt KubernetesAdminRole.Arn
+  ControlPlaneProvisionRoleArn:
+    Value: !GetAtt ControlPlaneProvisionRole.Arn
   NodeInstanceProfile:
     Value: !Ref NodeInstanceProfile
   NodeInstanceRoleArn:
@@ -470,18 +472,12 @@ Outputs:
   NodeInstanceRoleName:
     Value: !Ref NodeInstanceRole
   BastionRole:
-    Value: !If [EnableBastionRole, !Ref BastionRole, !Ref BastionIAMRoleName]
+    Value: !If [EnableBastionRole, !Ref BastionRole, ""]
+  KubeConfigUploadRoleArn:
+    Value: !GetAtt KubeConfigUploadRole.Arn
   CleanupLoadBalancersRoleArn:
     Value: !GetAtt CleanupLoadBalancersRole.Arn
   CleanupSecurityGroupDependenciesRoleArn:
     Value: !GetAtt CleanupSecurityGroupDependenciesRole.Arn
   GetCallerArnRoleArn:
     Value: !GetAtt GetCallerArnRole.Arn
-  CreateVpcRoleRoleArn:
-    Value: !GetAtt CreateVpcRoleRole.Arn
-  ExecutionRoleArn:
-    Value: !GetAtt ExecutionRole.Arn
-  RegisterTypeRoleArn:
-    Value: !GetAtt RegisterTypeRole.Arn
-  LogDeliveryRoleArn:
-    Value: !GetAtt LogDeliveryRole.Arn

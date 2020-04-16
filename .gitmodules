@@ -9,3 +9,6 @@
 [submodule "functions/source/EksClusterResource"]
 	path = functions/source/EksClusterResource
 	url = https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git
+[submodule "functions/source/quickstart-amazon-eks-cluster-resource-provider"]
+	path = functions/source/quickstart-amazon-eks-cluster-resource-provider
+	url = https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git

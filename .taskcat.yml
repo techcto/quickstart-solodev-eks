@@ -2,7 +2,7 @@ general:
   auth:
     default: dev
 project:
-  name: quickstart-amazon-eks
+  name: quickstart-solodev-eks
   owner: quickstart-eng@amazon.com
   regions:
   - us-east-1
@@ -21,6 +21,7 @@ project:
     RemoteAccessCIDR: 10.0.0.0/16
     QSS3BucketName: $[taskcat_autobucket]
     QSS3BucketRegion: $[taskcat_current_region]
+    QSS3KeyPrefix: "quickstart-solodev-eks/"
     ProvisionBastionHost: Disabled
   lambda_source_path: functions/source
   lambda_zip_path: functions/packages

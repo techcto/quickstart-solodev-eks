@@ -21,6 +21,7 @@ project:
     ProvisionBastionHost: Disabled
   lambda_source_path: functions/source
   lambda_zip_path: functions/packages
+  build_submodules: true
 tests:
   defaults:
     parameters:

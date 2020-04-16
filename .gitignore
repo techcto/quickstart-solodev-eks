@@ -13,3 +13,5 @@ ci/bin
 /.venv
 .DS_Store
 /.taskcat
+
+.taskcat_overrides.yml

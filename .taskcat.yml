@@ -29,12 +29,12 @@ tests:
   defaults:
     parameters:
       AvailabilityZones: $[taskcat_genaz_3]
-  # aws:
-  #   parameters:
-  #     AvailabilityZones: $[taskcat_genaz_3]
-  #   template: ./templates/amazon-eks-master.template.yaml
-  #   regions:
-  #       - us-east-1
+  aws:
+    parameters:
+      AvailabilityZones: $[taskcat_genaz_3]
+    template: templates/amazon-eks-master.template.yaml
+    regions:
+        - us-east-1
   # public-endpoint:
   #   parameters:
   #     AvailabilityZones: $[taskcat_genaz_3]

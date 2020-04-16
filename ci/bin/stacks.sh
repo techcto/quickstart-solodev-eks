@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #Params
-CLUSTER=1
+CLUSTER=0
 MEGACLUSTER=0
 
 if [ $CLUSTER == 1 ]; then

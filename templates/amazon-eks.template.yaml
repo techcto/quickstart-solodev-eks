@@ -528,6 +528,7 @@ Resources:
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
         EnableWeave: !Ref EnableWeave
+        ControlPlaneProvisionRoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
   PrometheusStack:
     Condition: EnableMonitoringPrometheusGrafana
     Type: AWS::CloudFormation::Stack

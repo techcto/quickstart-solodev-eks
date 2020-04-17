@@ -419,10 +419,6 @@ EOF
 }
 
 function install_kubernetes_client_tools() {
-    echo "Installing Pip"
-    easy_install pip
-    echo "Upgrading AWS CLI"
-    /usr/local/bin/pip3 install awscli --upgrade --user
     mkdir -p /usr/local/bin/
     retry_command 20 curl --retry 5 -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
     chmod +x ./aws-iam-authenticator
@@ -566,10 +562,7 @@ request_eip
 install_kubernetes_client_tools
 setup_kubeconfig
 KUBECONFIG="/home/${user_group}/.kube/config"
-NAMESPACE="solodev-dcx"
-
-su ${user_group} -c "/usr/local/bin/helm repo add charts 'https://raw.githubusercontent.com/techcto/charts/master/'"
-su ${user_group} -c "/usr/local/bin/helm repo update"
+NAMESPACE="solodev"
 
 #Network Setup
 initCNI(){
@@ -584,7 +577,7 @@ initWeave(){
 }
 
 initServiceAccount(){
-    kubectl --kubeconfig=$KUBECONFIG create namespace solodev-dcx
+    kubectl --kubeconfig=$KUBECONFIG create namespace ${NAMESPACE}
     echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
     ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
     echo $ISSUER_URL
@@ -620,8 +613,8 @@ initServiceAccount(){
 }
 EOF
 
-    #To Review - AWS Marketplace Policy
-    ROLE_NAME=solodev-usage-${K8S_CLUSTER_NAME}
+    #AWS Marketplace Policy
+    ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
     cat > iam-policy.json << EOF
 {
@@ -698,9 +691,9 @@ EOF
     /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
 }
 
-initStorage(){
-    kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/storage-class.yaml
-}
+# initStorage(){
+#     kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/storage-class.yaml
+# }
 
 #Service Account
 initServiceAccount

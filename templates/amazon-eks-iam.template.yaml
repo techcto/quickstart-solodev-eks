@@ -460,3 +460,5 @@ Outputs:
     Value: !GetAtt RegisterTypeRole.Arn
   LogDeliveryRoleArn:
     Value: !GetAtt LogDeliveryRole.Arn
+  ControlPlaneProvisionRoleArn:
+    Value: !GetAtt ControlPlaneProvisionRole.Arn

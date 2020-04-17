@@ -768,7 +768,7 @@ Resources:
                   - BinaryPath
                 BINARY_BUCKET_REGION: us-west-2
             b-bootstrap:
-              command: !Sub /etc/eks/bootstrap.sh ${EKSControlPlane} ${BootstrapArguments}
+              command: !Sub /tmp/worker/bootstrap.sh ${EKSControlPlane} ${BootstrapArguments}
     Properties:
       AssociatePublicIpAddress: false
       IamInstanceProfile: !Ref NodeInstanceProfile

@@ -52,6 +52,8 @@ Parameters:
   EKSEncryptSecretsKmsKeyArn:
     Type: String
     Default: ""
+  KubeManifestLambdaArn:
+    Type: String
   EnableWeave:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
@@ -70,7 +72,6 @@ Conditions:
     - !Equals [ !Ref EKSEncryptSecretsKmsKeyArn, "" ]
     - !Equals [ !Ref EKSEncryptSecrets, Enabled ]
   EnableEncryption: !Equals [ !Ref EKSEncryptSecrets, Enabled ]
-  AddUsers: !Not [ !Equals [!Select [ 0, !Ref AdditionalEKSAdminArns ], ""] ]
   EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
   KMSKey:
@@ -151,7 +152,7 @@ Resources:
       ServiceToken: !Ref GetCallerArnLambdaArn
   CNI:
     Condition: EnableWeaveCNI
-    DependsOn: [ EksNodeUser, KubeConfigToS3 ]
+    DependsOn: [ EKS ]
     Type: "Custom::KubeManifest"
     Version: '1.0'
     Properties:

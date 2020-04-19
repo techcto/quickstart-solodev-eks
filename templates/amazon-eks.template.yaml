@@ -332,7 +332,7 @@ Resources:
         EnableX11Forwarding: !Ref BastionEnableX11Forwarding
         EnvironmentVariables: !Sub
         - >
-          EnableWeave=${EnableWeave}
+          EnableWeave=${EnableWeave},
           K8S_CLUSTER_NAME=${EKSControlPlane.Outputs.EKSName},
           K8S_CA_DATA=${EKSControlPlane.Outputs.CAData},
           K8S_ENDPOINT=${EKSControlPlane.Outputs.EKSEndpoint}${Joiner}

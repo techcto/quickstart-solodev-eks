@@ -440,7 +440,7 @@ EOF
     mv ./linux-amd64/tiller /usr/local/bin/
     rm -rf ./linux-amd64/
     touch /var/log/tiller.log
-    chown ${user_group} /var/log/tiller.log
+    chown ${user}:${user_group} /var/log/tiller.log
     cat > /usr/local/bin/helm <<"EOF"
 #!/bin/bash
 /usr/local/bin/tiller -listen 127.0.0.1:44134 -alsologtostderr -storage secret &>> /var/log/tiller.log &
@@ -453,7 +453,7 @@ kill %1
 exit ${EXIT_CODE}
 EOF
     chmod +x /usr/local/bin/helm
-    su ${user_group} -c "/usr/local/bin/helm init --client-only"
+    su ${user} -c "/usr/local/bin/helm init --client-only"
 }
 
 ##################################### End Function Definitions
@@ -561,6 +561,8 @@ prevent_process_snooping
 request_eip
 install_kubernetes_client_tools
 setup_kubeconfig
+
+#Custom
 KUBECONFIG="/home/${user_group}/.kube/config"
 NAMESPACE="solodev"
 

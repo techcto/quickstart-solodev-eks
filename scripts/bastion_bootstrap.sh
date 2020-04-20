@@ -278,7 +278,8 @@ EOF
         apt-get install -y bash-completion
         echo "0 0 * * * unattended-upgrades -d" > ~/mycron
     else
-        yum install -y bash-completion --enablerepo=epel
+        #AL2
+        # yum install -y bash-completion --enablerepo=epel
         echo "0 0 * * * yum -y update --security" > ~/mycron
     fi
 

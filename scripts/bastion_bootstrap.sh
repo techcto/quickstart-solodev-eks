@@ -65,7 +65,7 @@ function setup_environment_variables() {
     BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
     touch ${BASTION_LOGFILE}
     if ! [ -L "$BASTION_LOGFILE_SHADOW" ]; then
-        if ! [ -F "$BASTION_LOGFILE_SHADOW" ]; then
+        if ! [ -f "$BASTION_LOGFILE_SHADOW" ]; then
             ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
         fi
     fi
@@ -567,7 +567,7 @@ install_kubernetes_client_tools
 setup_kubeconfig
 
 #Custom
-KUBECONFIG="/home/${user_group}/.kube/config"
+KUBECONFIG="/home/${user}/.kube/config"
 NAMESPACE="solodev"
 
 #Network Setup
@@ -583,7 +583,7 @@ initWeave(){
 }
 
 initServiceAccount(){
-    kubectl --kubeconfig=$KUBECONFIG create namespace ${NAMESPACE}
+    /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create namespace ${NAMESPACE}
     echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
     ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
     echo $ISSUER_URL

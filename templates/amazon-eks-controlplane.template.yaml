@@ -58,8 +58,6 @@ Parameters:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
-  ControlPlaneProvisionRoleArn:
-    Type: String
 Conditions:
     Default: ""
 Conditions:
@@ -168,5 +166,3 @@ Outputs:
     Value: !GetAtt EKS.Endpoint
   EKSName:
     Value: !Ref EKS
-  ControlPlaneProvisionRoleArn:
-    Value: !Ref ControlPlaneProvisionRoleArn

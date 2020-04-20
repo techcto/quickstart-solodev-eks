@@ -528,7 +528,6 @@ Resources:
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
         EnableWeave: !Ref EnableWeave
-        ControlPlaneProvisionRoleArn: !GetAtt IamStack.Outputs.ControlPlaneProvisionRoleArn
         KubeManifestLambdaArn: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
   PrometheusStack:
     Condition: EnableMonitoringPrometheusGrafana

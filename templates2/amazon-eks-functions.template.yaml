@@ -101,7 +101,8 @@ Resources:
               - s3:GetObject
             Resource:
               - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}"
-              - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/${QSS3KeyPrefix}functions/packages/EksClusterResource/awsqs-eks-cluster.zip"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/${QSS3KeyPrefix}functions/packages/EksClusterResource/*"
   KubectlLayer:
     DependsOn: CopyZips
     Type: AWS::Lambda::LayerVersion
@@ -329,6 +330,10 @@ Resources:
               logger.debug(event)
               status = cfnresponse.SUCCESS
               try:
+                  print(event['ResourceProperties']['SourceBucket'])
+                  print(event['ResourceProperties']['DestBucket'])
+                  print(event['ResourceProperties']['Prefix'])
+                  print(event['ResourceProperties']['Objects'])
                   if event['RequestType'] == 'Delete':
                       delete_objects(event['ResourceProperties']['DestBucket'], event['ResourceProperties']['Prefix'],
                                      event['ResourceProperties']['Objects'])

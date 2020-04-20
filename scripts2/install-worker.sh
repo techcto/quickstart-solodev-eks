@@ -7,32 +7,6 @@ IFS=$'\n\t'
 
 TEMPLATE_DIR=${TEMPLATE_DIR:-/tmp/worker}
 
-################################################################################
-### Network ####################################################################
-################################################################################
-
-# Disable the automatic assignment of additional ip addresses
-zypper remove -y cloud-netconfig-ec2
-sed -i "s/cloud-netconfig //" /etc/sysconfig/network/config
-sed -i 's/CLOUD_NETCONFIG_MANAGE="yes"/CLOUD_NETCONFIG_MANAGE="no"/' /etc/sysconfig/network/ifcfg-eth*
-systemctl restart wickedd
-systemctl restart network
-
-################################################################################
-### Packages ###################################################################
-################################################################################
-
-# Update the OS to begin with to catch up to the latest packages.
-zypper up -y
-
-# Install necessary packages
-# SLES already provides aws-cli, chrony, curl, unzip, and wget.
-# If we're here, cfn-bootstrap has already been installed
-zypper in -y \
-    conntrack-tools \
-    nfs-utils \
-    socat
-
 # Not in the distro repos, so grab the binary from the official GitHub releases
 wget -O /usr/bin/jq 'https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64'
 chmod +x /usr/bin/jq
@@ -115,7 +89,6 @@ sudo chown root:root /etc/systemd/system/kubelet.service
 sudo mv $TEMPLATE_DIR/kubelet-config.json /etc/kubernetes/kubelet/kubelet-config.json
 sudo chown root:root /etc/kubernetes/kubelet/kubelet-config.json
 
-
 sudo systemctl daemon-reload
 # Disable the kubelet until the proper dropins have been configured
 sudo systemctl disable kubelet
@@ -125,6 +98,7 @@ sudo systemctl disable kubelet
 ################################################################################
 
 sudo mkdir -p /etc/eks
-sudo mv $TEMPLATE_DIR/eni-max-pods.txt /etc/eks/eni-max-pods.txt
+sudo touch /etc/eks/solodev.txt
+# sudo mv $TEMPLATE_DIR/eni-max-pods.txt /etc/eks/eni-max-pods.txt
 sudo mv $TEMPLATE_DIR/bootstrap.sh /etc/eks/bootstrap.sh
 sudo chmod +x /etc/eks/bootstrap.sh

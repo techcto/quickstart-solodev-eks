@@ -204,8 +204,8 @@ Parameters:
     Default: ""
   BastionOS:
     Type: String
-    AllowedValues: [ "Amazon-Linux-HVM", "CentOS-7-HVM", "Ubuntu-Server-14.04-LTS-HVM", "Ubuntu-Server-16.04-LTS-HVM", "SUSE-SLES-15-HVM" ]
-    Default: "Amazon-Linux-HVM"
+    AllowedValues: [ "Amazon-Linux2-HVM", "Amazon-Linux-HVM", "CentOS-7-HVM", "Ubuntu-Server-14.04-LTS-HVM", "Ubuntu-Server-16.04-LTS-HVM", "SUSE-SLES-15-HVM" ]
+    Default: "Amazon-Linux2-HVM"
   ProvisionBastionHost:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
@@ -252,6 +252,10 @@ Parameters:
   HttpProxy:
     Type: String
     Default: ""
+  EnableWeave:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
 Conditions:
   3AZDeployment: !Not [!Equals [!Ref PrivateSubnet3ID, ""]]
   2AZDeployment: !Or
@@ -328,6 +332,8 @@ Resources:
         EnableX11Forwarding: !Ref BastionEnableX11Forwarding
         EnvironmentVariables: !Sub
         - >
+          EnableWeave=${EnableWeave},
+          K8S_ROLE_ARN=${IamStack.Outputs.KubernetesAdminRoleArn},
           K8S_CLUSTER_NAME=${EKSControlPlane.Outputs.EKSName},
           K8S_CA_DATA=${EKSControlPlane.Outputs.CAData},
           K8S_ENDPOINT=${EKSControlPlane.Outputs.EKSEndpoint}${Joiner}
@@ -522,6 +528,8 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
+        EnableWeave: !Ref EnableWeave
+        KubeManifestLambdaArn: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
   PrometheusStack:
     Condition: EnableMonitoringPrometheusGrafana
     Type: AWS::CloudFormation::Stack

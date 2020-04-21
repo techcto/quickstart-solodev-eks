@@ -371,10 +371,6 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
     Description: "Skip creating a bastion host by setting this is set to Disabled."
-  EnableWeave:
-    Type: String
-    AllowedValues: [ "Enabled", "Disabled" ]
-    Default: "Disabled"
 Rules:
   EKSSupport:
     Assertions:
@@ -412,7 +408,6 @@ Rules:
           - !Ref 'ClusterAutoScaler'
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
-  EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
   EKSStack:
     Type: AWS::CloudFormation::Stack
@@ -458,8 +453,8 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
-        BastionVariables: !If [EnableWeaveCNI, "EnableWeave=Enabled,", ""]
-        BootstrapArguments: !If [EnableWeaveCNI, "--enable-weave 'true'", ""]
+        BastionVariables: "EnableWeave=Enabled"
+        BootstrapArguments: "--enable-weave 'true'"
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

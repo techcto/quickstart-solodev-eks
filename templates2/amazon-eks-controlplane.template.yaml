@@ -59,8 +59,6 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
 Conditions:
-    Default: ""
-Conditions:
   AddUser: !Not [ !Equals [ !Ref AdditionalEKSAdminUserArn, "" ] ]
   AddRole: !Not [ !Equals [ !Ref AdditionalEKSAdminRoleArn, "" ] ]
   BastionRole: !Not [ !Equals [ !Ref BastionRole, "" ] ]

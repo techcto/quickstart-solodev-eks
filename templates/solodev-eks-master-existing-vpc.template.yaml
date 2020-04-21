@@ -409,6 +409,52 @@ Rules:
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
+  SysOpsAdminRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: eksStackPolicySysOps
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudformation:*
+                  - eks:*
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeVpcs
+                  - lambda:InvokeFunction
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ec2:CreateNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DeleteNetworkInterface
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - lambda:AddPermission
+                  - lambda:RemovePermission
+                Resource:  "*"
+              - Effect: Allow
+                Action:
+                  - events:PutRule
+                  - events:DeleteRule
+                  - events:PutTargets
+                  - events:RemoveTargets
+                Resource:  "*"
   EKSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -438,7 +484,7 @@ Resources:
         NodeInstanceType: !Ref NodeInstanceType
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         AdditionalEKSAdminUserArn: !Ref AdditionalEKSAdminUserArn
-        AdditionalEKSAdminRoleArn: !Ref AdditionalEKSAdminRoleArn
+        AdditionalEKSAdminRoleArn: !Ref SysOpsAdminRole
         VPCID: !Ref VPCID
         KubernetesVersion: !Ref KubernetesVersion
         ProvisionClusterAutoScaler: !Ref ClusterAutoScaler
@@ -470,3 +516,6 @@ Outputs:
     Value: !GetAtt EKSStack.Outputs.BastionSecurityGroup
   NodeGroupSecurityGroup:
     Value: !GetAtt EKSStack.Outputs.NodeGroupSecurityGroup
+  SysOpsAdminRoleArn:
+    Value: !GetAtt SysOpsAdminRole.Arn
+

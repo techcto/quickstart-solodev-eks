@@ -3,7 +3,7 @@ general:
     default: dev
 project:
   name: quickstart-solodev-eks
-  owner: quickstart-eng@amazon.com
+  owner: help@solodev.com
   regions:
   - us-east-1
   # - us-east-2

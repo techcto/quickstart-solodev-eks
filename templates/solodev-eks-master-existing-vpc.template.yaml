@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Deploys an EKS cluster into an existing VPC (qs-1p7nknoht)
+Description: Deploys a Solodev Optimized EKS cluster into an existing VPC (qs-1p7nknoht)
 Metadata:
   LintSpellExclude:
     - Kubernetes

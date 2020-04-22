@@ -53,7 +53,6 @@ Metadata:
           default: Optional Kubernetes add-ins
         Parameters:
           - ClusterAutoScaler
-          - EnableWeave
           - EfsStorageClass
           - EfsPerformanceMode
           - EfsThroughputMode
@@ -105,8 +104,6 @@ Metadata:
         default: Lambda zips bucket name
       ClusterAutoScaler:
         default: Cluster autoscaler
-      EnableWeave:
-        default: "Disabled"
       EfsStorageClass:
         default: EFS storage class
       EfsPerformanceMode:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#Params.
+#Params..
 CLUSTER=1
 MEGACLUSTER=1
 

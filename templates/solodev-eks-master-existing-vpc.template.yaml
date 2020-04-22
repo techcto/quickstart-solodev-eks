@@ -484,7 +484,7 @@ Resources:
         NodeInstanceType: !Ref NodeInstanceType
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         AdditionalEKSAdminUserArn: !Ref AdditionalEKSAdminUserArn
-        AdditionalEKSAdminRoleArn: !Ref SysOpsAdminRole
+        AdditionalEKSAdminRoleArn: !GetAtt SysOpsAdminRole.Arn
         VPCID: !Ref VPCID
         KubernetesVersion: !Ref KubernetesVersion
         ProvisionClusterAutoScaler: !Ref ClusterAutoScaler

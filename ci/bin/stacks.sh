@@ -4,7 +4,7 @@
 CLUSTER=1
 MEGACLUSTER=1
 
-if [ $CLUSTER == 1 ]; then
+if [ $CLUSTER == 0 ]; then
 
 echo "Create AWS EKS Cluster"
 echo $(aws s3 cp s3://build-secure/params/amazon-eks.json - ) > amazon-eks.json

@@ -52,8 +52,6 @@ Parameters:
   EKSEncryptSecretsKmsKeyArn:
     Type: String
     Default: ""
-  KubeManifestLambdaArn:
-    Type: String
 Conditions:
   AddUser: !Not [ !Equals [ !Ref AdditionalEKSAdminUserArn, "" ] ]
   AddRole: !Not [ !Equals [ !Ref AdditionalEKSAdminRoleArn, "" ] ]
@@ -64,7 +62,6 @@ Conditions:
     - !Equals [ !Ref EKSEncryptSecretsKmsKeyArn, "" ]
     - !Equals [ !Ref EKSEncryptSecrets, Enabled ]
   EnableEncryption: !Equals [ !Ref EKSEncryptSecrets, Enabled ]
-  EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
   KMSKey:
     Condition: CreateKey
@@ -142,15 +139,6 @@ Resources:
     Type: Custom::GetCallerArn
     Properties:
       ServiceToken: !Ref GetCallerArnLambdaArn
-  CNI:
-    Condition: EnableWeaveCNI
-    DependsOn: [ EKS ]
-    Type: "Custom::KubeManifest"
-    Version: '1.0'
-    Properties:
-      ServiceToken: !Ref KubeManifestLambdaArn
-      CNI:
-        Prep: "true"
 Outputs:
   EksArn:
     Value: !GetAtt EKS.Arn

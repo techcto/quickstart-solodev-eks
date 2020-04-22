@@ -2,7 +2,7 @@
 
 #Params..
 CLUSTER=1
-MEGACLUSTER=1
+MEGACLUSTER=0
 
 if [ $CLUSTER == 1 ]; then
 

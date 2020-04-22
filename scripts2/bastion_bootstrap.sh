@@ -65,9 +65,7 @@ function setup_environment_variables() {
     BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
     touch ${BASTION_LOGFILE}
     if ! [ -L "$BASTION_LOGFILE_SHADOW" ]; then
-        if ! [ -f "$BASTION_LOGFILE_SHADOW" ]; then
-            ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
-        fi
+      ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
     fi
     mkdir -p /usr/bin/bastion
     touch /tmp/messages
@@ -151,10 +149,12 @@ DATE_TIME_WHOAMI="`whoami`:`date "+%Y-%m-%d %H:%M:%S"`"
 LOG_ORIGINAL_COMMAND=`echo "$DATE_TIME_WHOAMI:$SSH_ORIGINAL_COMMAND"`
 echo "$LOG_ORIGINAL_COMMAND" >> "${bastion_mnt}/${bastion_log}"
 log_dir="/var/log/bastion/"
+
 else
 # The "script" program could be circumvented with some commands
 # (e.g. bash, nc). Therefore, I intentionally prevent users
 # from supplying commands.
+
 echo "This bastion supports interactive sessions only. Do not supply a command"
 exit 1
 fi
@@ -278,8 +278,7 @@ EOF
         apt-get install -y bash-completion
         echo "0 0 * * * unattended-upgrades -d" > ~/mycron
     else
-        #AL2
-        # yum install -y bash-completion --enablerepo=epel
+        yum install -y bash-completion --enablerepo=epel
         echo "0 0 * * * yum -y update --security" > ~/mycron
     fi
 
@@ -418,8 +417,6 @@ users:
         - "token"
         - "-i"
         - "${K8S_CLUSTER_NAME}"
-        - "-r"
-        - "${K8S_ROLE_ARN}"
 EOF
     cp -r /home/${user}/.kube/ /root/.kube/
     chown -R ${user}:${user_group} /home/${user}/.kube/
@@ -568,5 +565,149 @@ prevent_process_snooping
 request_eip
 install_kubernetes_client_tools
 setup_kubeconfig
+
+#Custom
+KUBECONFIG="/home/ec2-user/.kube/config"
+NAMESPACE="solodev"
+
+#Network Setup
+initCNI(){
+    #WEAVE
+    initWeave
+}
+
+initWeave(){
+    echo "Install Weave CNI"
+    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(/usr/local/bin/kubectl --kubeconfig $KUBECONFIG version | base64 | tr -d '\n')"
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f weave-net.yaml
+}
+
+initServiceAccount(){
+    /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create namespace ${NAMESPACE}
+    echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
+    ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
+    echo $ISSUER_URL
+    ISSUER_URL_WITHOUT_PROTOCOL=$(echo $ISSUER_URL | sed 's/https:\/\///g' )
+    ISSUER_HOSTPATH=$(echo $ISSUER_URL_WITHOUT_PROTOCOL | sed "s/\/id.*//" )
+    rm *.crt || echo "No files that match *.crt exist"
+    ROOT_CA_FILENAME=$(openssl s_client -showcerts -connect $ISSUER_HOSTPATH:443 < /dev/null \
+                        | awk '/BEGIN/,/END/{ if(/BEGIN/){a++}; out="cert"a".crt"; print > out } END {print "cert"a".crt"}')
+    ROOT_CA_FINGERPRINT=$(openssl x509 -fingerprint -noout -in $ROOT_CA_FILENAME \
+                        | sed 's/://g' | sed 's/SHA1 Fingerprint=//')
+    aws iam create-open-id-connect-provider \
+                        --url $ISSUER_URL \
+                        --thumbprint-list $ROOT_CA_FINGERPRINT \
+                        --client-id-list sts.amazonaws.com \
+                        --region ${REGION} || echo "A provider for $ISSUER_URL already exists"
+    ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+    PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/$ISSUER_URL_WITHOUT_PROTOCOL"
+    cat > trust-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Principal": {
+            "Federated": "${PROVIDER_ARN}"
+        },
+        "Action": "sts:AssumeRoleWithWebIdentity",
+        "Condition": {
+            "StringEquals": {
+                "${ISSUER_URL_WITHOUT_PROTOCOL}:sub": "system:serviceaccount:${NAMESPACE}:aws-serviceaccount"
+            }
+        }
+    }]
+}
+EOF
+
+    #AWS Marketplace Policy
+    ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
+    aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
+    cat > iam-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "aws-marketplace:RegisterUsage"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        }
+    ]
+}
+EOF
+
+    POLICY_ARN=$(aws iam create-policy --policy-name AWSMarketplacePolicy-${K8S_CLUSTER_NAME} --policy-document file://iam-policy.json --query Policy.Arn | sed 's/"//g')
+    echo ${POLICY_ARN}
+    aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn $POLICY_ARN
+    echo $ROLE_NAME
+    applyServiceAccount $ROLE_NAME
+}
+
+applyServiceAccount(){
+    ROLE_NAME=$1
+    echo "Role="$ROLE_NAME
+    ROLE_ARN=$(aws iam get-role --role-name ${ROLE_NAME} --query Role.Arn --output text)
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG create sa aws-serviceaccount --namespace ${NAMESPACE}
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$ROLE_ARN --namespace ${NAMESPACE}
+    echo "Service Account Created: aws-serviceaccount"
+}
+
+initNetwork(){
+    export PATH=/usr/local/bin/:$PATH
+    su ${user_group} -c "/usr/local/bin/helm install --name nginx-ingress stable/nginx-ingress --set controller.service.annotations.\"service\.beta\.kubernetes\.io/aws-load-balancer-type\"=nlb \
+        --set controller.publishService.enabled=true,controller.stats.enabled=true,controller.metrics.enabled=true,controller.hostNetwork=true,controller.kind=DaemonSet"
+    su ${user_group} -c "/usr/local/bin/helm install --name external-dns stable/external-dns --set logLevel=debug \
+        --set policy=sync --set rbac.create=true \
+        --set aws.zoneType=public --set txtOwnerId=${K8S_CLUSTER_NAME}"
+        # --set controller.hostNetwork=true,controller.kind=DaemonSet"
+}
+
+initDashboard(){
+    yum install -y jq
+    DOWNLOAD_URL=$(curl --silent "https://api.github.com/repos/kubernetes-sigs/metrics-server/releases/latest" | jq -r .tarball_url)
+    DOWNLOAD_VERSION=$(grep -o '[^/v]*$' <<< $DOWNLOAD_URL)
+    curl -Ls $DOWNLOAD_URL -o metrics-server-$DOWNLOAD_VERSION.tar.gz
+    mkdir metrics-server-$DOWNLOAD_VERSION
+    tar -xzf metrics-server-$DOWNLOAD_VERSION.tar.gz --directory metrics-server-$DOWNLOAD_VERSION --strip-components 1
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f metrics-server-$DOWNLOAD_VERSION/deploy/1.8+/
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG get deployment metrics-server -n kube-system
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml
+    cat > eks-admin-service-account.yaml << EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eks-admin
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eks-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: eks-admin
+  namespace: kube-system
+EOF
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f eks-admin-service-account.yaml
+    /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
+}
+
+#Service Account
+initServiceAccount
+
+if [[ "$ProvisionSolodevDCXNetwork" = "Enabled" ]]; then
+    initCNI
+fi
+
+initNetwork
+initStorage
+
+#Dashboard Setup
+initDashboard
 
 echo "Bootstrap complete."

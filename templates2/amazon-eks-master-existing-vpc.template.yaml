@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Deploys an EKS cluster into an existing VPC
+Description: Deploys an EKS cluster into an existing VPC (qs-1p7nknoht)
 Metadata:
   LintSpellExclude:
     - Kubernetes
@@ -9,12 +9,9 @@ Metadata:
     - IOPS
     - EfsStorageClass
     - dcd
+    - vpc-0343606e
     - Lambda
     - maxIO
-    - Resource Name
-    - Enabled
-    - Disabled
-    - Prometheus
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -28,19 +25,16 @@ Metadata:
           - PublicSubnet2ID
           - PublicSubnet3ID
           - RemoteAccessCIDR
-          - NumberOfAZs
-          - RemoteAccessCIDR
-          - ProvisionBastionHost
       - Label:
           default: Amazon EC2 configuration
         Parameters:
           - KeyPairName
+          - ProvisionBastionHost
       - Label:
           default: Amazon EKS configuration
         Parameters:
           - NodeInstanceType
           - NumberOfNodes
-          - MaxNumberOfNodes
           - NodeGroupName
           - NodeVolumeSize
           - ManagedNodeGroup
@@ -48,10 +42,13 @@ Metadata:
           - AdditionalEKSAdminUserArn
           - AdditionalEKSAdminRoleArn
           - KubernetesVersion
-          - EKSPublicAccessEndpoint
-          - EKSPublicAccessCIDRs
-          - EKSPrivateAccessEndpoint
-          - EKSClusterLoggingTypes
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+          - QSS3BucketRegion
+          - LambdaZipsBucketName
       - Label:
           default: Optional Kubernetes add-ins
         Parameters:
@@ -60,15 +57,6 @@ Metadata:
           - EfsPerformanceMode
           - EfsThroughputMode
           - EfsProvisionedThroughputInMibps
-          - MonitoringStack
-          - EnableWeave
-      - Label:
-          default: AWS Quick Start configuration
-        Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
-          - QSS3BucketRegion
-          - LambdaZipsBucketName
     ParameterLabels:
       KeyPairName:
         default: SSH key name
@@ -84,20 +72,32 @@ Metadata:
         default: Nodes instance type
       NumberOfNodes:
         default: Number of nodes
-      MaxNumberOfNodes:
-        default: Maximum number of nodes  
       NodeGroupName:
         default: Node group name
       NodeVolumeSize:
         default: Node volume size
       ManagedNodeGroup:
-        default: Managed node group
+        default: Managed Node Group
       ManagedNodeGroupAMIType:
-        default: Managed node group AMI type
+        default: Managed Node Group AMI Type
+      PublicSubnet1ID:
+        default: Public subnet 1 ID
+      PublicSubnet2ID:
+        default: Public subnet 2 ID
+      PublicSubnet3ID:
+        default: Public subnet 3 ID
+      PrivateSubnet1ID:
+        default: Private subnet 1 ID
+      PrivateSubnet2ID:
+        default: Private subnet 2 ID
+      PrivateSubnet3ID:
+        default: Private subnet 3 ID
+      VPCID:
+        default: VPC ID
       AdditionalEKSAdminUserArn:
-        default: Additional EKS admin ARN (IAM user)
+        default: Additional EKS admin ARN (IAM User)
       AdditionalEKSAdminRoleArn:
-        default: Additional EKS admin ARN (IAM role)
+        default: Additional EKS admin ARN (IAM Role)
       KubernetesVersion:
         default: Kubernetes version
       LambdaZipsBucketName:
@@ -112,30 +112,8 @@ Metadata:
         default: EFS throughput mode
       EfsProvisionedThroughputInMibps:
         default: EFS provisioned throughput in Mibps
-      MonitoringStack:
-        default: Monitoring stack
-      NumberOfAZs:
-        default: Number of Availability Zones
       ProvisionBastionHost:
-        default: Provision bastion host
-      EKSPrivateAccessEndpoint:
-        default: EKS private access endpoint
-      EKSPublicAccessEndpoint:
-        default: EKS public access endpoint
-      EKSPublicAccessCIDRs:
-        default: EKS public access CIDRs
-      EKSClusterLoggingTypes:
-        default: EKS cluster logging types
-      PublicSubnet1ID:
-        default: Public subnet 1 ID
-      PublicSubnet2ID:
-        default: Public subnet 2 ID
-      PrivateSubnet1ID:
-        default: Private subnet 1 ID
-      PrivateSubnet2ID:
-        default: Private subnet 2 ID
-      VPCID:
-        default: VPC ID
+        default: Provision Bastion Host
 Parameters:
   KeyPairName:
     Description: The name of an existing public/private key pair, which allows you
@@ -146,7 +124,7 @@ Parameters:
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: solodev-quickstarts
+    Default: aws-quickstart
     Description: S3 bucket name for the Quick Start assets. This string can include
       numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
       or end with a hyphen (-).
@@ -155,7 +133,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/.]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), dots(.) and forward slash (/).
-    Default: eks/
+    Default: quickstart-amazon-eks/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
       forward slash (/).
@@ -168,8 +146,7 @@ Parameters:
   RemoteAccessCIDR:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/x
-    Description: The CIDR IP range that is permitted to access the instances. We recommend
-      that you set this value to a trusted IP range.
+    Description: The CIDR IP range that is permitted to access the instances. We recommend that you set this value to a trusted IP range.
     Type: String
   EKSPublicAccessCIDRs:
     AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
@@ -304,10 +281,6 @@ Parameters:
     Default: 3
     Description: The number of Amazon EKS node instances. The default is one for each of the three Availability Zones.
     Type: Number
-  MaxNumberOfNodes:
-    Default: 3
-    Description: The maximum number of Amazon EKS node instances. The default is three node.
-    Type: Number  
   NodeGroupName:
     Default: Default
     Description: The name for EKS node group.
@@ -322,59 +295,19 @@ Parameters:
     Description: Choose if you want to use a managed node group. If you select "yes", you must select Kubernetes version 1.14 or higher.
     Type: String
   ManagedNodeGroupAMIType:
-    Description: Select one of the two AMI types for your managed node group (only applies if you chose "yes" for ManagedNodeGroup). GPU instance types should use the AL2_x86_64_GPU AMI type, which uses the Amazon EKS-optimized Linux AMI with GPU support. Non-GPU instances should use the AL2_x86_64 AMI type, which uses the Amazon EKS-optimized Linux AMI.
-    AllowedValues: [ "AL2_x86_64", "AL2_x86_64_GPU", ""]
+    Description: Select one of the two AMI Types for your Managed Node Group (Only applies if you selected Managed Node Group "yes". ). GPU instance types should use the AL2_x86_64_GPU AMI type, which uses the Amazon EKS-optimized Linux AMI with GPU support. Non-GPU instances should use the AL2_x86_64 AMI type, which uses the Amazon EKS-optimized Linux AMI.
+    AllowedValues: [ "AL2_x86_64", " AL2_x86_64_GPU", ""]
     Default: "AL2_x86_64"
     Type: String
   KubernetesVersion:
     Type: String
-    AllowedValues: [ "1.13", "1.14", "1.15" ]
+    AllowedValues: [ "1.15", "1.14", "1.13" ]
     Default: "1.15"
     Description: The Kubernetes control plane version.
   LambdaZipsBucketName:
     Description: '[OPTIONAL] The name of the S3 bucket where the Lambda zip files should be placed. If you leave this parameter blank, an S3 bucket will be created.'
     Type: String
     Default: ''
-  ClusterAutoScaler:
-    Type: String
-    AllowedValues: [ Enabled, Disabled ]
-    Default: Disabled
-    Description: Choose "Enabled" to enable Kubernetes cluster autoscaler.
-  EfsStorageClass:
-    Type: String
-    AllowedValues: [ Enabled, Disabled ]
-    Default: Disabled
-    Description: Choose Enabled to enable EFS storage class, which will create the required EFS volume.
-  EfsPerformanceMode:
-    Type: String
-    AllowedValues: [ generalPurpose, maxIO ]
-    Default: generalPurpose
-    Description: Choose maxIO mode to provide greater IOPS with an increased latency. Only has an effect when EfsStorageClass is enabled.
-  EfsThroughputMode:
-    Type: String
-    AllowedValues: [ bursting, provisioned ]
-    Default: bursting
-    Description: Choose provisioned for throughput that is not dependent on the amount of data stored in the file system. Only has an effect when EfsStorageClass is enabled.
-  EfsProvisionedThroughputInMibps:
-    Type: Number
-    MinValue: 0
-    Default: 0
-    Description: Set to 0 if EfsThroughputMode is set to bursting. Only has an effect when EfsStorageClass is enabled.
-  MonitoringStack:
-    Type: String
-    AllowedValues: [ "Prometheus + Grafana", "None" ]
-    Default: "None"
-    Description: Enable monitoring stack with "Prometheus+Grafana"
-  NumberOfAZs:
-    Type: String
-    AllowedValues: ["2", "3"]
-    Default: "2"
-    Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
-  ProvisionBastionHost:
-    Type: String
-    AllowedValues: [ "Enabled", "Disabled" ]
-    Default: "Enabled"
-    Description: "Skip creating a bastion host by setting this is set to Disabled."
   VPCID:
     Type: "AWS::EC2::VPC::Id"
     Description: The ID of your existing VPC (e.g., vpc-0343606e)
@@ -401,10 +334,40 @@ Parameters:
     Type: String
     Description: The ID of the private subnet in Availability Zone 3 in your existing VPC (e.g., subnet-abd39039)
     Default: ""
-  EnableWeave:
+  ClusterAutoScaler:
+    Type: String
+    AllowedValues: [ Enabled, Disabled ]
+    Default: Disabled
+    Description: Choose Enabled to enable Kubernetes cluster autoscaler.
+  EfsStorageClass:
+    Type: String
+    AllowedValues: [ Enabled, Disabled ]
+    Default: Disabled
+    Description: Choose Enabled to enable EFS storage class, which will create the required EFS volume.
+  EfsPerformanceMode:
+    Type: String
+    AllowedValues: [ generalPurpose, maxIO ]
+    Default: generalPurpose
+    Description: Choose maxIO mode to provide greater IOPS with an increased latency. Only has an effect when EfsStorageClass is enabled.
+  EfsThroughputMode:
+    Type: String
+    AllowedValues: [ bursting, provisioned ]
+    Default: bursting
+    Description: Choose provisioned for throughput that is not dependent on the amount of data stored in the file system. Only has an effect when EfsStorageClass is enabled.
+  EfsProvisionedThroughputInMibps:
+    Type: Number
+    MinValue: 0
+    Default: 0
+    Description: Set to 0 if EfsThroughputMode is set to bursting. Only has an effect when EfsStorageClass is enabled.
+  HttpProxy:
+    Type: String
+    Default: ""
+    Description: "HTTP(S) proxy configuration, if provided all worker nodes and pod egress traffic will go use this proxy. Example: http://10.101.0.100:3128/"
+  ProvisionBastionHost:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
-    Default: "Disabled"
+    Default: "Enabled"
+    Description: "Skip creating a bastion host by setting this is set to Disabled."
 Rules:
   EKSSupport:
     Assertions:
@@ -426,12 +389,12 @@ Rules:
              - ap-south-1
              - ca-central-1
           - !Ref 'AWS::Region'
-  EKSVersion_ManagedNodeGroup:
+  EKSVersion_ManagedNodeGrou:
     RuleCondition: !Equals [ !Ref 'ManagedNodeGroup', 'yes' ]
     Assertions:
       - AssertDescription: To use Managed Node Groups you must use EKS version 1.14 or higher
         Assert: !Contains
-          - [ '1.15', '1.14' ]
+          - [ '1.14', '1.15' ]
           - !Ref 'KubernetesVersion'
   ClusterAutoScalerVerification:
     RuleCondition: !Equals [ !Ref 'ManagedNodeGroup', 'yes' ]
@@ -441,12 +404,7 @@ Rules:
           - - 'Disabled'
           - !Ref 'ClusterAutoScaler'
 Conditions:
-  3AZDeployment: !Equals [!Ref NumberOfAZs, "3"]
-  2AZDeployment: !Or
-    - !Equals [!Ref NumberOfAZs, "2"]
-    - !Equals [!Ref NumberOfAZs, "3"]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
-  EnableWeaveCNI: !Equals [!Ref 'EnableWeave', 'Enabled']
 Resources:
   EKSStack:
     Type: AWS::CloudFormation::Stack
@@ -456,30 +414,19 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        HttpProxy: !Ref HttpProxy
         PublicSubnet1ID: !Ref PublicSubnet1ID
-        PublicSubnet2ID: !If
-          - 2AZDeployment
-          - !Ref PublicSubnet2ID
-          - !Ref AWS::NoValue
-        PublicSubnet3ID: !If
-          - 3AZDeployment
-          - !Ref PublicSubnet3ID
-          - !Ref AWS::NoValue
+        PublicSubnet2ID: !Ref PublicSubnet2ID
+        PublicSubnet3ID: !Ref PublicSubnet3ID
         KeyPairName: !Ref KeyPairName
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         QSS3BucketRegion: !Ref QSS3BucketRegion
         PrivateSubnet1ID: !Ref PrivateSubnet1ID
-        PrivateSubnet2ID: !If
-          - 2AZDeployment
-          - !Ref PrivateSubnet2ID
-          - !Ref AWS::NoValue
-        PrivateSubnet3ID: !If
-          - 3AZDeployment
-          - !Ref PrivateSubnet3ID
-          - !Ref AWS::NoValue
+        PrivateSubnet2ID: !Ref PrivateSubnet2ID
+        PrivateSubnet3ID: !Ref PrivateSubnet3ID
         NumberOfNodes: !Ref NumberOfNodes
-        MaxNumberOfNodes: !Ref MaxNumberOfNodes
+        MaxNumberOfNodes: !Ref NumberOfNodes
         NodeGroupName: !Ref NodeGroupName
         NodeVolumeSize: !Ref NodeVolumeSize
         ManagedNodeGroup: !Ref ManagedNodeGroup
@@ -496,7 +443,6 @@ Resources:
         EfsPerformanceMode: !Ref EfsPerformanceMode
         EfsThroughputMode: !Ref EfsThroughputMode
         EfsProvisionedThroughputInMibps: !Ref EfsProvisionedThroughputInMibps
-        ProvisionMonitoringStack: !Ref MonitoringStack
         ProvisionBastionHost: !Ref ProvisionBastionHost
         EKSPublicAccessCIDRs: !Join [ ',', !Ref 'EKSPublicAccessCIDRs' ]
         EKSPublicAccessEndpoint: !Ref EKSPublicAccessEndpoint
@@ -504,7 +450,6 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
-        BootstrapArguments: !If [EnableWeaveCNI, "--solodev-network 'true'", ""]
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

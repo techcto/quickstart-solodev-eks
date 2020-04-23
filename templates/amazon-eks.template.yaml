@@ -179,7 +179,7 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
   BastionBootstrapScript:
-    Default: "true"
+    Default: ""
     Type: String
   BastionInstanceType:
     Default: "t2.micro"
@@ -220,10 +220,6 @@ Parameters:
   HttpProxy:
     Type: String
     Default: ""
-  EnableWeave:
-    Type: String
-    Default: "false"
-    AllowedValues: [ "true", "false" ]
 Conditions:
   3AZDeployment: !Not [!Equals [!Ref PrivateSubnet3ID, ""]]
   2AZDeployment: !Or

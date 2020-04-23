@@ -211,7 +211,7 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
   BastionBootstrapScript:
-    Default: ""
+    Default: "true"
     Type: String
   BastionInstanceType:
     Default: "t2.micro"

@@ -570,13 +570,7 @@ setup_kubeconfig
 KUBECONFIG="/home/ec2-user/.kube/config"
 NAMESPACE="solodev"
 
-#Network Setup
-initWeave(){
-    echo "Install Weave CNI"
-    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(/usr/local/bin/kubectl --kubeconfig $KUBECONFIG version | base64 | tr -d '\n')"
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f weave-net.yaml
-}
-
+#Default solodev service account for launching Solodev Cloudformation apps
 initServiceAccount(){
     /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create namespace ${NAMESPACE}
     echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
@@ -648,6 +642,13 @@ applyServiceAccount(){
     echo "Service Account Created: aws-serviceaccount"
 }
 
+#Weave
+initWeave(){
+    echo "Install Weave CNI"
+    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(/usr/local/bin/kubectl --kubeconfig $KUBECONFIG version | base64 | tr -d '\n')"
+    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f weave-net.yaml
+}
+
 initNetwork(){
     export PATH=/usr/local/bin/:$PATH
     su ${user_group} -c "/usr/local/bin/helm install --name nginx-ingress stable/nginx-ingress --set controller.service.annotations.\"service\.beta\.kubernetes\.io/aws-load-balancer-type\"=nlb \
@@ -658,6 +659,7 @@ initNetwork(){
         # --set controller.hostNetwork=true,controller.kind=DaemonSet"
 }
 
+#Dashboard
 initDashboard(){
     yum install -y jq
     DOWNLOAD_URL=$(curl --silent "https://api.github.com/repos/kubernetes-sigs/metrics-server/releases/latest" | jq -r .tarball_url)
@@ -692,15 +694,16 @@ EOF
     /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
 }
 
-#Service Account
+#AWS Marketplace Service Account
 initServiceAccount
 
+#Weave Add-On
 if [[ "$EableWeave" = "Enabled" ]]; then
     initWeave
 fi
 
+#Web Add-On
 initNetwork
-initStorage
 
 #Dashboard Setup
 initDashboard

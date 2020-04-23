@@ -566,12 +566,11 @@ install_kubernetes_client_tools
 setup_kubeconfig
 
 #Custom
-KUBECONFIG="/home/ec2-user/.kube/config"
 NAMESPACE="solodev"
 
-#Default solodev service account for launching Solodev Cloudformation apps
+#Default solodev service account for launching Cloudformation apps
 initServiceAccount(){
-    /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create namespace ${NAMESPACE}
+    kubectl create namespace ${NAMESPACE}
     echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
     ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
     echo $ISSUER_URL
@@ -636,16 +635,16 @@ applyServiceAccount(){
     ROLE_NAME=$1
     echo "Role="$ROLE_NAME
     ROLE_ARN=$(aws iam get-role --role-name ${ROLE_NAME} --query Role.Arn --output text)
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG create sa aws-serviceaccount --namespace ${NAMESPACE}
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$ROLE_ARN --namespace ${NAMESPACE}
+    kubectl create sa aws-serviceaccount --namespace ${NAMESPACE}
+    kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$ROLE_ARN --namespace ${NAMESPACE}
     echo "Service Account Created: aws-serviceaccount"
 }
 
 #Weave
 initWeave(){
     echo "Install Weave CNI"
-    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(/usr/local/bin/kubectl --kubeconfig $KUBECONFIG version | base64 | tr -d '\n')"
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f weave-net.yaml
+    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+    kubectl apply -f weave-net.yaml
 }
 
 initNetwork(){
@@ -666,9 +665,9 @@ initDashboard(){
     curl -Ls $DOWNLOAD_URL -o metrics-server-$DOWNLOAD_VERSION.tar.gz
     mkdir metrics-server-$DOWNLOAD_VERSION
     tar -xzf metrics-server-$DOWNLOAD_VERSION.tar.gz --directory metrics-server-$DOWNLOAD_VERSION --strip-components 1
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f metrics-server-$DOWNLOAD_VERSION/deploy/1.8+/
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG get deployment metrics-server -n kube-system
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml
+    kubectl apply -f metrics-server-$DOWNLOAD_VERSION/deploy/1.8+/
+    kubectl get deployment metrics-server -n kube-system
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml
     cat > eks-admin-service-account.yaml << EOF
 apiVersion: v1
 kind: ServiceAccount
@@ -689,8 +688,8 @@ subjects:
   name: eks-admin
   namespace: kube-system
 EOF
-    /usr/local/bin/kubectl --kubeconfig $KUBECONFIG apply -f eks-admin-service-account.yaml
-    /usr/local/bin/kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
+    kubectl apply -f eks-admin-service-account.yaml
+    kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
 }
 
 #AWS Marketplace Service Account

@@ -498,6 +498,14 @@ Resources:
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
         BastionVariables: "EnableWeave=Enabled"
         BootstrapArguments: "--enable-weave 'true'"
+  CNI:
+    DependsOn: [ EKSStack ]
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      CNI:
+        Prep: "true"
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

@@ -571,11 +571,6 @@ KUBECONFIG="/home/ec2-user/.kube/config"
 NAMESPACE="solodev"
 
 #Network Setup
-initCNI(){
-    #WEAVE
-    initWeave
-}
-
 initWeave(){
     echo "Install Weave CNI"
     curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(/usr/local/bin/kubectl --kubeconfig $KUBECONFIG version | base64 | tr -d '\n')"
@@ -700,8 +695,8 @@ EOF
 #Service Account
 initServiceAccount
 
-if [[ "$ProvisionSolodevDCXNetwork" = "Enabled" ]]; then
-    initCNI
+if [[ "$EableWeave" = "Enabled" ]]; then
+    initWeave
 fi
 
 initNetwork

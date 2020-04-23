@@ -14,6 +14,7 @@ Metadata:
     - Enabled
     - Disabled
     - Prometheus
+    - Encrypt
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -51,6 +52,8 @@ Metadata:
           - EKSPublicAccessCIDRs
           - EKSPrivateAccessEndpoint
           - EKSClusterLoggingTypes
+          - EKSEncryptSecrets
+          - EKSEncryptSecretsKmsKeyArn
       - Label:
           default: Optional Kubernetes add-ins
         Parameters:
@@ -140,6 +143,10 @@ Metadata:
         default: EKS public access CIDRs
       EKSClusterLoggingTypes:
         default: EKS cluster logging types
+      EKSEncryptSecrets:
+        default: Encrypt EKS secrets
+      EKSEncryptSecretsKmsKeyArn:
+        default: Encrypt EKS secrets KMS key ARN
 Parameters:
   AvailabilityZones:
     Description: The list of Availability Zones to use for the subnets in the VPC. Three
@@ -271,11 +278,6 @@ Parameters:
   NodeInstanceType:
     Default: t3.medium
     AllowedValues:
-      - t2.small
-      - t2.medium
-      - t2.large
-      - t2.xlarge
-      - t2.2xlarge
       - t3.nano
       - t3.micro
       - t3.small
@@ -283,26 +285,12 @@ Parameters:
       - t3.large
       - t3.xlarge
       - t3.2xlarge
-      - m3.medium
-      - m3.large
-      - m3.xlarge
-      - m3.2xlarge
-      - m4.large
-      - m4.xlarge
-      - m4.2xlarge
-      - m4.4xlarge
-      - m4.10xlarge
       - m5.large
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
       - m5.12xlarge
       - m5.24xlarge
-      - c4.large
-      - c4.xlarge
-      - c4.2xlarge
-      - c4.4xlarge
-      - c4.8xlarge
       - c5.large
       - c5.xlarge
       - c5.2xlarge
@@ -315,21 +303,8 @@ Parameters:
       - i3.4xlarge
       - i3.8xlarge
       - i3.16xlarge
-      - r3.xlarge
-      - r3.2xlarge
-      - r3.4xlarge
-      - r3.8xlarge
-      - r4.large
-      - r4.xlarge
-      - r4.2xlarge
-      - r4.4xlarge
-      - r4.8xlarge
-      - r4.16xlarge
       - x1.16xlarge
       - x1.32xlarge
-      - p2.xlarge
-      - p2.8xlarge
-      - p2.16xlarge
       - p3.2xlarge
       - p3.8xlarge
       - p3.16xlarge
@@ -430,26 +405,6 @@ Parameters:
     Default: "Enabled"
     Description: "Skip creating a bastion host by setting this is set to Disabled."
 Rules:
-  EKSSupport:
-    Assertions:
-      - AssertDescription: Your AWS Region does *NOT* yet support Amazon EKS
-        Assert: !Contains
-          -  - us-west-2
-             - us-east-1
-             - us-east-2
-             - sa-east-1
-             - eu-west-1
-             - eu-west-2
-             - eu-west-3
-             - eu-north-1
-             - eu-central-1
-             - ap-southeast-1
-             - ap-southeast-2
-             - ap-northeast-1
-             - ap-northeast-2
-             - ap-south-1
-             - ca-central-1
-          - !Ref 'AWS::Region'
   EKSVersion_ManagedNodeGroup:
     RuleCondition: !Equals [ !Ref 'ManagedNodeGroup', 'yes' ]
     Assertions:
@@ -473,6 +428,8 @@ Conditions:
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
+    Metadata:
+      cfn-lint: { config: { ignore_checks: [ W9901 ] } }
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
@@ -493,6 +450,8 @@ Resources:
         VPCCIDR: !Ref 'VPCCIDR'
   EKSStack:
     Type: AWS::CloudFormation::Stack
+    Metadata:
+      cfn-lint: { config: { ignore_checks: [ W9901 ] } }
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/amazon-eks.template.yaml'

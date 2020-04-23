@@ -15,3 +15,5 @@ ci/bin
 /.taskcat
 
 .taskcat_overrides.yml
+# /functions/packages
+/output

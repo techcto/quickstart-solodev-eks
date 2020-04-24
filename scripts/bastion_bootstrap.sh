@@ -707,7 +707,7 @@ initStorage(){
 #Service Account
 initServiceAccount
 
-if [[ "$ProvisionSolodevDCXNetwork" = "Enabled" ]]; then
+if [[ "$EnableWeave" = "Enabled" ]]; then
     initCNI
 fi
 

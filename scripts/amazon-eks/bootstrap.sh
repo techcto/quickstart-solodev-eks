@@ -20,7 +20,7 @@ function print_help {
     echo "--b64-cluster-ca The base64 encoded cluster CA content. Only valid when used with --apiserver-endpoint. Bypasses calling \"aws eks describe-cluster\""
     echo "--apiserver-endpoint The EKS cluster API Server endpoint. Only valid when used with --b64-cluster-ca. Bypasses calling \"aws eks describe-cluster\""
     echo "--kubelet-extra-args Extra arguments to add to the kubelet. Useful for adding labels or taints."
-    echo "--solodev-network Enable Solodev network settings (default: false)."
+    echo "--enable-weave Enable Weave CNI (default: false)."
 }
 
 POSITIONAL=()

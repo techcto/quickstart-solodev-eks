@@ -566,6 +566,7 @@ install_kubernetes_client_tools
 setup_kubeconfig
 
 #Custom
+cat > configure.sh << EOF
 NAMESPACE="solodev"
 
 #Default solodev service account for launching Cloudformation apps
@@ -588,7 +589,7 @@ initServiceAccount(){
                         --region ${REGION} || echo "A provider for $ISSUER_URL already exists"
     ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
     PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/$ISSUER_URL_WITHOUT_PROTOCOL"
-    cat > trust-policy.json << EOF
+    cat > trust-policy.json << EOF2
 {
     "Version": "2012-10-17",
     "Statement": [{
@@ -604,12 +605,12 @@ initServiceAccount(){
         }
     }]
 }
-EOF
+EOF2
 
     #AWS Marketplace Policy
     ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
-    cat > iam-policy.json << EOF
+    cat > iam-policy.json << EOF3
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -622,7 +623,7 @@ EOF
         }
     ]
 }
-EOF
+EOF3
 
     POLICY_ARN=$(aws iam create-policy --policy-name AWSMarketplacePolicy-${K8S_CLUSTER_NAME} --policy-document file://iam-policy.json --query Policy.Arn | sed 's/"//g')
     echo ${POLICY_ARN}
@@ -668,7 +669,7 @@ initDashboard(){
     kubectl apply -f metrics-server-$DOWNLOAD_VERSION/deploy/1.8+/
     kubectl get deployment metrics-server -n kube-system
     kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml
-    cat > eks-admin-service-account.yaml << EOF
+    cat > eks-admin-service-account.yaml << EOF4
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -687,7 +688,7 @@ subjects:
 - kind: ServiceAccount
   name: eks-admin
   namespace: kube-system
-EOF
+EOF4
     kubectl apply -f eks-admin-service-account.yaml
     kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
 }
@@ -705,5 +706,7 @@ initNetwork
 
 #Dashboard Setup
 initDashboard
+
+EOF
 
 echo "Bootstrap complete."

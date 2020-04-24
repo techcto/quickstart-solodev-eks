@@ -53,7 +53,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --enable-weave)
-            SOLODEV_NETWORK=$2
+            ENABLE_WEAVE=$2
             shift
             shift
             ;;

@@ -20,7 +20,7 @@ phases:
       - ls -alh submodules/quickstart-linux-bastion
       # Clean Up
       - rm -Rf .git jq get-pip.py aws_credentials.json
-      - aws s3 sync . s3://solodev-quickstarts/eks --delete
+      - aws s3 sync . s3://solodev-quickstarts/eks/1.15 --delete
       - DATE=$(date +%d%H%M)
       - chmod 700 ci/bin/cleanStacks.sh ci/bin/stacks.sh
       # - ./bin/cleanStacks.sh

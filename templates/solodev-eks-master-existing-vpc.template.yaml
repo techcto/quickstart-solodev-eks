@@ -499,11 +499,11 @@ Resources:
         BastionVariables: "EnableWeave=Enabled"
         BootstrapArguments: "--enable-weave 'true'"
   CNI:
-    DependsOn: [ EKS ]
+    DependsOn: [ EKSStack ]
     Type: "Custom::KubeManifest"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref KubeManifestLambdaArn
+      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
       CNI:
         Prep: "true"
 Outputs:

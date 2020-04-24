@@ -1,7 +1,3 @@
 .vscode
 server.*
 params
-
-eks/bin/*
-eks/bin/!kcmd.sh
-eks/bin/!setService.sh

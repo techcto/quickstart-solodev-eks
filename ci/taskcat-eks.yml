@@ -17,6 +17,6 @@ global:
 tests:
   dcxt1:
     parameter_input: solodev-master-vpc.json
-    template_file: solodev-master.yaml
+    template_file: solodev-eks.yaml
     regions:
       - us-west-1

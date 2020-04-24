@@ -623,8 +623,8 @@ initServiceAccount(){
 }
 EOF
 
-    #To Review - AWS Marketplace Policy
-    ROLE_NAME=solodev-usage-${K8S_CLUSTER_NAME}
+    #AWS Marketplace Policy
+    ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
     cat > iam-policy.json << EOF
 {
@@ -664,7 +664,6 @@ initNetwork(){
     su ${user_group} -c "/usr/local/bin/helm install --name external-dns stable/external-dns --set logLevel=debug \
         --set policy=sync --set domainFilters={${DOMAIN}} --set rbac.create=true \
         --set aws.zoneType=public --set txtOwnerId=${K8S_CLUSTER_NAME}"
-        # --set controller.hostNetwork=true,controller.kind=DaemonSet"
 }
 
 initDashboard(){

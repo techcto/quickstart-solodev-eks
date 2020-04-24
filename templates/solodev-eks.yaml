@@ -330,7 +330,7 @@ Resources:
         EfsThroughputMode: !Ref EfsThroughputMode
         EfsProvisionedThroughputInMibps: !Ref EfsProvisionedThroughputInMibps
         EnableWeave: !Ref EnableWeave
-        BootstrapArguments: !If [EnableWeaveCNI, "--solodev-network 'true'", ""]
+        BootstrapArguments: !If [EnableWeaveCNI, "--enable-weave 'true'", ""]
 
 Outputs:
   KubeConfigPath:

@@ -52,8 +52,8 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
-        --solodev-network)
-            SOLODEV_NETWORK=$2
+        --enable-weave)
+            ENABLE_WEAVE=$2
             shift
             shift
             ;;
@@ -73,7 +73,7 @@ USE_MAX_PODS="${USE_MAX_PODS:-true}"
 B64_CLUSTER_CA="${B64_CLUSTER_CA:-}"
 APISERVER_ENDPOINT="${APISERVER_ENDPOINT:-}"
 KUBELET_EXTRA_ARGS="${KUBELET_EXTRA_ARGS:-}"
-SOLODEV_NETWORK="${SOLODEV_NETWORK:-false}"
+ENABLE_WEAVE="${ENABLE_WEAVE:-false}"
 
 if [ -z "$CLUSTER_NAME" ]; then
     echo "CLUSTER_NAME is not defined"
@@ -130,7 +130,7 @@ if [[ "$USE_MAX_PODS" = "true" ]]; then
     set +o pipefail
     MAX_PODS=$(grep ^$INSTANCE_TYPE $MAX_PODS_FILE | awk '{print $2}')
     set -o pipefail
-    if [[ "$SOLODEV_NETWORK" = "true" ]]; then
+    if [[ "$ENABLE_WEAVE" = "true" ]]; then
         MAX_PODS=$(($MAX_PODS*5))
     fi
     if [[ -n "$MAX_PODS" ]]; then
@@ -204,7 +204,7 @@ Environment='KUBELET_EXTRA_ARGS=$KUBELET_EXTRA_ARGS'
 EOF
 fi
 
-if [[ "$SOLODEV_NETWORK" = "true" ]]; then
+if [[ "$ENABLE_WEAVE" = "true" ]]; then
     rm -Rf /etc/cni/net.d/10-aws.conflist /opt/cni/bin/aws-cni
 fi
 

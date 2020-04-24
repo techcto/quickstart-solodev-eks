@@ -18,7 +18,7 @@ export AWS_PROFILE="profile1"
 
 #Solodev
 export RELEASE="solodev-dcx-aws"
-export NAMESPACE="solodev-dcx"
+export NAMESPACE="solodev"
 export SECRET="BigSecret123"
 export PASSWORD="password"
 export DBPASSWORD="password"

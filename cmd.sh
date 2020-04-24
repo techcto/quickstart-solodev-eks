@@ -23,4 +23,11 @@ build(){
     taskcat test run
 }
 
+tag(){
+    VERSION="${args[1]}"
+    git tag -a v${VERSION} -m "tag release"
+    git push --tags
+}
+
+
 $*

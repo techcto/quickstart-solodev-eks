@@ -570,46 +570,28 @@ initServiceAccount(){
     echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
     ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
     echo $ISSUER_URL
-    ISSUER_URL_WITHOUT_PROTOCOL=$(echo $ISSUER_URL | sed 's/https:\/\///g' )
-    ISSUER_HOSTPATH=$(echo $ISSUER_URL_WITHOUT_PROTOCOL | sed "s/\/id.*//" )
-    rm *.crt || echo "No files that match *.crt exist"
-    ROOT_CA_FILENAME=$(openssl s_client -showcerts -connect $ISSUER_HOSTPATH:443 < /dev/null \
-                        | awk '/BEGIN/,/END/{ if(/BEGIN/){a++}; out="cert"a".crt"; print > out } END {print "cert"a".crt"}')
-    ROOT_CA_FINGERPRINT=$(openssl x509 -fingerprint -noout -in $ROOT_CA_FILENAME \
-                        | sed 's/://g' | sed 's/SHA1 Fingerprint=//')
-    aws iam create-open-id-connect-provider \
-                        --url $ISSUER_URL \
-                        --thumbprint-list $ROOT_CA_FINGERPRINT \
-                        --client-id-list sts.amazonaws.com \
-                        --region ${REGION} || echo "A provider for $ISSUER_URL already exists"
+
+
+    # STEP 1: create IAM role and attach the target policy:
+    ISSUER_HOSTPATH=$(echo $ISSUER_URL | cut -f 3- -d'/')
     ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-    PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/$ISSUER_URL_WITHOUT_PROTOCOL"
-    cat > trust-policy.json << EOF2
-{
-    "Version": "2012-10-17",
-    "Statement": [{
-        "Effect": "Allow",
-        "Principal": {
-            "Federated": "${PROVIDER_ARN}"
-        },
-        "Action": "sts:AssumeRoleWithWebIdentity",
-        "Condition": {
-            "StringEquals": {
-                "${ISSUER_URL_WITHOUT_PROTOCOL}:sub": "system:serviceaccount:${NAMESPACE}:aws-serviceaccount"
-            }
-        }
-    }]
-}
-EOF2
-    #AWS Marketplace Policy
-    ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
-    aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
-    cat > iam-policy.json << EOF3
+    PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/$ISSUER_HOSTPATH"
+    cat > irp-trust-policy.json << EOF
 {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Action": [
+        "Effect": "Allow",
+        "Principal": {
+            "Federated": "$PROVIDER_ARN"
+        },
+        "Action": "sts:AssumeRoleWithWebIdentity",
+        "Condition": {
+            "StringEquals": {
+            "${ISSUER_HOSTPATH}:sub": "system:serviceaccount:default:aws-serviceaccount"
+            }
+        },
+        "Action": [
                 "aws-marketplace:RegisterUsage"
             ],
             "Resource": "*",
@@ -617,13 +599,14 @@ EOF2
         }
     ]
 }
-EOF3
-
-    POLICY_ARN=$(aws iam create-policy --policy-name AWSMarketplacePolicy-${K8S_CLUSTER_NAME} --policy-document file://trust-policy.json --query Policy.Arn | sed 's/"//g')
-    echo ${POLICY_ARN}
-    aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn $POLICY_ARN
-    echo $ROLE_NAME
-    rm -f trust-policy.json trust-policy.json
+EOF
+    
+    ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
+    aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://irp-trust-policy.json
+    aws iam update-assume-role-policy --role-name $ROLE_NAME --policy-document file://irp-trust-policy.json
+    aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+    S3_ROLE_ARN=$(aws iam get-role --role-name $ROLE_NAME --query Role.Arn --output text)
+    # rm -f irp-trust-policy.json
 }
 
 initServiceAccount

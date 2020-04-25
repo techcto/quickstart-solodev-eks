@@ -253,7 +253,8 @@ Resources:
                   - iam:CreateRole
                   - iam:CreatePolicy
                   - iam:AttachRolePolicy
-                  - iam:CreateOpenIDConnectProvider 
+                  - iam:UpdateAssumeRolePolicy
+                  - iam:CreateOpenIDConnectProvider
                 Resource: "*"
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM'

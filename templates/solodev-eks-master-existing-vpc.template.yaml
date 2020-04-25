@@ -430,7 +430,7 @@ Rules:
           - !Ref 'ClusterAutoScaler'
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
-  AddSysOpsAdminRole: !Not [ !Equals [ !Ref AdditionalEKSAdminRoleArn, "" ] ]
+  AddSysOpsAdminRole: !Equals [ !Ref AdditionalEKSAdminRoleArn, "" ]
   EnableWeave: !Equals [!Ref 'ProvisionWeave', 'Enabled']
   EnableNginxIngress: !Equals [!Ref 'ProvisionNginxIngress', 'Enabled']
   EnableExternalDNS: !Equals [!Ref 'ProvisionExternalDNS', 'Enabled']
@@ -594,5 +594,5 @@ Outputs:
   NodeGroupSecurityGroup:
     Value: !GetAtt EKSStack.Outputs.NodeGroupSecurityGroup
   SysOpsAdminRoleArn:
-    Value: !GetAtt SysOpsAdminRole.Arn
+    Value: !If [AddSysOpsAdminRole, !GetAtt SysOpsAdminRole.Arn, !Ref AdditionalEKSAdminRoleArn]
 

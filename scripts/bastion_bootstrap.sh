@@ -565,13 +565,8 @@ request_eip
 install_kubernetes_client_tools
 setup_kubeconfig
 
-#Custom
-cat > configure.sh << EOF
-NAMESPACE="solodev"
-
-#Default solodev service account for launching Cloudformation apps
+#Apply AWS Marketplace service account for launching paid container apps
 initServiceAccount(){
-    kubectl create namespace ${NAMESPACE}
     echo "aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text"
     ISSUER_URL=$(aws eks describe-cluster --name ${K8S_CLUSTER_NAME} --region ${REGION} --query cluster.identity.oidc.issuer --output text )
     echo $ISSUER_URL
@@ -606,7 +601,6 @@ initServiceAccount(){
     }]
 }
 EOF2
-
     #AWS Marketplace Policy
     ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://trust-policy.json
@@ -625,88 +619,13 @@ EOF2
 }
 EOF3
 
-    POLICY_ARN=$(aws iam create-policy --policy-name AWSMarketplacePolicy-${K8S_CLUSTER_NAME} --policy-document file://iam-policy.json --query Policy.Arn | sed 's/"//g')
+    POLICY_ARN=$(aws iam create-policy --policy-name AWSMarketplacePolicy-${K8S_CLUSTER_NAME} --policy-document file://trust-policy.json --query Policy.Arn | sed 's/"//g')
     echo ${POLICY_ARN}
     aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn $POLICY_ARN
     echo $ROLE_NAME
-    applyServiceAccount $ROLE_NAME
+    rm -f trust-policy.json trust-policy.json
 }
 
-applyServiceAccount(){
-    ROLE_NAME=$1
-    echo "Role="$ROLE_NAME
-    ROLE_ARN=$(aws iam get-role --role-name ${ROLE_NAME} --query Role.Arn --output text)
-    kubectl create sa aws-serviceaccount --namespace ${NAMESPACE}
-    kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$ROLE_ARN --namespace ${NAMESPACE}
-    echo "Service Account Created: aws-serviceaccount"
-}
-
-#Weave
-initWeave(){
-    echo "Install Weave CNI"
-    curl --location -o ./weave-net.yaml "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-    kubectl apply -f weave-net.yaml
-}
-
-initNetwork(){
-    export PATH=/usr/local/bin/:$PATH
-    su ${user} -c "/usr/local/bin/helm install --name nginx-ingress stable/nginx-ingress --set controller.service.annotations.\"service\.beta\.kubernetes\.io/aws-load-balancer-type\"=nlb \
-        --set controller.publishService.enabled=true,controller.stats.enabled=true,controller.metrics.enabled=true,controller.hostNetwork=true,controller.kind=DaemonSet"
-    su ${user} -c "/usr/local/bin/helm install --name external-dns stable/external-dns --set logLevel=debug \
-        --set policy=sync --set rbac.create=true \
-        --set aws.zoneType=public --set txtOwnerId=${K8S_CLUSTER_NAME}"
-        # --set controller.hostNetwork=true,controller.kind=DaemonSet"
-}
-
-#Dashboard
-initDashboard(){
-    yum install -y jq
-    DOWNLOAD_URL=$(curl --silent "https://api.github.com/repos/kubernetes-sigs/metrics-server/releases/latest" | jq -r .tarball_url)
-    DOWNLOAD_VERSION=$(grep -o '[^/v]*$' <<< $DOWNLOAD_URL)
-    curl -Ls $DOWNLOAD_URL -o metrics-server-$DOWNLOAD_VERSION.tar.gz
-    mkdir metrics-server-$DOWNLOAD_VERSION
-    tar -xzf metrics-server-$DOWNLOAD_VERSION.tar.gz --directory metrics-server-$DOWNLOAD_VERSION --strip-components 1
-    kubectl apply -f metrics-server-$DOWNLOAD_VERSION/deploy/1.8+/
-    kubectl get deployment metrics-server -n kube-system
-    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml
-    cat > eks-admin-service-account.yaml << EOF4
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: eks-admin
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: eks-admin
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: eks-admin
-  namespace: kube-system
-EOF4
-    kubectl apply -f eks-admin-service-account.yaml
-    kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;
-}
-
-#AWS Marketplace Service Account
 initServiceAccount
-
-#Weave Add-On
-if [[ "$EnableWeave" = "Enabled" ]]; then
-    initWeave
-fi
-
-#Web Add-On
-initNetwork
-
-#Dashboard Setup
-initDashboard
-
-EOF
 
 echo "Bootstrap complete."

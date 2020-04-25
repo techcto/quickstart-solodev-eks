@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Deploys the External DNS helm chart into an existing kubernetes cluster (qs-1qde66ffn)"
+
+Metadata: 
+
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "EKS Cluster"
+        Parameters: 
+          - HelmLambdaArn
+          - ClusterName
+
+Parameters:
+
+  HelmLambdaArn:
+    Type: String
+
+  ClusterName:
+    Type: String
+
+Resources:
+
+  ExternalDNS:
+    Type: "Custom::Helm"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref HelmLambdaArn
+      ClusterName: !Ref ClusterName
+      Namespace: external-dns
+      Chart: stable/external-dns
+      Name: external-dns
+      ValueYaml: !Sub |
+        logLevel: debug
+        policy: sync
+        rbac:
+          create: true
+        aws:
+          zoneType: public
+        txtOwnerId: ${ClusterName}
+

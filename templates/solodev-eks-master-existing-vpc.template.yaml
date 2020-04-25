@@ -368,6 +368,31 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
     Description: "Skip creating a bastion host by setting this is set to Disabled."
+  ProvisionWeave:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Enabled"
+    Description: "Choose Enabled to enable Weave CNI"
+  EnableNginxIngress:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Enabled"
+    Description: "Choose Enabled to enable Inginx Proxy"
+  ProvisionExternalDNS:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Enabled"
+    Description: "Choose Enabled to enable External DNS with Route 53"
+  ProvisionDashboard:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Enabled"
+    Description: "Choose Enabled to enable Kubernetes Dashboard"
+  ProvisionCMS:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
+    Description: "Choose Enabled to enable Solodev CMS"
 Rules:
   EKSSupport:
     Assertions:
@@ -405,6 +430,11 @@ Rules:
           - !Ref 'ClusterAutoScaler'
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  EnableWeave: !Equals [!Ref 'ProvisionWeave', 'Enabled']
+  EnableNginxIngress: !Equals [!Ref 'ProvisionInginxIngress', 'Enabled']
+  EnableExternalDNS: !Equals [!Ref 'ProvisionExternalDNS', 'Enabled']
+  EnableDashboard: !Equals [!Ref 'ProvisionDashboard', 'Enabled']
+  EnableCMS: !Equals [!Ref 'ProvisionCMS', 'Enabled']
 Resources:
   SysOpsAdminRole:
     Type: "AWS::IAM::Role"
@@ -496,16 +526,60 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
-        BastionVariables: "EnableWeave=Enabled"
-        BootstrapArguments: "--enable-weave 'true'"
-  CNI:
+        BootstrapArguments: !If [EnableWeave, "--enable-weave 'true'", ""]
+  Weave:
+    Condition: EnableWeave
     DependsOn: [ EKSStack ]
     Type: "Custom::KubeManifest"
     Version: '1.0'
     Properties:
       ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
-      CNI:
-        Prep: "true"
+      Weave:
+        Enable: "true"
+  NginxIngressStack:
+    DependsOn: [ EKSStack ]
+    Condition: EnableNginxIngress
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/solodev-eks-nginx-ingress.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
+        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+  ExternalDNSStack:
+    DependsOn: [ EKSStack ]
+    Condition: EnableExternalDNS
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/solodev-eks-external-dns.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
+        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+  Dashboard:
+    DependsOn: [ EKSStack ]
+    Condition: EnableDashboard
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      Dashboard:
+        Enable: "true"
+  CMSStack:
+    Condition: EnableCMS
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/solodev-eks-cms.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
+        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

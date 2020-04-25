@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Deploys the Solodev CMS helm chart into an existing kubernetes cluster (qs-1qde66ffn)"
+
+Metadata: 
+
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "User Settings"
+        Parameters: 
+          - AdminUser
+          - AdminPassword
+      - 
+        Label: 
+          default: "Advanced Settings"
+        Parameters: 
+          - DatabaseName
+          - DatabasePassword
+          - AppSecret
+      - 
+        Label: 
+          default: "EKS Cluster"
+        Parameters: 
+          - HelmLambdaArn
+          - ClusterName
+          - ServiceRoleName
+
+Parameters:
+
+  AdminUser:
+      Description: The solodev admin username
+      Type: String
+      Default: 'solodev'
+      AllowedPattern: .+
+      ConstraintDescription: Please set admin username
+
+  AdminPassword: 
+      NoEcho: true
+      Description: The solodev admin password
+      Type: String
+      MinLength: 1
+      MaxLength: 41
+      AllowedPattern: .+
+      ConstraintDescription: Please set admin password
+
+  DatabaseName:
+      Description: The solodev database name
+      Type: String
+      MinLength: 1
+      MaxLength: 64
+      AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+      ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+      Default: 'solodev'
+
+  DatabasePassword:
+      NoEcho: true
+      Description: The database root password
+      Type: String
+      MinLength: 1
+      MaxLength: 41
+      AllowedPattern: .+
+      ConstraintDescription: Please set database root password
+
+  AppSecret:
+    Type: String
+    Description: Secret Key for App Encryption
+    Default: 'c5d3adbb98f43thc0d12f0cc8fbcd7f8'
+
+  HelmLambdaArn:
+    Type: String
+
+  ClusterName:
+    Type: String
+
+  ServiceRoleName:
+    Type: String
+    Default: 'aws-serviceaccount'
+
+Resources:
+
+  Marketplace:
+    DependsOn: [ EKSStack ]
+    Condition: EnableMarketplace
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      Namespace: "solodev"
+      Marketplace:
+        Enable: "true"
+
+  SolodevCMS:
+    Type: "Custom::Helm"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref HelmLambdaArn
+      ClusterName: !Ref ClusterName
+      RepoUrl: https://raw.githubusercontent.com/techcto/charts/master/
+      Chart: charts/solodev-cms-aws
+      Name: !Ref AWS::StackName
+      Namespace: "solodev"
+      ValueYaml: !Sub |
+        serviceAccountName: "${ServiceRoleName}"
+        solodev:
+          settings:
+            appSecret: ${AppSecret}
+            appUser: ${AdminUser}
+            appPassword: ${AdminPassword}
+            dbName: ${DatabaseName}
+            dbPassword: ${DatabasePassword}
+        mongo:
+          settings:
+            password: ${DatabasePassword}
+
+Outputs:
+
+    AdminUrl: 
+        Description: Point your DNS to this CNAME.
+        Value: "Locate external endpoint address for UI in services"
+    
+    AdminUsername: 
+        Description: Solodev admin username.
+        Value: !Ref AdminUser
+    
+    AdminPassword: 
+        Description: Solodev admin password.
+        Value: !Ref AdminPassword

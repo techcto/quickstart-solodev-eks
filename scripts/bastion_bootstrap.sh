@@ -579,19 +579,27 @@ initServiceAccount(){
     cat > irp-trust-policy.json << EOF
 {
     "Version": "2012-10-17",
-    "Statement": [
-        {
+    "Statement": [{
         "Effect": "Allow",
         "Principal": {
-            "Federated": "$PROVIDER_ARN"
+            "Federated": "${PROVIDER_ARN}"
         },
         "Action": "sts:AssumeRoleWithWebIdentity",
         "Condition": {
             "StringEquals": {
-            "${ISSUER_HOSTPATH}:sub": "system:serviceaccount:default:aws-serviceaccount"
+                "${ISSUER_URL_WITHOUT_PROTOCOL}:sub": "system:serviceaccount:${NAMESPACE}:aws-serviceaccount"
             }
-        },
-        "Action": [
+        }
+    }]
+}
+EOF
+
+    cat > aws-usage-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
                 "aws-marketplace:RegisterUsage"
             ],
             "Resource": "*",
@@ -604,9 +612,10 @@ EOF
     ROLE_NAME=aws-usage-${K8S_CLUSTER_NAME}
     aws iam create-role --role-name $ROLE_NAME --assume-role-policy-document file://irp-trust-policy.json
     aws iam update-assume-role-policy --role-name $ROLE_NAME --policy-document file://irp-trust-policy.json
-    aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
-    S3_ROLE_ARN=$(aws iam get-role --role-name $ROLE_NAME --query Role.Arn --output text)
-    # rm -f irp-trust-policy.json
+    POLICY_ARN=$(aws iam create-policy --policy-name AWSUsagePolicy-${K8S_CLUSTER_NAME} --policy-document file://aws-usage-policy.json --query Policy.Arn | sed 's/"//g')
+    echo ${POLICY_ARN}
+    aws iam attach-role-policy --role-name $ROLE_NAME --policy-arn ${POLICY_ARN}
+    rm -f irp-trust-policy.json
 }
 
 initServiceAccount

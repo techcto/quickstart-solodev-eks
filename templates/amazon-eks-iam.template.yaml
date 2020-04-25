@@ -249,6 +249,11 @@ Resources:
                   - ec2:AssociateAddress
                   - ec2:DescribeAddresses
                   - eks:ListClusters
+                  - iam:GetRole
+                  - iam:CreateRole
+                  - iam:CreatePolicy
+                  - iam:AttachRolePolicy
+                  - iam:CreateOpenIDConnectProvider 
                 Resource: "*"
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM'

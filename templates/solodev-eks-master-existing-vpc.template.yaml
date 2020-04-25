@@ -538,8 +538,8 @@ Resources:
       Weave:
         Enable: "true"
       Parameters:
-        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
-        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   NginxIngressStack:
     Condition: EnableNginxIngress
     Type: AWS::CloudFormation::Stack
@@ -571,8 +571,8 @@ Resources:
       Dashboard:
         Enable: "true"
       Parameters:
-        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
-        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   CMSStack:
     Condition: EnableCMS
     Type: AWS::CloudFormation::Stack

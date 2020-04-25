@@ -373,7 +373,7 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
     Description: "Choose Enabled to enable Weave CNI"
-  EnableNginxIngress:
+  ProvisionNginxIngress:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
@@ -430,13 +430,15 @@ Rules:
           - !Ref 'ClusterAutoScaler'
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  AddSysOpsAdminRole: !Not [ !Equals [ !Ref AdditionalEKSAdminRoleArn, "" ] ]
   EnableWeave: !Equals [!Ref 'ProvisionWeave', 'Enabled']
-  EnableNginxIngress: !Equals [!Ref 'ProvisionInginxIngress', 'Enabled']
+  EnableNginxIngress: !Equals [!Ref 'ProvisionNginxIngress', 'Enabled']
   EnableExternalDNS: !Equals [!Ref 'ProvisionExternalDNS', 'Enabled']
   EnableDashboard: !Equals [!Ref 'ProvisionDashboard', 'Enabled']
   EnableCMS: !Equals [!Ref 'ProvisionCMS', 'Enabled']
 Resources:
   SysOpsAdminRole:
+    Condition: AddSysOpsAdminRole
     Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
@@ -511,7 +513,7 @@ Resources:
         NodeInstanceType: !Ref NodeInstanceType
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         AdditionalEKSAdminUserArn: !Ref AdditionalEKSAdminUserArn
-        AdditionalEKSAdminRoleArn: !GetAtt SysOpsAdminRole.Arn
+        AdditionalEKSAdminRoleArn: !If [AddSysOpsAdminRole, !GetAtt SysOpsAdminRole.Arn, !Ref AdditionalEKSAdminRoleArn]
         VPCID: !Ref VPCID
         KubernetesVersion: !Ref KubernetesVersion
         ProvisionClusterAutoScaler: !Ref ClusterAutoScaler
@@ -529,7 +531,6 @@ Resources:
         BootstrapArguments: !If [EnableWeave, "--enable-weave 'true'", ""]
   Weave:
     Condition: EnableWeave
-    DependsOn: [ EKSStack ]
     Type: "Custom::KubeManifest"
     Version: '1.0'
     Properties:
@@ -537,7 +538,6 @@ Resources:
       Weave:
         Enable: "true"
   NginxIngressStack:
-    DependsOn: [ EKSStack ]
     Condition: EnableNginxIngress
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -546,10 +546,9 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
-        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   ExternalDNSStack:
-    DependsOn: [ EKSStack ]
     Condition: EnableExternalDNS
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -558,10 +557,9 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
-        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   Dashboard:
-    DependsOn: [ EKSStack ]
     Condition: EnableDashboard
     Type: "Custom::KubeManifest"
     Version: '1.0'
@@ -578,8 +576,8 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
-        HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

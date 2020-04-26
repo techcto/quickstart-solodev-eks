@@ -535,11 +535,10 @@ Resources:
     Version: '1.0'
     Properties:
       ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
       Weave:
         Enable: "true"
-      Parameters:
-        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   NginxIngressStack:
     Condition: EnableNginxIngress
     Type: AWS::CloudFormation::Stack
@@ -568,11 +567,10 @@ Resources:
     Version: '1.0'
     Properties:
       ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
       Dashboard:
         Enable: "true"
-      Parameters:
-        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   CMSStack:
     Condition: EnableCMS
     Type: AWS::CloudFormation::Stack

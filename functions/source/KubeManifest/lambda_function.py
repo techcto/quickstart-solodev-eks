@@ -225,7 +225,7 @@ def enable_dashboard(cluster_name):
             "metadata": {
                 "name": "eks-admin",
                 "namespace": "kube-system"
-        },{
+            },
             "apiVersion": "rbac.authorization.k8s.io/v1beta1",
             "kind": "ClusterRoleBinding",
             "metadata": {

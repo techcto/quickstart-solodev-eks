@@ -219,6 +219,32 @@ def enable_dashboard(cluster_name):
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml"))
     logger.debug(run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}"))
     logger.debug(run_command(f"kubectl config use-context {cluster_name}"))
+    configmap = {
+            "apiVersion": "v1",
+            "kind": "ServiceAccount",
+            "metadata": {
+                "name": "eks-admin",
+                "namespace": "kube-system"
+        },{
+            "apiVersion": "rbac.authorization.k8s.io/v1beta1",
+            "kind": "ClusterRoleBinding",
+            "metadata": {
+                "name": "eks-admin"
+            },
+            "roleRef": {
+                "apiGroup": "rbac.authorization.k8s.io",
+                "kind": "ClusterRole",
+                "name": "cluster-admin"
+            },
+            "subjects": {
+                "kind": "ServiceAccount"
+            },
+            "name": "eks-admin",
+            "namespace": "kube-system"
+        }
+    write_manifest(configmap, '/tmp/eks-admin-service-account.yaml')
+    logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-service-account.yaml"))
+    logger.debug(run_command(f"kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
 
 
 def handler_init(event):

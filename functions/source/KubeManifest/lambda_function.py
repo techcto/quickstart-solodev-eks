@@ -236,11 +236,11 @@ def enable_dashboard(cluster_name):
                 "kind": "ClusterRole",
                 "name": "cluster-admin"
             },
-            "subjects": {
+            "subjects": [
                 "kind": "ServiceAccount"
-            },
-            "name": "eks-admin",
-            "namespace": "kube-system"
+                "name": "eks-admin",
+                "namespace": "kube-system"
+            ]
         }
     write_manifest(configmap, '/tmp/eks-admin-service-account.yaml')
     logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-service-account.yaml"))

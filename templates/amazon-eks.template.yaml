@@ -167,6 +167,11 @@ Parameters:
     Type: String
     AllowedValues: [ "Prometheus + Grafana", "None" ]
     Default: "None"
+  ProvisionWeave:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
+    Description: "Choose Enabled to enable Weave CNI"
   BootstrapArguments:
     Type: String
     Default: ""
@@ -236,6 +241,7 @@ Conditions:
   EnableClusterAutoScaler: !Equals [!Ref 'ProvisionClusterAutoScaler', 'Enabled']
   EnableMonitoringPrometheusGrafana: !Equals [!Ref 'ProvisionMonitoringStack', 'Prometheus + Grafana']
   EnableEfs: !Equals [!Ref 'EfsStorageClass', 'Enabled']
+  EnableWeave: !Equals [!Ref 'ProvisionWeave', 'Enabled']
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   BastionEksPermissions:
@@ -489,6 +495,16 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
+  Weave:
+    Condition: EnableWeave
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
+      ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
+      HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
+      Weave:
+        Enable: "true"
   PrometheusStack:
     Condition: EnableMonitoringPrometheusGrafana
     Type: AWS::CloudFormation::Stack

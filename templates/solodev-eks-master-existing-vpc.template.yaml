@@ -529,16 +529,6 @@ Resources:
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
         BootstrapArguments: !If [EnableWeave, "--enable-weave 'true'", ""]
-  Weave:
-    Condition: EnableWeave
-    Type: "Custom::KubeManifest"
-    Version: '1.0'
-    Properties:
-      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
-      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
-      Weave:
-        Enable: "true"
   NginxIngressStack:
     Condition: EnableNginxIngress
     Type: AWS::CloudFormation::Stack

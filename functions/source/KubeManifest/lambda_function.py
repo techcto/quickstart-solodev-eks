@@ -216,12 +216,9 @@ def enable_marketplace(cluster_name, namespace):
     logger.debug(run_command("kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$(aws iam get-role --role-name aws-usage-${cluster_name} --query Role.Arn --output text) --namespace ${namespace}"))
 
 def enable_dashboard(cluster_name):
-    logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml"))
-    logger.debug(run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}"))
-    logger.debug(run_command(f"kubectl config use-context {cluster_name}")
-    #?
-    logger.debug(run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}")))
-    logger.debug(run_command(f"kubectl config use-context {cluster_name}"))
+    #https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
+    logger.debug(run_command(f"kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
+    logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
     #Role
     dict_file = [{'apiVersion': 'v1', 'kind': 'ServiceAccount', 'metadata': { 'name': 'eks-admin', 'namespace': 'kube-system' }}]
     with open(r'/tmp/eks-admin-role.yaml', 'w') as file:

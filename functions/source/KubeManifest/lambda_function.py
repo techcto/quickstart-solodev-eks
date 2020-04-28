@@ -218,34 +218,20 @@ def enable_marketplace(cluster_name, namespace):
 def enable_dashboard(cluster_name):
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta6/aio/deploy/alternative.yaml"))
     logger.debug(run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}"))
+    logger.debug(run_command(f"kubectl config use-context {cluster_name}")
+    #?
+    logger.debug(run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}")))
     logger.debug(run_command(f"kubectl config use-context {cluster_name}"))
-    configmap = {
-            "apiVersion": "v1",
-            "kind": "ServiceAccount",
-            "metadata": {
-                "name": "eks-admin",
-                "namespace": "kube-system"
-            },
-            "apiVersion": "rbac.authorization.k8s.io/v1beta1",
-            "kind": "ClusterRoleBinding",
-            "metadata": {
-                "name": "eks-admin"
-            },
-            "roleRef": {
-                "apiGroup": "rbac.authorization.k8s.io",
-                "kind": "ClusterRole",
-                "name": "cluster-admin"
-            },
-            "subjects": [
-                "kind": "ServiceAccount"
-                "name": "eks-admin",
-                "namespace": "kube-system"
-            ]
-        }
-    write_manifest(configmap, '/tmp/eks-admin-service-account.yaml')
-    logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-service-account.yaml"))
+    #Role
+    dict_file = [{'apiVersion': 'v1', 'kind': 'ServiceAccount', 'metadata': { 'name': 'eks-admin', 'namespace': 'kube-system' }}]
+    with open(r'/tmp/eks-admin-role.yaml', 'w') as file:
+        documents = yaml.dump(dict_file, file)
+    dict_file = [{'apiVersion': 'rbac.authorization.k8s.io/v1', 'kind': 'ClusterRoleBinding', 'metadata': { 'name': 'admin-user' }, 'roleRef': { 'apiGroup': 'rbac.authorization.k8s.io', 'kind': 'ClusterRole', 'name': 'cluster-admin' },'subjects': [ {'kind': 'ServiceAccount'}, {'name': 'eks-admin'}, {'namespace': 'kube-system'}]}]
+    with open(r'/tmp/eks-admin-role-binding.yaml', 'w') as file:
+        documents = yaml.dump(dict_file, file)
+    logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-role.yaml"))
+    logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-role-binding.yaml"))
     logger.debug(run_command(f"kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
-
 
 def handler_init(event):
     logger.debug('Received event: %s' % json.dumps(event, default=json_serial))
@@ -254,9 +240,9 @@ def handler_init(event):
     manifest_file = None
     create_kubeconfig(event['ResourceProperties']['ClusterName'])
     if 'Weave' in event['ResourceProperties'].keys():
-        enable_weave(event['ResourceProperties']['ClusterName'])
+        enable_weave()
     if 'Dashboard' in event['ResourceProperties'].keys():
-        enable_dashboard(event['ResourceProperties']['ClusterName'])
+        enable_dashboard()
     if 'MarketPlace' in event['ResourceProperties'].keys():
         enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'])
     if 'HttpProxy' in event['ResourceProperties'].keys() and event['RequestType'] != 'Delete':

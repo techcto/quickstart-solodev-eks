@@ -217,18 +217,10 @@ def enable_marketplace(cluster_name, namespace):
 
 def enable_dashboard(cluster_name):
     #https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
-    logger.debug(run_command(f"kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
+    logger.debug(run_command("kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
-    #Role
-    dict_file = [{'apiVersion': 'v1', 'kind': 'ServiceAccount', 'metadata': { 'name': 'eks-admin', 'namespace': 'kube-system' }}]
-    with open(r'/tmp/eks-admin-role.yaml', 'w') as file:
-        documents = yaml.dump(dict_file, file)
-    dict_file = [{'apiVersion': 'rbac.authorization.k8s.io/v1', 'kind': 'ClusterRoleBinding', 'metadata': { 'name': 'admin-user' }, 'roleRef': { 'apiGroup': 'rbac.authorization.k8s.io', 'kind': 'ClusterRole', 'name': 'cluster-admin' },'subjects': [ {'kind': 'ServiceAccount'}, {'name': 'eks-admin'}, {'namespace': 'kube-system'}]}]
-    with open(r'/tmp/eks-admin-role-binding.yaml', 'w') as file:
-        documents = yaml.dump(dict_file, file)
-    logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-role.yaml"))
-    logger.debug(run_command(f"kubectl apply -f /tmp/eks-admin-role-binding.yaml"))
-    logger.debug(run_command(f"kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
+    logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/techcto/charts/solodev-network/templates/admin-role.yaml"))
+    logger.debug(run_command("kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
 
 def handler_init(event):
     logger.debug('Received event: %s' % json.dumps(event, default=json_serial))

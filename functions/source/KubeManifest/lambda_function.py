@@ -239,7 +239,7 @@ def handler_init(event):
     if 'Weave' in event['ResourceProperties'].keys():
         enable_weave()
     if 'Dashboard' in event['ResourceProperties'].keys():
-        enable_dashboard()
+        enable_dashboard(event['ResourceProperties']['ClusterName'])
     if 'MarketPlace' in event['ResourceProperties'].keys():
         enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'])
     if 'HttpProxy' in event['ResourceProperties'].keys() and event['RequestType'] != 'Delete':

@@ -229,7 +229,7 @@ def handler_init(event):
     manifest_file = None
     create_kubeconfig(event['ResourceProperties']['ClusterName'])
     if 'Weave' in event['ResourceProperties'].keys():
-        enable_weave()
+        enable_weave(event['ResourceProperties']['ClusterName'])
     if 'Dashboard' in event['ResourceProperties'].keys():
         enable_dashboard(event['ResourceProperties']['ClusterName'])
     if 'MarketPlace' in event['ResourceProperties'].keys():

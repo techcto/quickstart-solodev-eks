@@ -208,7 +208,7 @@ def enable_proxy(proxy_host, vpc_id):
 
 def enable_weave(cluster_name):
     logger.debug(run_command("kubectl delete ds aws-node -n kube-system"))
-    logger.debug(run_command("WVERSION=$(kubectl version | base64 | tr -d '\n') && echo $WVERSION && curl --location -o /tmp/weave-net.yaml https://cloud.weave.works/k8s/net?k8s-version=$WVERSION"))
+    logger.debug(run_command("WVERSION=$(/usr/local/bin/kubectl version | base64 | tr -d '\n') && echo $WVERSION && curl --location -o /tmp/weave-net.yaml https://cloud.weave.works/k8s/net?k8s-version=$WVERSION"))
     logger.debug(run_command("kubectl apply -f /tmp/weave-net.yaml"))
 
 def enable_marketplace(cluster_name, namespace):

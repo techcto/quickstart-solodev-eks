@@ -270,7 +270,7 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        BastionHostName: !Join ["-", [ 'EKS', !GetAtt EKSControlPlane.Outputs.EKSName, 'Bastion' ]]
+        BastionHostName: !Join ["-", [ !GetAtt EKSControlPlane.Outputs.EKSName, 'Bastion-Node' ]]
         BastionBanner: !Sub
           - 's3://${S3Bucket}/${QSS3KeyPrefix}scripts/bastion_banner_message.txt'
           - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]

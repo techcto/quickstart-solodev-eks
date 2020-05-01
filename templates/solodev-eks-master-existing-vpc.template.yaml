@@ -564,7 +564,6 @@ Resources:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   Dashboard:
-    DependsOn: ExternalDNSStack
     Condition: EnableDashboard
     Type: "Custom::KubeManifest"
     Version: '1.0'

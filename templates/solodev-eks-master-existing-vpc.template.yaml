@@ -552,16 +552,6 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
-  Dashboard:
-    Condition: EnableDashboard
-    Type: "Custom::KubeManifest"
-    Version: '1.0'
-    Properties:
-      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
-      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
-      Dashboard:
-        Enable: "true"
   CMSStack:
     Condition: EnableCMS
     Type: AWS::CloudFormation::Stack
@@ -573,6 +563,17 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+  Dashboard:
+    DependsOn: ExternalDNSStack
+    Condition: EnableDashboard
+    Type: "Custom::KubeManifest"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+      Dashboard:
+        Enable: "true"
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

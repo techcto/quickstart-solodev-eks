@@ -219,7 +219,8 @@ def enable_dashboard(cluster_name):
     DOWNLOAD_VERSION="v0.3.6"
     DOWNLOAD_FILE="curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/${DOWNLOAD_VERSION} -o /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz"
     logger.debug(run_command(DOWNLOAD_FILE))
-    logger.debug(run_command("ls -al /tmp/metrics-server-${DOWNLOAD_VERSION}"))
+    LS="ls -al /tmp/metrics-server-${DOWNLOAD_VERSION}"
+    logger.debug(run_command(LS))
     LOCAL_DIR="mkdir -p /tmp/metrics-server-${DOWNLOAD_VERSION}"
     logger.debug(run_command(LOCAL_DIR))
     LOCAL_FILE="tar -xzf /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz --directory /tmp/metrics-server-${DOWNLOAD_VERSION} --strip-components 1"

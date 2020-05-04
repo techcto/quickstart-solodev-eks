@@ -217,7 +217,8 @@ def enable_marketplace(cluster_name, namespace):
 
 def enable_dashboard(cluster_name):
     DOWNLOAD_VERSION="v0.3.6"
-    logger.debug(run_command("curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/${DOWNLOAD_VERSION} -o /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz"))
+    DOWNLOAD_FILE="curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/${DOWNLOAD_VERSION} -o /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz"
+    subprocess.check_output(DOWNLOAD_FILE, shell=True)
     logger.debug(run_command("mkdir -p /tmp/metrics-server-${DOWNLOAD_VERSION}"))
     logger.debug(run_command("tar -xzf /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz --directory /tmp/metrics-server-${DOWNLOAD_VERSION} --strip-components 1"))
     logger.debug(run_command("ls -al /tmp/metrics-server-${DOWNLOAD_VERSION}"))

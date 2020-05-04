@@ -218,13 +218,13 @@ def enable_marketplace(cluster_name, namespace):
 def enable_dashboard(cluster_name):
     DOWNLOAD_VERSION="v0.3.6"
     DOWNLOAD_FILE="curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/${DOWNLOAD_VERSION} -o /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz"
-    subprocess.check_output(DOWNLOAD_FILE, shell=True)
+    logger.debug(subprocess.check_output(DOWNLOAD_FILE, shell=True))
     LOCAL_DIR="mkdir -p /tmp/metrics-server-${DOWNLOAD_VERSION}"
-    subprocess.check_output(LOCAL_DIR, shell=True)
+    logger.debug(subprocess.check_output(LOCAL_DIR, shell=True))
     LOCAL_FILE="tar -xzf /tmp/metrics-server-${DOWNLOAD_VERSION}.tar.gz --directory /tmp/metrics-server-${DOWNLOAD_VERSION} --strip-components 1"
-    subprocess.check_output(LOCAL_FILE, shell=True)
+    logger.debug(subprocess.check_output(LOCAL_FILE, shell=True))
     METRICS_SERVER="kubectl apply -f /tmp/metrics-server-${DOWNLOAD_VERSION}/deploy/1.8+/"
-    subprocess.check_output(METRICS_SERVER, shell=True)
+    logger.debug(subprocess.check_output(METRICS_SERVER, shell=True))
     logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/admin-role.yaml"))

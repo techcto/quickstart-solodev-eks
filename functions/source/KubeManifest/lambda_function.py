@@ -218,9 +218,10 @@ def enable_marketplace(cluster_name, namespace):
 def enable_dashboard(cluster_name):
     DOWNLOAD_VERSION="v0.3.6"
     logger.debug(run_command(f"curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/{DOWNLOAD_VERSION} -o /tmp/metrics-server-{DOWNLOAD_VERSION}.tar.gz"))
-    logger.debug(run_command(f"ls -al /tmp/metrics-server-{DOWNLOAD_VERSION}"))
+    logger.debug(run_command(f"ls -al /tmp"))
     logger.debug(run_command(f"mkdir -p /tmp/metrics-server-{DOWNLOAD_VERSION}"))
     logger.debug(run_command(f"tar -xzf /tmp/metrics-server-{DOWNLOAD_VERSION}.tar.gz --directory /tmp/metrics-server-{DOWNLOAD_VERSION} --strip-components 1"))
+    logger.debug(run_command(f"ls -al /tmp/metrics-server-{DOWNLOAD_VERSION}"))
     logger.debug(run_command(f"kubectl apply -f /tmp/metrics-server-{DOWNLOAD_VERSION}/deploy/1.8+/"))
     logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))

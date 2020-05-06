@@ -497,7 +497,7 @@ Resources:
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
   Weave:
     Condition: EnableWeave
-    Type: "Custom::KubeManifest"
+    Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
       ServiceToken: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn

@@ -580,6 +580,7 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   WaitHandle: 
@@ -593,7 +594,7 @@ Resources:
   Dashboard:
     DependsOn: DashboardWaitCondition
     Condition: EnableDashboard
-    Type: "Custom::KubeManifest"
+    Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
       ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
@@ -603,7 +604,7 @@ Resources:
         Enable: "true"
       Count: 0
   AccessToken:
-    Type: "Custom::KubeManifest"
+    Type: "Custom::WebStack"
     Condition: EnableAccessToken
     Version: '1.0'
     Properties:

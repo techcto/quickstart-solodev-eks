@@ -75,6 +75,7 @@ Resources:
       - functions/packages/DeleteBucketContents/lambda.zip
       - functions/packages/KubeManifest/lambda.zip
       - functions/packages/KubeGet/lambda.zip
+      - functions/packages/WebStack/lambda.zip
       - functions/packages/CleanupLoadBalancers/lambda.zip
       - functions/packages/CleanupSecurityGroupDependencies/lambda.zip
       - functions/packages/kubectlLayer/lambda.zip
@@ -268,6 +269,23 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaZipsBucketName
         S3Key: !Sub '${QSS3KeyPrefix}functions/packages/KubeGet/lambda.zip'
+      Environment: { Variables: { KUBECONFIG: /tmp/.kube/config } }
+      VpcConfig:
+        SecurityGroupIds: [!Ref EKSLambdaSecurityGroup]
+        SubnetIds: !Ref EKSSubnetIds
+  WebStackLambda:
+    DependsOn: [ CopyZips, LambdaSGCleanup ]
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      MemorySize: 256
+      Role: !Ref KubernetesAdminRoleArn
+      Runtime: python3.7
+      Timeout: 900
+      Layers: [!Ref KubectlLayer, !Ref CrhelperLayer, !Ref AwsCliLayer]
+      Code:
+        S3Bucket: !Ref LambdaZipsBucketName
+        S3Key: !Sub '${QSS3KeyPrefix}functions/packages/WebStack/lambda.zip'
       Environment: { Variables: { KUBECONFIG: /tmp/.kube/config } }
       VpcConfig:
         SecurityGroupIds: [!Ref EKSLambdaSecurityGroup]

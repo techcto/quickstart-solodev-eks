@@ -23,6 +23,7 @@ Metadata:
         Label: 
           default: "EKS Cluster"
         Parameters: 
+          - ServiceToken
           - HelmLambdaArn
           - ClusterName
           - ServiceRoleName
@@ -74,6 +75,9 @@ Parameters:
   ClusterName:
     Type: String
 
+  ServiceToken:
+    Type: String
+
   ServiceRoleName:
     Type: String
     Default: 'aws-serviceaccount'
@@ -81,16 +85,18 @@ Parameters:
 Resources:
 
   Marketplace:
-    DependsOn: [ EKSStack ]
-    Type: "Custom::KubeManifest"
+    Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
-      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+      ServiceToken: !Ref ServiceToken
+      ClusterName: !Ref ClusterName
+      HelmLambdaArn: !Ref HelmLambdaArn
       Namespace: "solodev"
       Marketplace:
         Enable: "true"
 
   SolodevCMS:
+    DependsOn: Marketplace
     Type: "Custom::Helm"
     Version: '1.0'
     Properties:

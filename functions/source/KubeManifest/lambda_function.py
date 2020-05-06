@@ -5,7 +5,6 @@ import subprocess
 import shlex
 import re
 import requests
-import cfnresponse
 from ruamel import yaml
 from datetime import date, datetime
 from crhelper import CfnResource
@@ -207,49 +206,12 @@ def enable_proxy(proxy_host, vpc_id):
         logger.debug(run_command(patch_cmd % (pod, pod)))
         logger.debug(run_command(setenv_cmd % pod))
 
-def enable_weave(cluster_name):
-    logger.debug(run_command("kubectl delete ds aws-node -n kube-system"))
-    subprocess.check_output("curl --location -o /tmp/weave-net.yaml \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"", shell=True)
-    logger.debug(run_command("kubectl apply -f /tmp/weave-net.yaml"))
-
-def enable_marketplace(cluster_name, namespace):
-    logger.debug(run_command("kubectl create sa aws-serviceaccount --namespace ${namespace}"))
-    logger.debug(run_command("kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$(aws iam get-role --role-name aws-usage-${cluster_name} --query Role.Arn --output text) --namespace ${namespace}"))
-
-def get_token():
-    token=subprocess.check_output("kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-admin | awk '{print $1}')", shell=True)
-    return token
-
-def enable_dashboard(cluster_name):
-    DOWNLOAD_VERSION="v0.3.6"
-    logger.debug(run_command(f"curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/{DOWNLOAD_VERSION} -o /tmp/metrics-server-{DOWNLOAD_VERSION}.tar.gz"))
-    logger.debug(run_command(f"ls -al /tmp"))
-    logger.debug(run_command(f"mkdir -p /tmp/metrics-server-{DOWNLOAD_VERSION}"))
-    logger.debug(run_command(f"tar -xzf /tmp/metrics-server-{DOWNLOAD_VERSION}.tar.gz --directory /tmp/metrics-server-{DOWNLOAD_VERSION} --strip-components 1"))
-    logger.debug(run_command(f"ls -al /tmp/metrics-server-{DOWNLOAD_VERSION}"))
-    logger.debug(run_command(f"kubectl apply -f /tmp/metrics-server-{DOWNLOAD_VERSION}/deploy/1.8+/"))
-    logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
-    logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
-    logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/admin-role.yaml"))
-    logger.debug(run_command("kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
-
 def handler_init(event, context):
     logger.debug('Received event: %s' % json.dumps(event, default=json_serial))
 
     physical_resource_id = None
     manifest_file = None
     create_kubeconfig(event['ResourceProperties']['ClusterName'])
-    if 'Weave' in event['ResourceProperties'].keys():
-        enable_weave(event['ResourceProperties']['ClusterName'])
-    if 'Dashboard' in event['ResourceProperties'].keys():
-        enable_dashboard(event['ResourceProperties']['ClusterName'])
-    if 'MarketPlace' in event['ResourceProperties'].keys():
-        enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'])
-    if 'AccessToken' in event['ResourceProperties'].keys():
-        token=get_token()
-        responseData = {}
-        responseData['token'] = token
-        cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData) 
     if 'HttpProxy' in event['ResourceProperties'].keys() and event['RequestType'] != 'Delete':
         enable_proxy(event['ResourceProperties']['HttpProxy'], event['ResourceProperties']['VpcId'])
     if 'Manifest' in event['ResourceProperties'].keys():

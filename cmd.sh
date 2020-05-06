@@ -29,5 +29,16 @@ tag(){
     git push --tags
 }
 
+clean(){
+    for BUCKET in $(aws s3api list-buckets --region us-east-1 | jq -r '.Buckets[].Name')
+    do
+        if [[ $BUCKET == "tcat-"* ]]; then
+            echo "I found one. Time to delete a bucket: ${BUCKET}.  Bye-Bye!"
+            # aws s3 rm arn:aws:s3:::$BUCKET --recursive
+            aws s3 rb "s3://${BUCKET}" --force 
+        fi
+    done
+}
+
 
 $*

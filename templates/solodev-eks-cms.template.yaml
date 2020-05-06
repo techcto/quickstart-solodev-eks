@@ -82,7 +82,6 @@ Resources:
 
   Marketplace:
     DependsOn: [ EKSStack ]
-    Condition: EnableMarketplace
     Type: "Custom::KubeManifest"
     Version: '1.0'
     Properties:

@@ -5,8 +5,8 @@ args=("$@")
 export KUBECONFIG="eksconfig"
 
 #GET VALUES FROM CLOUDFORMATION OUTPUT OF EKS STACK
-export EKSName=""
-export ControlPlaneProvisionRoleArn=""
+export EKSClusterName=""
+export SysOpsAdminRoleArn=""
 
 #AWS
 export REGION="us-east-1"
@@ -76,13 +76,13 @@ initConfig(){
     addTrustPolicy
     echo "Sleep for 30 seconds"
     sleep 30
-    echo "aws eks --region $REGION update-kubeconfig --name $EKSName --role-arn $ControlPlaneProvisionRoleArn --kubeconfig $KUBECONFIG"
-    aws eks --region $REGION update-kubeconfig --name $EKSName --role-arn $ControlPlaneProvisionRoleArn --kubeconfig $KUBECONFIG
+    echo "aws eks --region $REGION update-kubeconfig --name $EKSClusterName --role-arn $SysOpsAdminRoleArn --kubeconfig $KUBECONFIG"
+    aws eks --region $REGION update-kubeconfig --name $EKSClusterName --role-arn $SysOpsAdminRoleArn --kubeconfig $KUBECONFIG
 }
 
 addTrustPolicy(){
     if [ "$USER_ARN" != "" ]; then
-        ROLE_NAME=$(echo $ControlPlaneProvisionRoleArn | awk -F/ '{print $NF}')
+        ROLE_NAME=$(echo $SysOpsAdminRoleArn | awk -F/ '{print $NF}')
         aws iam get-role --role-name ${ROLE_NAME} --profile ${AWS_PROFILE} > role-trust-policy.json
         POLICY='{
         "Effect": "Allow",

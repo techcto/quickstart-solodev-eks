@@ -50,6 +50,14 @@ Metadata:
           - QSS3BucketRegion
           - LambdaZipsBucketName
       - Label:
+          default: Optional Kubernetes web hosting add-ins
+        Parameters:
+          - ProvisionWeave
+          - ProvisionNginxIngress
+          - ProvisionExternalDNS
+          - ProvisionDashboard
+          - ProvisionCMS
+      - Label:
           default: Optional Kubernetes add-ins
         Parameters:
           - ClusterAutoScaler

@@ -165,6 +165,15 @@ The following parameters must be configured to launch your Solodev EKS CloudForm
 	</tr>   		       
 </table>
 
+<table>
+	<tr>
+		<td colspan="2"><strong>Other Parameters</strong></td>
+	<tr>
+		<td width="33%">MaxNumberOfNodes</td>
+		<td width="600px">The maximum number of Amazon EKS node instances.</td>
+	</tr>   		       
+</table>
+
 <strong>Specify Options</strong><br />
 Generally speaking, no additional options need to be configured. If you are experiencing continued problems installing the software, disable "Rollback on failure" under the "Advanced" options. This will allow for further troubleshooting if necessary. Click on the "Next" button to continue.
 

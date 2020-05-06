@@ -206,7 +206,7 @@ def enable_proxy(proxy_host, vpc_id):
         logger.debug(run_command(patch_cmd % (pod, pod)))
         logger.debug(run_command(setenv_cmd % pod))
 
-def handler_init(event, context):
+def handler_init(event):
     logger.debug('Received event: %s' % json.dumps(event, default=json_serial))
 
     physical_resource_id = None

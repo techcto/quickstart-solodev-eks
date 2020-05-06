@@ -569,7 +569,7 @@ request_eip
 install_kubernetes_client_tools
 setup_kubeconfig
 KUBECONFIG="/home/${user_group}/.kube/config"
-NAMESPACE="solodev-dcx"
+NAMESPACE="solodev"
 
 su ${user_group} -c "/usr/local/bin/helm repo add charts 'https://raw.githubusercontent.com/techcto/charts/master/'"
 su ${user_group} -c "/usr/local/bin/helm repo update"

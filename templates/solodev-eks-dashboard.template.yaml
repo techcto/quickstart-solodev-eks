@@ -27,8 +27,8 @@ Resources:
     Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
-      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
+      ClusterName: !Ref ClusterName
+      ServiceToken: !Ref WebStackArn
       Dashboard:
         Enable: "true"
       Count: 0

@@ -23,9 +23,9 @@ Metadata:
         Label: 
           default: "EKS Cluster"
         Parameters: 
-          - ServiceToken
-          - HelmLambdaArn
           - ClusterName
+          - WebStackArn
+          - HelmLambdaArn
           - ServiceRoleName
 
 Parameters:
@@ -69,13 +69,13 @@ Parameters:
     Description: Secret Key for App Encryption
     Default: 'c5d3adbb98f43thc0d12f0cc8fbcd7f8'
 
-  HelmLambdaArn:
-    Type: String
-
   ClusterName:
     Type: String
 
-  ServiceToken:
+  WebStackArn:
+    Type: String
+
+  HelmLambdaArn:
     Type: String
 
   ServiceRoleName:
@@ -88,9 +88,8 @@ Resources:
     Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref ServiceToken
+      ServiceToken: !Ref WebStackArn
       ClusterName: !Ref ClusterName
-      HelmLambdaArn: !Ref HelmLambdaArn
       Namespace: "solodev"
       Marketplace:
         Enable: "true"

@@ -555,7 +555,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   ExternalDNSStack:
     Condition: EnableExternalDNS
     Type: AWS::CloudFormation::Stack
@@ -566,7 +566,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   ExternalDNSWaitHandle: 
     Condition: EnableExternalDNS
     DependsOn: ExternalDNSStack
@@ -580,9 +580,8 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
-        ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   WaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 
@@ -597,9 +596,8 @@ Resources:
     Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
-      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
       ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
       Dashboard:
         Enable: "true"
       Count: 0
@@ -608,9 +606,8 @@ Resources:
     Condition: EnableAccessToken
     Version: '1.0'
     Properties:
-      ServiceToken: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
       ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
       AccessToken:
         Enable: "true"
 
@@ -632,5 +629,6 @@ Outputs:
   SysOpsAdminRoleArn:
     Value: !If [AddSysOpsAdminRole, !GetAtt SysOpsAdminRole.Arn, !Ref AdditionalEKSAdminRoleArn]
   AccessTokenOutput: 
-    Value: !GetAtt AccessToken.token
+    Condition: EnableAccessToken
+    Value: !GetAtt AccessToken.Token
     Description: Return secure access token

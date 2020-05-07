@@ -500,9 +500,8 @@ Resources:
     Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
-      ServiceToken: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
+      ServiceToken: !GetAtt FunctionStack.Outputs.WebStackArn
       ClusterName: !GetAtt EKSControlPlane.Outputs.EKSName
-      HelmLambdaArn: !GetAtt FunctionStack.Outputs.HelmLambdaArn
       Weave:
         Enable: "true"
   PrometheusStack:
@@ -534,6 +533,8 @@ Outputs:
     Value: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
   KubeGetLambdaArn:
     Value: !GetAtt FunctionStack.Outputs.KubeGetLambdaArn
+  WebStackArn:
+    Value: !GetAtt FunctionStack.Outputs.WebStackArn
   BastionIP:
     Value: !If
       - EnableBastion

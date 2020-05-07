@@ -369,6 +369,8 @@ Outputs:
     Value: !GetAtt KubeManifestLambda.Arn
   KubeGetLambdaArn:
     Value: !GetAtt KubeGetLambda.Arn
+  WebStackArn:
+    Value: !GetAtt WebStackLambda.Arn
   CleanupLoadBalancersLambdaArn:
     Value: !GetAtt CleanupLoadBalancersLambda.Arn
   CleanupSecurityGroupDependenciesLambdaArn:

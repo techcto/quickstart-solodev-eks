@@ -43,13 +43,12 @@ def enable_dashboard(cluster_name):
     logger.debug(run_command("kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
     logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
+
+def enable_token():
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/admin-role.yaml"))
     logger.debug(run_command("kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
-
-def get_token():
-    token=subprocess.check_output("kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-admin | awk '{print $1}')", shell=True).decode("utf-8")
-    logger.debug(run_command("echo ${token}"))
-    return token
+    token=subprocess.check_output("kubectl get secrets -o jsonpath=\"{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='eks-admin')].data.token}\"|base64 --decode", shell=True)
+    helper.Data['Token'] = token
 
 @helper.create
 @helper.update
@@ -64,7 +63,7 @@ def create_handler(event, _):
     if 'MarketPlace' in event['ResourceProperties'].keys():
         enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'])
     if 'AccessToken' in event['ResourceProperties'].keys():
-        helper.Data['Token'] = get_token()
+        enable_token()
 
 def lambda_handler(event, context):
     helper(event, context)

@@ -609,6 +609,7 @@ Resources:
     Version: '1.0'
     Properties:
       ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
+      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
       AccessToken:
         Enable: "true"
 Outputs:

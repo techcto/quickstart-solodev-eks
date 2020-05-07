@@ -38,22 +38,18 @@ def enable_marketplace(cluster_name, namespace):
     logger.debug(run_command("kubectl create sa aws-serviceaccount --namespace ${namespace}"))
     logger.debug(run_command("kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$(aws iam get-role --role-name aws-usage-${cluster_name} --query Role.Arn --output text) --namespace ${namespace}"))
 
-def get_token():
-    token=subprocess.check_output("kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-admin | awk '{print $1}')", shell=True)
-    return token
-
 def enable_dashboard(cluster_name):
     DOWNLOAD_VERSION="v0.3.6"
-    logger.debug(run_command(f"curl -Ls https://api.github.com/repos/kubernetes-sigs/metrics-server/tarball/{DOWNLOAD_VERSION} -o /tmp/metrics-server-{DOWNLOAD_VERSION}.tar.gz"))
-    logger.debug(run_command(f"ls -al /tmp"))
-    logger.debug(run_command(f"mkdir -p /tmp/metrics-server-{DOWNLOAD_VERSION}"))
-    logger.debug(run_command(f"tar -xzf /tmp/metrics-server-{DOWNLOAD_VERSION}.tar.gz --directory /tmp/metrics-server-{DOWNLOAD_VERSION} --strip-components 1"))
-    logger.debug(run_command(f"ls -al /tmp/metrics-server-{DOWNLOAD_VERSION}"))
-    logger.debug(run_command(f"kubectl apply -f /tmp/metrics-server-{DOWNLOAD_VERSION}/deploy/1.8+/"))
+    logger.debug(run_command("kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
     logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/techcto/charts/master/solodev-network/templates/admin-role.yaml"))
     logger.debug(run_command("kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
+
+def get_token():
+    token=subprocess.check_output("kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep eks-admin | awk '{print $1}')", shell=True).decode("utf-8")
+    logger.debug(run_command("echo ${token}"))
+    return token
 
 @helper.create
 @helper.update

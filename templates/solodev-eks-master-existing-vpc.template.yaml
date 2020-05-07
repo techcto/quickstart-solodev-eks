@@ -554,6 +554,7 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   ExternalDNSStack:
     Condition: EnableExternalDNS

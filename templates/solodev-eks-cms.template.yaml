@@ -105,6 +105,7 @@ Resources:
     Version: '1.0'
     Properties:
       ServiceToken: !Ref HelmLambdaArn
+      ClusterName: !Ref ClusterName
       RepoUrl: https://raw.githubusercontent.com/techcto/charts/master/
       Chart: charts/solodev-cms-aws
       Name: !Ref AWS::StackName

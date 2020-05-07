@@ -39,7 +39,6 @@ def enable_marketplace(cluster_name, namespace):
     logger.debug(run_command("kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$(aws iam get-role --role-name aws-usage-${cluster_name} --query Role.Arn --output text) --namespace ${namespace}"))
 
 def enable_dashboard():
-    DOWNLOAD_VERSION="v0.3.6"
     logger.debug(run_command("kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
     logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))

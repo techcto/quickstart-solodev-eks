@@ -604,6 +604,7 @@ Resources:
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   AccessToken:
     Type: "Custom::WebStack"
+    DependsOn: DashboardStack
     Condition: EnableAccessToken
     Version: '1.0'
     Properties:

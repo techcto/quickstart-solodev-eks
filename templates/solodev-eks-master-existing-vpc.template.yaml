@@ -582,25 +582,26 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
-  WaitHandle: 
+  DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 
     Type: "AWS::CloudFormation::WaitCondition"
     Properties: 
-      Handle: !If [EnableWeave, !Ref ExternalDNSWaitHandle, !Ref WaitHandle]
+      Handle: !If [EnableWeave, !Ref ExternalDNSWaitHandle, !Ref DashboardWaitHandle]
       Timeout: "1"
       Count: 0
-  Dashboard:
+  DashboardStack:
     DependsOn: DashboardWaitCondition
     Condition: EnableDashboard
-    Type: "Custom::WebStack"
-    Version: '1.0'
+    Type: AWS::CloudFormation::Stack
     Properties:
-      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
-      Dashboard:
-        Enable: "true"
-      Count: 0
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/solodev-eks-dashboard.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   AccessToken:
     Type: "Custom::WebStack"
     Condition: EnableAccessToken
@@ -610,7 +611,6 @@ Resources:
       ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
       AccessToken:
         Enable: "true"
-
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn

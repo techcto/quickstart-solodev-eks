@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Deploys the Kubernetes Dashboard into an existing kubernetes cluster (qs-1qde66ffn)"
+
+Metadata: 
+
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "EKS Cluster"
+        Parameters: 
+          - WebStackArn
+          - ClusterName
+
+Parameters:
+
+  WebStackArn:
+    Type: String
+
+  ClusterName:
+    Type: String
+
+Resources:
+
+  Dashboard:
+    Type: "Custom::WebStack"
+    Version: '1.0'
+    Properties:
+      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
+      Dashboard:
+        Enable: "true"
+      Count: 0
+  AccessToken:
+    Type: "Custom::WebStack"
+    Condition: EnableAccessToken
+    Version: '1.0'
+    Properties:
+      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
+      AccessToken:
+        Enable: "true"
+

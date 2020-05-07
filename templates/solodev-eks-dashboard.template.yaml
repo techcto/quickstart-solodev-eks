@@ -8,17 +8,13 @@ Metadata:
     ParameterGroups: 
       - 
         Label: 
-          default: "EKS Cluster"
+          default: "Lambda Function"
         Parameters: 
           - WebStackArn
-          - ClusterName
 
 Parameters:
 
   WebStackArn:
-    Type: String
-
-  ClusterName:
     Type: String
 
 Resources:
@@ -27,7 +23,6 @@ Resources:
     Type: "Custom::WebStack"
     Version: '1.0'
     Properties:
-      ClusterName: !Ref ClusterName
       ServiceToken: !Ref WebStackArn
       Dashboard:
         Enable: "true"

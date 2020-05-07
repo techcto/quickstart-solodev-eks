@@ -8,17 +8,13 @@ Metadata:
     ParameterGroups: 
       - 
         Label: 
-          default: "EKS Cluster"
+          default: "Lambda Function"
         Parameters: 
           - WebStackArn
-          - ClusterName
 
 Parameters:
 
   WebStackArn:
-    Type: String
-
-  ClusterName:
     Type: String
 
 Resources:
@@ -28,7 +24,6 @@ Resources:
     Version: '1.0'
     Properties:
       ServiceToken: !Ref WebStackArn
-      ClusterName: !Ref ClusterName
       Namespace: nginx-ingress
       Chart: stable/nginx-ingress
       Name: nginx-ingress

@@ -29,7 +29,7 @@ def create_kubeconfig(cluster_name):
     run_command(f"aws eks update-kubeconfig --name {cluster_name} --alias {cluster_name}")
     run_command(f"kubectl config use-context {cluster_name}")
 
-def enable_weave(cluster_name):
+def enable_weave():
     logger.debug(run_command("kubectl delete ds aws-node -n kube-system"))
     subprocess.check_output("curl --location -o /tmp/weave-net.yaml \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"", shell=True)
     logger.debug(run_command("kubectl apply -f /tmp/weave-net.yaml"))
@@ -38,7 +38,7 @@ def enable_marketplace(cluster_name, namespace):
     logger.debug(run_command("kubectl create sa aws-serviceaccount --namespace ${namespace}"))
     logger.debug(run_command("kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$(aws iam get-role --role-name aws-usage-${cluster_name} --query Role.Arn --output text) --namespace ${namespace}"))
 
-def enable_dashboard(cluster_name):
+def enable_dashboard():
     DOWNLOAD_VERSION="v0.3.6"
     logger.debug(run_command("kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml"))
     logger.debug(run_command("kubectl get deployment metrics-server -n kube-system"))
@@ -57,9 +57,9 @@ def create_handler(event, _):
     create_kubeconfig(event['ResourceProperties']['ClusterName'])
     response_data = {}
     if 'Weave' in event['ResourceProperties'].keys():
-        enable_weave(event['ResourceProperties']['ClusterName'])
+        enable_weave()
     if 'Dashboard' in event['ResourceProperties'].keys():
-        enable_dashboard(event['ResourceProperties']['ClusterName'])
+        enable_dashboard()
     if 'MarketPlace' in event['ResourceProperties'].keys():
         enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'])
     if 'AccessToken' in event['ResourceProperties'].keys():

@@ -32,13 +32,3 @@ Resources:
       Dashboard:
         Enable: "true"
       Count: 0
-  AccessToken:
-    Type: "Custom::WebStack"
-    Condition: EnableAccessToken
-    Version: '1.0'
-    Properties:
-      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
-      AccessToken:
-        Enable: "true"
-

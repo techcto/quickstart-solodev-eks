@@ -582,6 +582,9 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        AdminPassword: !GetAtt EKSStack.Outputs.EKSClusterName
+        DatabasePassword: !GetAtt EKSStack.Outputs.EKSClusterName
   DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 
@@ -602,16 +605,18 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
-  AccessToken:
-    Type: "Custom::WebStack"
+  AccessTokenStack:
     DependsOn: DashboardStack
     Condition: EnableAccessToken
-    Version: '1.0'
+    Type: AWS::CloudFormation::Stack
     Properties:
-      ServiceToken: !GetAtt EKSStack.Outputs.WebStackArn
-      ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-      AccessToken:
-        Enable: "true"
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/solodev-eks-token.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt EKSStack.Outputs.HelmLambdaArn
@@ -631,5 +636,5 @@ Outputs:
     Value: !If [AddSysOpsAdminRole, !GetAtt SysOpsAdminRole.Arn, !Ref AdditionalEKSAdminRoleArn]
   AccessTokenOutput: 
     Condition: EnableAccessToken
-    Value: !GetAtt AccessToken.Token
+    Value: !GetAtt AccessTokenStack.Outputs.AccessToken
     Description: Return secure access token

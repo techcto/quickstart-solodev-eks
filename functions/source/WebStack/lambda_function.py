@@ -46,7 +46,7 @@ def enable_dashboard():
     logger.debug(run_command("kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts;"))
 
 def get_token():
-    token=subprocess.check_output("kubectl get secrets -o jsonpath=\"{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='eks-admin')].data.token}\"", shell=True).decode("utf-8")
+    token=subprocess.check_output("kubectl get secrets -n kube-system -o jsonpath=\"{.items[?(@.metadata.annotations['kubernetes\.io/service-account\.name']=='eks-admin')].data.token}\"", shell=True).decode("utf-8")
     helper.Data['Token'] = token
 
 @helper.create

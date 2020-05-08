@@ -634,7 +634,7 @@ Outputs:
     Value: !GetAtt EKSStack.Outputs.NodeGroupSecurityGroup
   SysOpsAdminRoleArn:
     Value: !If [AddSysOpsAdminRole, !GetAtt SysOpsAdminRole.Arn, !Ref AdditionalEKSAdminRoleArn]
-  AccessTokenOutput: 
+  AccessToken: 
     Condition: EnableAccessToken
     Value: !GetAtt AccessTokenStack.Outputs.AccessToken
     Description: Return secure access token

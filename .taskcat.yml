@@ -13,10 +13,10 @@ project:
     QSS3BucketRegion: $[taskcat_current_region]
     QSS3KeyPrefix: "quickstart-solodev-eks/"
     ProvisionBastionHost: Disabled
-  # lambda_source_path: functions/source
-  # lambda_zip_path: functions/packages
-  # build_submodules: true
-tests:
+  lambda_source_path: functions/source
+  lambda_zip_path: functions/packages
+  build_submodules: true
+# tests:
   # defaults:
   #   parameters:
   #     AvailabilityZones: $[taskcat_genaz_3]
@@ -26,16 +26,16 @@ tests:
   #   template: templates/amazon-eks-master-existing-vpc.template.yaml
   #   regions:
   #       - us-east-1
-  cms:
-    parameters:      
-      WebStackArn: $[WebStackArn]
-      HelmLambdaArn: $[HelmLambdaArn]
-      ClusterName: $[ClusterName]
-      AdminPassword: $[AdminPassword]
-      DatabasePassword: $[DatabasePassword]
-    template: templates/solodev-eks-cms.template.yaml
-    regions:
-        - us-east-1
+  # cms:
+  #   parameters:      
+  #     WebStackArn: $[WebStackArn]
+  #     HelmLambdaArn: $[HelmLambdaArn]
+  #     ClusterName: $[ClusterName]
+  #     AdminPassword: $[AdminPassword]
+  #     DatabasePassword: $[DatabasePassword]
+  #   template: templates/solodev-eks-cms.template.yaml
+  #   regions:
+  #       - us-east-1
   # token:
   #   parameters:
   #     WebStackArn: $[WebStackArn]

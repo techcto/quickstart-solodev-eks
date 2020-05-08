@@ -634,6 +634,8 @@ Outputs:
     Value: !GetAtt EKSStack.Outputs.NodeGroupSecurityGroup
   SysOpsAdminRoleArn:
     Value: !If [AddSysOpsAdminRole, !GetAtt SysOpsAdminRole.Arn, !Ref AdditionalEKSAdminRoleArn]
+  WebStackArn:
+    Value: !GetAtt EKSStack.Outputs.WebStackArn
   AccessToken: 
     Condition: EnableAccessToken
     Value: !GetAtt AccessTokenStack.Outputs.AccessToken

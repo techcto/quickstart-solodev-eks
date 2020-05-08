@@ -605,6 +605,7 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   AccessTokenStack:
     DependsOn: DashboardStack
     Condition: EnableAccessToken

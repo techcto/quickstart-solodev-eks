@@ -81,7 +81,7 @@ Parameters:
 
   ServiceRoleName:
     Type: String
-    Default: 'aws-serviceaccount'
+    Default: "aws-serviceaccount"
 
   Namespace:
     Type: String
@@ -96,6 +96,7 @@ Resources:
       ServiceToken: !Ref WebStackArn
       ClusterName: !Ref ClusterName
       Namespace: !Ref Namespace
+      ServiceRoleName: !Ref ServiceRoleName
       Marketplace:
         Enable: "true"
 

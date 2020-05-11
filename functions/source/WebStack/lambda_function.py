@@ -10,6 +10,7 @@ helper = CfnResource(json_logging=True, log_level='DEBUG')
 
 try:
     s3_client = boto3.client('s3')
+    iam_client = boto3.client('iam')
     kms_client = boto3.client('kms')
 except Exception as init_exception:
     helper.init_failure(init_exception)
@@ -34,9 +35,55 @@ def enable_weave():
     subprocess.check_output("curl --location -o /tmp/weave-net.yaml \"https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')\"", shell=True)
     logger.debug(run_command("kubectl apply -f /tmp/weave-net.yaml"))
 
-def enable_marketplace(cluster_name, namespace):
-    logger.debug(run_command("kubectl create sa aws-serviceaccount --namespace ${namespace}"))
-    logger.debug(run_command("kubectl annotate sa aws-serviceaccount eks.amazonaws.com/role-arn=$(aws iam get-role --role-name aws-usage-${cluster_name} --query Role.Arn --output text) --namespace ${namespace}"))
+#Apply AWS Marketplace service account for launching paid container apps
+def enable_marketplace(cluster_name, namespace, role_name):
+    ISSUER_URL=run_command(f"aws eks describe-cluster --name {cluster_name} --query cluster.identity.oidc.issuer --output text")
+    ISSUER_HOSTPATH=subprocess.check_output("echo {ISSUER_URL} | cut -f 3- -d'/'", shell=True)
+    ACCOUNT_ID=run_command(f"aws sts get-caller-identity --query Account --output text")
+    PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/{ISSUER_HOSTPATH}"
+    irp_trust_policy = {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Federated": "{PROVIDER_ARN}"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                    "StringEquals": {
+                        "{ISSUER_HOSTPATH}:sub": "system:serviceaccount:{namespace}:aws-serviceaccount"
+                    }
+                }
+            }
+        ]
+    }
+    logger.debug(iam_client.create_role(
+        RoleName=role_name,
+        AssumeRolePolicyDocument=json.dumps(irp_trust_policy)
+    ))
+    aws_usage_policy = {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": [
+                    "aws-marketplace:RegisterUsage"
+                ],
+                "Resource": "*",
+                "Effect": "Allow"
+            }
+        ]
+    }
+    logger.debug(response = iam_client.create_policy(
+        PolicyName='AWSUsagePolicy-' + namespace,
+        PolicyDocument=json.dumps(aws_usage_policy)
+    ))
+    logger.debug(iam_client.attach-role-policy(
+        RoleName={role_name},
+        PolicyArn=response['Policy']['Arn']
+    ))
+    logger.debug(run_command(f"kubectl create sa {role_name} --namespace {namespace}"))
+    logger.debug(run_command(f"kubectl annotate sa {role_name} eks.amazonaws.com/role-arn=$(aws iam get-role --role-name AWSUsagePolicy-{namespace} --query Role.Arn --output text) --namespace ${namespace}"))
 
 def enable_dashboard():
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))
@@ -57,8 +104,8 @@ def create_handler(event, _):
         enable_weave()
     if 'Dashboard' in event['ResourceProperties'].keys():
         enable_dashboard()
-    if 'MarketPlace' in event['ResourceProperties'].keys():
-        enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'])
+    if 'Marketplace' in event['ResourceProperties'].keys():
+        enable_marketplace(event['ResourceProperties']['ClusterName'], event['ResourceProperties']['Namespace'], event['ResourceProperties']['ServiceRoleName'])
     if 'AccessToken' in event['ResourceProperties'].keys():
         get_token()
 

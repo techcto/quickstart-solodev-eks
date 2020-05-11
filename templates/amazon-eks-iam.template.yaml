@@ -166,6 +166,14 @@ Resources:
                   - events:PutTargets
                   - events:RemoveTargets
                 Resource:  "*"
+              - Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:CreatePolicy
+                  - iam:AttachRolePolicy
+                  - iam:UpdateAssumeRolePolicy
+                  - iam:CreateOpenIDConnectProvider
+                Resource:  "*"
   ControlPlaneRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -250,11 +258,6 @@ Resources:
                   - ec2:DescribeAddresses
                   - eks:ListClusters
                   - iam:GetRole
-                  - iam:CreateRole
-                  - iam:CreatePolicy
-                  - iam:AttachRolePolicy
-                  - iam:UpdateAssumeRolePolicy
-                  - iam:CreateOpenIDConnectProvider
                 Resource: "*"
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonEC2RoleforSSM'

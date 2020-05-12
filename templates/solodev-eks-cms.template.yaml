@@ -8,6 +8,19 @@ Metadata:
     ParameterGroups: 
       - 
         Label: 
+          default: "Cluster Settings"
+        Parameters: 
+          - ClusterName
+          - WebStackArn
+          - HelmLambdaArn
+      - 
+        Label: 
+          default: "Optional: DNS"
+        Parameters: 
+          - DomainName
+          - ClusterZone
+      - 
+        Label: 
           default: "User Settings"
         Parameters: 
           - AdminUser
@@ -20,26 +33,13 @@ Metadata:
           - DatabasePassword
           - Namespace
           - AppSecret
-          - ClusterName
           - ServiceRoleName
-      - 
-        Label: 
-          default: "Lambda Functions"
-        Parameters: 
-          - WebStackArn
-          - HelmLambdaArn
       - 
         Label: 
           default: "Helm Chart"
         Parameters: 
           - RepoUrl
           - Chart
-      - 
-        Label: 
-          default: "Optional: DNS"
-        Parameters: 
-          - DomainName
-          - ClusterZone
 
 Parameters:
 

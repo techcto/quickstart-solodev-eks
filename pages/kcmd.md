@@ -8,13 +8,7 @@ Save or take note of these output values as you will need them when launching So
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/outputs-solodev-cms-eks.jpg" /></td>
-	</tr>
-</table>
-
-<table>
-	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/outputs-solodev-cms-eks-2.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/outputs-solodev-cms-eks-1-15.jpg" /></td>
 	</tr>
 </table>
 

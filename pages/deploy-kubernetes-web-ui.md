@@ -9,7 +9,36 @@ The following steps will allow you to deploy Kubernetes Web UI (Dashboard) to an
 The Amazon S3 template URL (used for the CloudFormation configuration) should be preselected. Click "Next" to continue.
 
 <strong>Specify Details</strong><br />
-The following parameters must be configured to launch your Solodev Managed Kubernetes for EKS CloudFormation stack:
+The following parameters must be configured to launch your Kubernetes Web UI (Dashboard) CloudFormation stack:
+
+<table>
+	<tr>
+		<th width="33%"><strong>Parameter</strong></th>
+		<th width="600px"><strong>Description</strong></th>
+	</tr>
+	<tr>
+		<td>Stack name</td>
+		<td>The name of your stack (set to "kubernetes-dashboard" by default). Stack name can include letters (A-Z and a-z), numbers (0-9), and dashes (-).</td>
+	</tr>
+</table>
+
+<table>
+	<tr>
+		<td colspan="2"><strong>Lambda Functions</strong></td>
+	</tr>
+	<tr>
+		<td width="33%">ClusterName</td>
+		<td width="600px">The "ClusterName" as found in your Solodev Managed Kubernetes for EKS CloudFormation stack output.</td>
+	</tr>
+	<tr>
+		<td>WebStackArn</td>
+		<td>The "WebStackArn" as found in your Solodev Managed Kubernetes for EKS CloudFormation stack output.</td>
+	</tr>
+	<tr>
+		<td>HelmLambdaArn</td>
+		<td>The "HelmLambdaArn" as found in your Solodev Managed Kubernetes for EKS CloudFormation stack output.</td>
+	</tr>  
+</table>
 
 ---
 © 2020 Solodev. All rights reserved worldwide. And off planet. 

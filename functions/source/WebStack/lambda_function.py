@@ -37,31 +37,36 @@ def enable_weave():
 
 #Apply AWS Marketplace service account for launching paid container apps
 def enable_marketplace(cluster_name, namespace, role_name):
-    ISSUER_URL=run_command(f"aws eks describe-cluster --name {cluster_name} --query cluster.identity.oidc.issuer --output text")
-    ISSUER_HOSTPATH=subprocess.check_output("echo {ISSUER_URL} | cut -f 3- -d'/'", shell=True)
-    ACCOUNT_ID=run_command(f"aws sts get-caller-identity --query Account --output text")
-    PROVIDER_ARN="arn:aws:iam::$ACCOUNT_ID:oidc-provider/{ISSUER_HOSTPATH}"
+    logger.debug(run_command(f"kubectl create namespace {namespace}"))
+    ISSUER_URL = run_command(f"aws eks describe-cluster --name {cluster_name} --query cluster.identity.oidc.issuer --output text")
+    print(ISSUER_URL)
+    ISSUER_HOSTPATH = subprocess.check_output("echo \"" + ISSUER_URL + "\" | cut -f 3- -d'/'", shell=True).decode("utf-8")
+    print(ISSUER_HOSTPATH)
+    ACCOUNT_ID = run_command(f"aws sts get-caller-identity --query Account --output text")
+    print(ACCOUNT_ID)
     irp_trust_policy = {
         "Version": "2012-10-17",
         "Statement": [
             {
                 "Effect": "Allow",
                 "Principal": {
-                    "Federated": "{PROVIDER_ARN}"
+                    "Federated": "arn:aws:iam::{ACCOUNT_ID}:oidc-provider/{ISSUER_HOSTPATH}"
                 },
                 "Action": "sts:AssumeRoleWithWebIdentity",
                 "Condition": {
                     "StringEquals": {
-                        "{ISSUER_HOSTPATH}:sub": "system:serviceaccount:{namespace}:aws-serviceaccount"
+                        "{ISSUER_HOSTPATH}:sub": "system:serviceaccount:{namespace}:{role_name}"
                     }
                 }
             }
         ]
     }
-    logger.debug(iam_client.create_role(
-        RoleName=role_name,
+    RoleName=role_name+"-"+namespace
+    json.dumps(irp_trust_policy)
+    iam_client.create_role(
+        RoleName=RoleName,
         AssumeRolePolicyDocument=json.dumps(irp_trust_policy)
-    ))
+    )
     aws_usage_policy = {
         "Version": "2012-10-17",
         "Statement": [
@@ -74,16 +79,18 @@ def enable_marketplace(cluster_name, namespace, role_name):
             }
         ]
     }
-    logger.debug(response = iam_client.create_policy(
+    response = iam_client.create_policy(
         PolicyName='AWSUsagePolicy-' + namespace,
         PolicyDocument=json.dumps(aws_usage_policy)
-    ))
-    logger.debug(iam_client.attach-role-policy(
-        RoleName={role_name},
+    )
+    iam_client.attach_role_policy(
+        RoleName=RoleName,
         PolicyArn=response['Policy']['Arn']
-    ))
+    )
     logger.debug(run_command(f"kubectl create sa {role_name} --namespace {namespace}"))
-    logger.debug(run_command(f"kubectl annotate sa {role_name} eks.amazonaws.com/role-arn=$(aws iam get-role --role-name AWSUsagePolicy-{namespace} --query Role.Arn --output text) --namespace ${namespace}"))
+    ROLE_ARN = run_command(f"aws iam get-role --role-name {RoleName} --query Role.Arn --output text")
+    print(ROLE_ARN)
+    logger.debug(run_command(f"kubectl annotate sa {role_name} eks.amazonaws.com/role-arn={ROLE_ARN} --namespace {namespace}"))
 
 def enable_dashboard():
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))

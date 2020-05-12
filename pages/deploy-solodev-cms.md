@@ -23,7 +23,7 @@ Click on the primary stack and view the "Outputs" tab. You will find details per
 
 
 ## Step 3: Launch your CloudFormation Stack
-<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-cms&templateURL=https://solodev-quickstarts.s3.amazonaws.com/cms/solodev-cms-aws.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+<p align="center"><a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=solodev-cms&templateURL=https://solodev-quickstarts.s3.amazonaws.com/eks/1.15/templates/solodev-eks-cms.template.yaml"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
 
 ## Step 4: Fill Out the CloudFormation Stack Wizard
 <strong>Continue with the preselected CloudFormation Template</strong><br />

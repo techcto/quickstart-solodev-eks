@@ -9,7 +9,7 @@ Solodev Managed Kubernetes for EKS uses a set of YAML templates to create a new 
 ![AWS Diagram](https://raw.githubusercontent.com/solodev/aws/master/pages/images/Solodev_EKS_Architecture.jpg)
 
 ## Step 1: Subscribe on the AWS Marketplace
-Before launching one of our products, you'll first need to subscribe to Solodev on the <a href="https://aws.amazon.com/marketplace/pp/B07XV951M6">AWS Marketplace.</a> Click the button below to get started: 
+Before launching one of our products, you'll first need to subscribe to Solodev Managed Kubernetes for EKS on the <a href="https://aws.amazon.com/marketplace/pp/B07XV951M6">AWS Marketplace.</a> Click the button below to get started: 
 <table>
 	<tr>
 		<td width="60%"><a href="https://aws.amazon.com/marketplace/pp/B07XV951M6"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/AWS_Marketplace_Logo.jpg" /></a></td>

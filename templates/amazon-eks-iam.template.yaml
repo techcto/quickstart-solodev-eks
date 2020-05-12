@@ -173,6 +173,7 @@ Resources:
                   - iam:AttachRolePolicy
                   - iam:UpdateAssumeRolePolicy
                   - iam:CreateOpenIDConnectProvider
+                  - iam:GetRole
                 Resource:  "*"
   ControlPlaneRole:
     Type: "AWS::IAM::Role"

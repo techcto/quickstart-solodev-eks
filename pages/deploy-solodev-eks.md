@@ -31,12 +31,12 @@ The following parameters must be configured to launch your Solodev Managed Kuber
 
 <strong>Kubernetes WebStack add-ins note:</strong> the Solodev Managed Kubernetes for EKS cluster contains a set of WebStack add-ins specifically configured for production-ready web development applications. These add-ins include CloudFormation templates for the following:
 <ul>
-	<li>Provision <a href="https://www.weave.works/docs/net/latest/kubernetes/kube-addon/">Weave CNI</a> rather than the default <a href="https://docs.aws.amazon.com/eks/latest/userguide/pod-networking.html">Amazon CNI</a></li>
+	<li>Provision <a href="https://www.weave.works/docs/net/latest/kubernetes/kube-addon/">Weave CNI</a></li>
 	<li>Provision <a href="https://kubernetes.github.io/ingress-nginx/">Nginx proxy</a></li>
 	<li>Provision external DNS management through Amazon Route 53</li>
 	<li>Enabled the <a href="https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/">Kubernetes dashboard</a></li>
 	<li>Enable secure access tokens</li>
-	<li>[OPTIONAL] Install Solodev CMS on the cluster on deployment</li>
+	<li>Optional installation of Solodev CMS on the cluster upon deployment</li>
 </ul>
 
 <table>
@@ -290,7 +290,7 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 </table>
 
 ## Launch Optional Apps on your Solodev Managed Kubernetes for EKS
-With your EKS stack successfully launched, you can proceed to launch additional apps such as the <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/pages/deploy-kubernetes-web-ui.md">Kubernetes Web UI (Dashboard)</a>. Return to the <a href="https://github.com/techcto/quickstart-solodev-eks#launch-apps-on-your-managed-kubernetes-cluster">repository home</a> to view available apps for available for installation.
+With your EKS stack successfully launched, you can proceed to launch additional apps such as the <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/pages/deploy-kubernetes-web-ui.md">Kubernetes Web UI (Dashboard)</a>. If you enabled the "ProvisionDashboard" parameter above, find instructions for connecting to the Kubernetes Web UI (Dashboard) via the .Return to the <a href="https://github.com/techcto/quickstart-solodev-eks#launch-apps-on-your-managed-kubernetes-cluster">repository home</a> to view available apps for available for installation.
 
 ---
 © 2020 Solodev. All rights reserved worldwide. And off planet. 

@@ -35,11 +35,11 @@ Already have a Solodev license? Call <a href="tel:1.800.859.7656">1-800-859-7656
 With your EKS cluster up and running, you can install apps within the cluster itself. Below are available apps with more to come!
 <table>
 	<tr>
-		<td width="25%"><a href="pages/deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-dcx-for-eks.jpg" /></a></td>
+		<td width="150"><a href="pages/deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-dcx-for-eks.jpg" /></a></td>
 		<td>
-			<h3>Solodev Content Management (CMS) for Kubernetes</h3>
+			<h4>Solodev Content Management (CMS) for Kubernetes</h4>
 			<p>Deploy Solodev CMS for Kubernetes and start managing and scaling your websites and digital experiences on AWS. Rapidly move from your local environment to the cloud, add or remove containers to meet shifts in traffic, and manage entire fleets of Solodev applications with the power of Amazon EKS.</p>
-			<p align="right"><a href="pages/deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-launch-btn.png" width="200" /></a></p>
+			<p align="right"><a href="pages/deploy-solodev-cms.md">More Details</a></p>
 		</td>
 	</tr>
 </table>

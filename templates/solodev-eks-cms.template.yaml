@@ -98,10 +98,15 @@ Parameters:
   DomainName:
     Description: This is the DNS Zone for all clusters
     Type: String
+    Default: ""
 
   ClusterZone:
     Description: This is the DNS Zone that for a single cluster
     Type: String
+    Default: ""
+
+Conditions:
+  IsDefault: !Equals [!Ref DomainName, '']
 
 Resources:
 
@@ -124,7 +129,7 @@ Resources:
       ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
-      Chart: !Ref Chart
+      Chart: Chart: !If [IsDefault, 'solodev-cms-aws', 'solodev-cms']
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       ValueYaml: !Sub |

@@ -397,9 +397,11 @@ Parameters:
   DomainName:
     Description: This is the DNS Zone for all clusters
     Type: String
+    Default: ""
   ClusterZone:
     Description: This is the DNS Zone that for a single cluster
     Type: String
+    Default: ""
   ProvisionDashboard:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
@@ -593,7 +595,6 @@ Resources:
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
         AdminPassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DatabasePassword: !GetAtt EKSStack.Outputs.EKSClusterName
-        Chart: !If [EnableExternalDNS, 'solodev-cms', '']
         DomainName: !Ref DomainName
         ClusterZone: !Ref ClusterZone
   DashboardWaitHandle: 

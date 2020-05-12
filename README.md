@@ -35,6 +35,16 @@ Already have a Solodev license? Call <a href="tel:1.800.859.7656">1-800-859-7656
 With your EKS cluster up and running, you can install apps within the cluster itself. Below are available apps with more to come!
 <table>
 	<tr>
+		<td width="150"><a href="pages/deploy-kubernetes-web-ui.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/apps/eks-app-kubernetes-web-ui.jpg" /></a></td>
+		<td>
+			<h4>Kubernetes Web UI (Dashboard)</h4>
+			<p>Dashboard is a web-based Kubernetes user interface. You can use Dashboard to deploy containerized applications to a Kubernetes cluster, troubleshoot your containerized application, and manage the cluster resources.</p>
+			<p align="right"><a href="pages/deploy-kubernetes-web-ui.md">More Details</a></p>
+		</td>
+	</tr>
+</table>
+<table>
+	<tr>
 		<td width="150"><a href="pages/deploy-solodev-cms.md"><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/solodev-dcx-for-eks.jpg" /></a></td>
 		<td>
 			<h4>Solodev Content Management (CMS) for Kubernetes</h4>

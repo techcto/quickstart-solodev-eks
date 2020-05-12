@@ -41,7 +41,7 @@ The following parameters must be configured to launch your Solodev EKS CloudForm
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/parameters-solodev-cms-eks.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/parameters-solodev-cms-eks-1-15.jpg" /></td>
 	</tr>
 </table>
 
@@ -276,7 +276,7 @@ Review all CloudFront details and options. Ensure that the "I acknowledge that A
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/review-solodev-cms-eks.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/review-solodev-cms-eks-1-15.jpg" /></td>
 	</tr>
 </table>
 

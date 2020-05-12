@@ -48,6 +48,8 @@ Metadata:
           - ProvisionWeave
           - ProvisionNginxIngress
           - ProvisionExternalDNS
+          - DomainName
+          - ClusterZone
           - ProvisionDashboard
           - ProvisionAccessToken
           - ProvisionCMS
@@ -392,6 +394,12 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
     Description: "Choose Enabled to enable External DNS with Route 53"
+  DomainName:
+    Description: This is the DNS Zone for all clusters
+    Type: String
+  ClusterZone:
+    Description: This is the DNS Zone that for a single cluster
+    Type: String
   ProvisionDashboard:
     Type: String
     AllowedValues: [ "Enabled", "Disabled" ]
@@ -585,6 +593,9 @@ Resources:
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
         AdminPassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DatabasePassword: !GetAtt EKSStack.Outputs.EKSClusterName
+        Chart: !If [EnableExternalDNS, 'solodev-cms', '']
+        DomainName: !Ref DomainName
+        ClusterZone: !Ref ClusterZone
   DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 

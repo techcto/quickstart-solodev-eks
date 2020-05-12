@@ -22,12 +22,20 @@ Metadata:
           - AppSecret
           - ClusterName
           - ServiceRoleName
+          - DomainName
+          - ClusterZone
       - 
         Label: 
           default: "Lambda Functions"
         Parameters: 
           - WebStackArn
           - HelmLambdaArn
+      - 
+        Label: 
+          default: "Helm Chart"
+        Parameters: 
+          - RepoUrl
+          - Chart
 
 Parameters:
 
@@ -129,7 +137,7 @@ Resources:
       ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
-      Chart: Chart: !If [IsDefault, 'solodev-cms-aws', 'solodev-cms']
+      Chart: !If [IsDefault, 'solodev-cms-aws', 'solodev-cms']
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       ValueYaml: !Sub |

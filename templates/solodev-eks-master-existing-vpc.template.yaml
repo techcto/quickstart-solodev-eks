@@ -555,7 +555,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   ExternalDNSStack:
     Condition: EnableExternalDNS
     Type: AWS::CloudFormation::Stack
@@ -566,7 +566,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   ExternalDNSWaitHandle: 
     Condition: EnableExternalDNS
     DependsOn: ExternalDNSStack

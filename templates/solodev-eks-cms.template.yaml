@@ -22,8 +22,6 @@ Metadata:
           - AppSecret
           - ClusterName
           - ServiceRoleName
-          - DomainName
-          - ClusterZone
       - 
         Label: 
           default: "Lambda Functions"
@@ -36,6 +34,12 @@ Metadata:
         Parameters: 
           - RepoUrl
           - Chart
+      - 
+        Label: 
+          default: "Optional: DNS"
+        Parameters: 
+          - DomainName
+          - ClusterZone
 
 Parameters:
 

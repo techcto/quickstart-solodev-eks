@@ -290,7 +290,7 @@ Upon launching your CloudFormation stack, you will be able to monitor the instal
 </table>
 
 ## Launch Optional Apps on your Solodev Managed Kubernetes for EKS
-With your EKS stack successfully launched, you can proceed to launch additional apps such as the <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/pages/deploy-kubernetes-web-ui.md">Kubernetes Web UI (Dashboard)</a>. If you enabled the "ProvisionDashboard" parameter above, find instructions for connecting to the Kubernetes Web UI (Dashboard) via the Solodev's custom <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/pages/kcmd.md">kcmd.sh script</a>.Return to the <a href="https://github.com/techcto/quickstart-solodev-eks#launch-apps-on-your-managed-kubernetes-cluster">repository home</a> to view available apps for available for installation.
+With your EKS stack successfully launched, you can proceed to launch additional apps such as the <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/pages/deploy-kubernetes-web-ui.md">Kubernetes Web UI (Dashboard)</a>. If you enabled the "ProvisionDashboard" parameter above, find instructions for connecting to the Kubernetes Web UI (Dashboard) via the Solodev's custom <a href="https://github.com/techcto/quickstart-solodev-eks/blob/master/pages/kcmd.md">kcmd.sh script</a>. Return to the <a href="https://github.com/techcto/quickstart-solodev-eks#launch-apps-on-your-managed-kubernetes-cluster">repository home</a> to view available apps for available for installation.
 
 ---
 © 2020 Solodev. All rights reserved worldwide. And off planet. 

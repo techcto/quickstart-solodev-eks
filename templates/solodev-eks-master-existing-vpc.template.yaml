@@ -43,14 +43,7 @@ Metadata:
           - AdditionalEKSAdminRoleArn
           - KubernetesVersion
       - Label:
-          default: AWS Quick Start configuration
-        Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
-          - QSS3BucketRegion
-          - LambdaZipsBucketName
-      - Label:
-          default: Optional Kubernetes web hosting add-ins
+          default: Optional Kubernetes WebStack add-ins
         Parameters:
           - ProvisionWeave
           - ProvisionNginxIngress
@@ -66,6 +59,13 @@ Metadata:
           - EfsPerformanceMode
           - EfsThroughputMode
           - EfsProvisionedThroughputInMibps
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+          - QSS3BucketRegion
+          - LambdaZipsBucketName
     ParameterLabels:
       KeyPairName:
         default: SSH key name

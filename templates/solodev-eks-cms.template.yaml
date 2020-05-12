@@ -141,7 +141,7 @@ Resources:
       ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
-      Chart: !If [IsDefault, 'charts/solodev-cms-aws', 'charts/solodev-cms']
+      Chart: !If [IsDefault, !Ref Chart, 'charts/solodev-cms']
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       ValueYaml: !Sub |

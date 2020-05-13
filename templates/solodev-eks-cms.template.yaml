@@ -107,6 +107,10 @@ Parameters:
     Type: String
     Default: "charts/solodev-cms-aws"
 
+  AppVersion:
+    Type: String
+    Default: "9.2.95"
+
   DomainName:
     Description: This is the DNS Zone for all clusters
     Type: String

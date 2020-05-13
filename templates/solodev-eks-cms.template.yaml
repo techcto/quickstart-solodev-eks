@@ -117,6 +117,14 @@ Parameters:
     Type: String
     Default: ""
 
+  ClientId:
+    Type: String
+    Default: ""
+    
+  ClientSecret:
+    Type: String
+    Default: ""
+
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
 
@@ -153,6 +161,9 @@ Resources:
             appPassword: ${AdminPassword}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
+            clientId: ${ClientId}
+            clientSecret: ${ClientSecret}
+          pullSecret: solodev
           domainName: ${DomainName}
           clusterZone: ${ClusterZone}
         mongo:

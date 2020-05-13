@@ -8,13 +8,7 @@ Save or take note of these output values as you will need them when launching So
 
 <table>
 	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/outputs-solodev-cms-eks.jpg" /></td>
-	</tr>
-</table>
-
-<table>
-	<tr>
-		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/outputs-solodev-cms-eks-2.jpg" /></td>
+		<td><img src="https://raw.githubusercontent.com/solodev/aws/master/pages/images/install/outputs-solodev-cms-eks-1-15.jpg" /></td>
 	</tr>
 </table>
 
@@ -29,8 +23,8 @@ Modify lines 8-9. The values will correspond to your stack's output.
 
 <pre>
 #GET VALUES FROM CLOUDFORMATION OUTPUT OF EKS STACK
-export EKSName=""
-export ControlPlaneProvisionRoleArn=""
+export EKSClusterName=""
+export SysOpsAdminRoleArn=""
 </pre>
 
 Modify lines 12-15. REGION corresponds to the <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html">AWS Region</a> where your EKS cluster is located. USER_ARN corresponds to the User ARN of your <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html">AWS IAM User</a>. KEY corresponds to the <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html">EC2 Key Pair</a> specified during the EKS cluster launch. BASTION corresponds to the Bastion IP which can be found in the stack's output.

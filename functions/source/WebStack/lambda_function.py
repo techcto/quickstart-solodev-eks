@@ -37,60 +37,74 @@ def enable_weave():
 
 #Apply AWS Marketplace service account for launching paid container apps
 def enable_marketplace(cluster_name, namespace, role_name):
-    logger.debug(run_command(f"kubectl create namespace {namespace}"))
-    ISSUER_URL = run_command(f"aws eks describe-cluster --name {cluster_name} --query cluster.identity.oidc.issuer --output text")
-    print(ISSUER_URL)
-    ISSUER_HOSTPATH = subprocess.check_output("echo \"" + ISSUER_URL + "\" | cut -f 3- -d'/'", shell=True).decode("utf-8")
-    print(ISSUER_HOSTPATH)
-    ACCOUNT_ID = run_command(f"aws sts get-caller-identity --query Account --output text")
-    print(ACCOUNT_ID)
-    irp_trust_policy = {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Effect": "Allow",
-                "Principal": {
-                    "Federated": "arn:aws:iam::{ACCOUNT_ID}:oidc-provider/{ISSUER_HOSTPATH}"
-                },
-                "Action": "sts:AssumeRoleWithWebIdentity",
-                "Condition": {
-                    "StringEquals": {
-                        "{ISSUER_HOSTPATH}:sub": "system:serviceaccount:{namespace}:{role_name}"
+    try:
+        logger.debug(run_command(f"kubectl create namespace {namespace}"))
+    except Exception as exception:
+        print("Namespace already exists")
+    
+    try:
+        ISSUER_URL = run_command(f"aws eks describe-cluster --name {cluster_name} --query cluster.identity.oidc.issuer --output text")
+        print(ISSUER_URL)
+        ISSUER_HOSTPATH = subprocess.check_output("echo \"" + ISSUER_URL + "\" | cut -f 3- -d'/'", shell=True).decode("utf-8")
+        print(ISSUER_HOSTPATH)
+        ACCOUNT_ID = run_command(f"aws sts get-caller-identity --query Account --output text")
+        print(ACCOUNT_ID)
+        irp_trust_policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": "arn:aws:iam::{ACCOUNT_ID}:oidc-provider/{ISSUER_HOSTPATH}"
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity",
+                    "Condition": {
+                        "StringEquals": {
+                            "{ISSUER_HOSTPATH}:sub": "system:serviceaccount:{namespace}:{role_name}"
+                        }
                     }
                 }
-            }
-        ]
-    }
-    RoleName=role_name+"-"+namespace
-    json.dumps(irp_trust_policy)
-    iam_client.create_role(
-        RoleName=RoleName,
-        AssumeRolePolicyDocument=json.dumps(irp_trust_policy)
-    )
-    aws_usage_policy = {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Action": [
-                    "aws-marketplace:RegisterUsage"
-                ],
-                "Resource": "*",
-                "Effect": "Allow"
-            }
-        ]
-    }
-    response = iam_client.create_policy(
-        PolicyName='AWSUsagePolicy-' + namespace,
-        PolicyDocument=json.dumps(aws_usage_policy)
-    )
-    iam_client.attach_role_policy(
-        RoleName=RoleName,
-        PolicyArn=response['Policy']['Arn']
-    )
-    logger.debug(run_command(f"kubectl create sa {role_name} --namespace {namespace}"))
-    ROLE_ARN = run_command(f"aws iam get-role --role-name {RoleName} --query Role.Arn --output text")
-    print(ROLE_ARN)
-    logger.debug(run_command(f"kubectl annotate sa {role_name} eks.amazonaws.com/role-arn={ROLE_ARN} --namespace {namespace}"))
+            ]
+        }
+        RoleName=role_name+"-"+namespace
+        iam_client.create_role(
+            RoleName=RoleName,
+            AssumeRolePolicyDocument=json.dumps(irp_trust_policy)
+        )
+    except Exception as exception:
+        print("Role already exists")
+
+    try:
+        aws_usage_policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": [
+                        "aws-marketplace:RegisterUsage"
+                    ],
+                    "Resource": "*",
+                    "Effect": "Allow"
+                }
+            ]
+        }
+        response = iam_client.create_policy(
+            PolicyName='AWSUsagePolicy-' + namespace,
+            PolicyDocument=json.dumps(aws_usage_policy)
+        )
+        iam_client.attach_role_policy(
+            RoleName=RoleName,
+            PolicyArn=response['Policy']['Arn']
+        )
+    except Exception as exception:
+        print("Policy already exists")
+
+    try:
+        logger.debug(run_command(f"kubectl create sa {role_name} --namespace {namespace}"))
+        ROLE_ARN = run_command(f"aws iam get-role --role-name {RoleName} --query Role.Arn --output text")
+        print(ROLE_ARN)
+        logger.debug(run_command(f"kubectl annotate sa {role_name} eks.amazonaws.com/role-arn={ROLE_ARN} --namespace {namespace}"))
+    except Exception as exception:
+        print("There was an error.")
 
 def enable_dashboard():
     logger.debug(run_command("kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/alternative.yaml"))

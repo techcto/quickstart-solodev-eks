@@ -127,6 +127,9 @@ Parameters:
 
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
+  NotDefault:
+      "Fn::Not":
+        - Condition: IsDefault
 
 Resources:
 
@@ -155,6 +158,11 @@ Resources:
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         solodev:
+          image:
+            registry: docker.io
+            repository: solodev/cms
+            tag: ${AppVersion}
+            pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}
             appUser: ${AdminUser}
@@ -173,8 +181,9 @@ Resources:
 Outputs:
 
     AdminUrl: 
+        Condition: NotDefault
         Description: Point your DNS to this CNAME.
-        Value: "Locate external endpoint address for UI in services"
+        Value: !Join ["", [ !Ref "AWS::StackName", ".", !Ref ClusterZone ]]
     
     AdminUsername: 
         Description: Solodev admin username.

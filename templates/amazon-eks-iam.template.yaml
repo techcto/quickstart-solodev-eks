@@ -221,6 +221,18 @@ Resources:
                 Resource: !Sub
                  - "arn:${AWS::Partition}:s3:::${BucketName}/${QSS3KeyPrefix}*"
                  - BucketName: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        - PolicyName: route53Access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: "route53:ChangeResourceRecordSets"
+                Resource: "arn:aws:route53:::hostedzone/*"
+              - Effect: Allow
+                Action: 
+                  - "route53:ListHostedZones"
+                  - "route53:ListResourceRecordSets"
+                Resource: "*"
   BastionRole:
     Condition: EnableBastionRole
     Type: "AWS::IAM::Role"

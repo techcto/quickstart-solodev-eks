@@ -412,6 +412,11 @@ Parameters:
     AllowedValues: [ "charts/solodev-cms-aws", "charts/wordpress" ]
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
+  AdminEmail:
+    Type: String
+  WebsiteUrl:
+    Type: String
+    Default: ""
 Rules:
   EKSSupport:
     Assertions:
@@ -591,6 +596,8 @@ Resources:
         AdminPassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DatabasePassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DefaultCMS: !Ref DefaultCMS
+        AdminEmail: !Ref AdminEmail
+        WebsiteUrl: !Ref WebsiteUrl
   DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 

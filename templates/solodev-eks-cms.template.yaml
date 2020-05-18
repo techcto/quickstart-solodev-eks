@@ -21,10 +21,12 @@ Metadata:
           - ClusterZone
       - 
         Label: 
-          default: "User Settings"
+          default: "CMS Settings"
         Parameters: 
           - AdminUser
           - AdminPassword
+          - AdminEmail
+          - WebsiteUrl
       - 
         Label: 
           default: "Advanced Settings"
@@ -58,6 +60,13 @@ Parameters:
       MaxLength: 41
       AllowedPattern: .+
       ConstraintDescription: Please set admin password
+
+  AdminEmail:
+    Type: String
+
+  WebsiteUrl:
+    Type: String
+    Default: ""
 
   DatabaseName:
       Description: The solodev database name
@@ -136,6 +145,10 @@ Conditions:
   NotDefault:
       "Fn::Not":
         - Condition: IsDefault
+  cleanInstall: !Equals [!Ref WebsiteUrl, '']
+  AddWebsite:
+      "Fn::Not":
+        - Condition: cleanInstall
   InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms-aws']
   InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
 
@@ -176,6 +189,8 @@ Resources:
             appSecret: ${AppSecret}
             appUser: ${AdminUser}
             appPassword: ${AdminPassword}
+            appEmail: ${AdminEmail}
+            websiteUrl: ${WebsiteUrl}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
           domainName: ${DomainName}
@@ -205,6 +220,8 @@ Resources:
             appSecret: ${AppSecret}
             appUser: ${AdminUser}
             appPassword: ${AdminPassword}
+            appEmail: ${AdminEmail}
+            websiteUrl: ${WebsiteUrl}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
             clientId: ${ClientId}
@@ -230,3 +247,8 @@ Outputs:
     AdminPassword: 
         Description: Solodev admin password.
         Value: !Ref AdminPassword
+
+    WebsiteUrl: 
+        Condition: AddWebsite
+        Description: The public website address
+        Value: !Ref WebsiteUrl

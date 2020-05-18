@@ -103,10 +103,6 @@ Parameters:
     Type: String
     Default: "https://raw.githubusercontent.com/techcto/charts/master/"
 
-  Chart:
-    Type: String
-    Default: "charts/solodev-cms-aws"
-
   AppVersion:
     Type: String
     Default: "9.2.95"
@@ -129,11 +125,19 @@ Parameters:
     Type: String
     Default: ""
 
+  DefaultCMS:
+    Type: String
+    AllowedValues: [ "charts/solodev-cms-aws", "charts/wordpress" ]
+    Default: "charts/wordpress"
+    Description: "Choose preferred CMS"
+
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
   NotDefault:
       "Fn::Not":
         - Condition: IsDefault
+  InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms-aws']
+  InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
 
 Resources:
 
@@ -148,7 +152,8 @@ Resources:
       Marketplace:
         Enable: "true"
 
-  SolodevCMS:
+  Wordpress:
+    Condition: InstallWordpress
     DependsOn: Marketplace
     Type: "Custom::Helm"
     Version: '1.0'
@@ -156,7 +161,36 @@ Resources:
       ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
-      Chart: !If [IsDefault, !Ref Chart, 'charts/solodev-cms']
+      Chart: !Ref DefaultCMS
+      Name: !Ref AWS::StackName
+      Namespace: !Ref Namespace
+      ValueYaml: !Sub |
+        serviceAccountName: "${ServiceRoleName}"
+        wordpress:
+          image:
+            registry: docker.io
+            repository: solodev/wordpress
+            tag: ${AppVersion}
+            pullPolicy: IfNotPresent
+          settings:
+            appSecret: ${AppSecret}
+            appUser: ${AdminUser}
+            appPassword: ${AdminPassword}
+            dbName: ${DatabaseName}
+            dbPassword: ${DatabasePassword}
+          domainName: ${DomainName}
+          clusterZone: ${ClusterZone}
+
+  SolodevCMS:
+    Condition: InstallSolodev
+    DependsOn: Marketplace
+    Type: "Custom::Helm"
+    Version: '1.0'
+    Properties:
+      ServiceToken: !Ref HelmLambdaArn
+      ClusterName: !Ref ClusterName
+      RepoUrl: !Ref RepoUrl
+      Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       ValueYaml: !Sub |

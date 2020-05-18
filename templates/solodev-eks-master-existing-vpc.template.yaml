@@ -407,6 +407,11 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Disabled"
     Description: "Choose Enabled to enable Solodev CMS"
+  DefaultCMS:
+    Type: String
+    AllowedValues: [ "charts/solodev-cms-aws", "charts/wordpress" ]
+    Default: "charts/wordpress"
+    Description: "Choose preferred CMS"
 Rules:
   EKSSupport:
     Assertions:
@@ -585,6 +590,7 @@ Resources:
         HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
         AdminPassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DatabasePassword: !GetAtt EKSStack.Outputs.EKSClusterName
+        DefaultCMS: !Ref DefaultCMS
   DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 

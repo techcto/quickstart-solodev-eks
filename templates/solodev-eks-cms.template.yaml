@@ -170,7 +170,7 @@ Resources:
           image:
             registry: docker.io
             repository: solodev/wordpress
-            tag: ${AppVersion}
+            tag: latest
             pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}

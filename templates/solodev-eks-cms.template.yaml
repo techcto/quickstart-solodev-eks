@@ -39,7 +39,7 @@ Metadata:
           default: "Helm Chart"
         Parameters: 
           - RepoUrl
-          - Chart
+          - DefaultCMS
 
 Parameters:
 

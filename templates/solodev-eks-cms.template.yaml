@@ -24,8 +24,8 @@ Metadata:
           default: "CMS Settings"
         Parameters: 
           - AdminUser
-          - AdminPassword
           - AdminEmail
+          - AdminPassword
           - WebsiteUrl
       - 
         Label: 
@@ -114,7 +114,7 @@ Parameters:
 
   AppVersion:
     Type: String
-    Default: "9.2.95"
+    Default: "9.2.102"
 
   DomainName:
     Description: This is the DNS Zone for all clusters

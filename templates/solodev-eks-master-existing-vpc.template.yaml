@@ -45,6 +45,7 @@ Metadata:
       - Label:
           default: Optional Kubernetes WebStack add-ins
         Parameters:
+          - AdminEmail
           - ProvisionWeave
           - ProvisionNginxIngress
           - ProvisionExternalDNS
@@ -414,6 +415,7 @@ Parameters:
     Description: "Choose preferred CMS"
   AdminEmail:
     Type: String
+    Default: ""
   WebsiteUrl:
     Type: String
     Default: ""

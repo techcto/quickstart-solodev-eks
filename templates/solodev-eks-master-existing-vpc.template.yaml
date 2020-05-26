@@ -656,3 +656,6 @@ Outputs:
     Condition: EnableAccessToken
     Value: !GetAtt AccessTokenStack.Outputs.AccessToken
     Description: Return secure access token
+  NumberOfNodes:
+    Value: !Ref NumberOfNodes
+    Description: Number of Nodes

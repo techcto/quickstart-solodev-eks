@@ -112,10 +112,6 @@ Parameters:
     Type: String
     Default: "https://raw.githubusercontent.com/techcto/charts/master/"
 
-  AppVersion:
-    Type: String
-    Default: "9.2.102"
-
   DomainName:
     Description: This is the DNS Zone for all clusters
     Type: String
@@ -190,7 +186,7 @@ Resources:
             appUser: ${AdminUser}
             appPassword: ${AdminPassword}
             appEmail: ${AdminEmail}
-            websiteUrl: ${WebsiteUrl}
+            websiteUrl: "${AWS::StackName}.${ClusterZone}"
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
           domainName: ${DomainName}
@@ -214,7 +210,7 @@ Resources:
           image:
             registry: docker.io
             repository: solodev/cms
-            tag: ${AppVersion}
+            tag: 9.2.102
             pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}
@@ -234,11 +230,6 @@ Resources:
             password: ${DatabasePassword}
 
 Outputs:
-
-    AdminUrl: 
-        Condition: NotDefault
-        Description: Point your DNS to this CNAME.
-        Value: !Join ["", [ !Ref "AWS::StackName", ".", !Ref ClusterZone ]]
     
     AdminUsername: 
         Description: Solodev admin username.
@@ -247,6 +238,10 @@ Outputs:
     AdminPassword: 
         Description: Solodev admin password.
         Value: !Ref AdminPassword
+
+    AdminUrl: 
+        Description: Point your DNS to this CNAME.
+        Value: !Join ["", [ !Ref "AWS::StackName", ".", !Ref ClusterZone ]]
 
     WebsiteUrl: 
         Condition: AddWebsite

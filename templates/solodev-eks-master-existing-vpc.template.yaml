@@ -52,6 +52,8 @@ Metadata:
           - ProvisionDashboard
           - ProvisionAccessToken
           - ProvisionCMS
+          - DefaultCMS
+          - WebsiteUrl
       - Label:
           default: Optional Kubernetes add-ins
         Parameters:

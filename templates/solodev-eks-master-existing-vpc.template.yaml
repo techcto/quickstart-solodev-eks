@@ -126,6 +126,10 @@ Metadata:
         default: EFS provisioned throughput in Mibps
       ProvisionBastionHost:
         default: Provision Bastion Host
+      WebsiteUrl:
+        default: Website URL
+      DefaultCMS:
+        default: Default CMS
 Parameters:
   KeyPairName:
     Description: The name of an existing public/private key pair, which allows you
@@ -412,15 +416,17 @@ Parameters:
     Description: "Choose Enabled to enable Solodev CMS"
   DefaultCMS:
     Type: String
-    AllowedValues: [ "charts/solodev-cms-aws", "charts/wordpress" ]
+    AllowedValues: [ "", "charts/solodev-cms-aws", "charts/wordpress" ]
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
   AdminEmail:
     Type: String
     Default: ""
+    Description: "What is your email address?"
   WebsiteUrl:
     Type: String
     Default: ""
+    Description: "Website address"
 Rules:
   EKSSupport:
     Assertions:
@@ -602,6 +608,18 @@ Resources:
         DefaultCMS: !Ref DefaultCMS
         AdminEmail: !Ref AdminEmail
         WebsiteUrl: !Ref WebsiteUrl
+  LetsEncryptStack:
+    Condition: EnableCMS
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/solodev-eks-lets-encrypt.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        AdminEmail: !Ref AdminEmail
   DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
   DashboardWaitCondition: 

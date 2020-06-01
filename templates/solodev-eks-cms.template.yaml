@@ -136,6 +136,10 @@ Parameters:
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
 
+  AppVersion:
+    Type: String
+    Default: "latest"
+
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
   NotDefault:
@@ -179,7 +183,7 @@ Resources:
           image:
             registry: docker.io
             repository: solodev/wordpress
-            tag: latest
+            tag: ${AppVersion}
             pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}
@@ -210,7 +214,7 @@ Resources:
           image:
             registry: docker.io
             repository: solodev/cms
-            tag: 9.2.102
+            tag: ${AppVersion}
             pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}

@@ -27,6 +27,7 @@ Metadata:
           - AdminEmail
           - AdminPassword
           - WebsiteUrl
+          - AppVersion
       - 
         Label: 
           default: "Advanced Settings"
@@ -139,6 +140,37 @@ Parameters:
   AppVersion:
     Type: String
     Default: "latest"
+    Description: "CMS version"
+
+  SolodevRegistry:
+    Type: String
+    Default: "117940112483.dkr.ecr.us-east-1.amazonaws.com/0c908dc0-e52e-4d48-bf4c-9e883d405d92/cg-1018795255"
+    Description: "Solodev Registry"
+
+  SolodevRepo:
+    Type: String
+    Default: "solodev-cms"
+    Description: "Solodev Repo"
+
+  ApacheRepo:
+    Type: String
+    Default: "solodev-apache"
+    Description: "Apache Repo"
+
+  MysqlRepo:
+    Type: String
+    Default: "mariadb"
+    Description: "Mysql Repo"
+
+  MongoRepo:
+    Type: String
+    Default: "techcto/mongo"
+    Description: "Mongo Repo"
+
+  RedisRepo:
+    Type: String
+    Default: "techcto/redis"
+    Description: "Redis Repo"
 
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
@@ -212,8 +244,8 @@ Resources:
         serviceAccountName: "${ServiceRoleName}"
         solodev:
           image:
-            registry: docker.io
-            repository: solodev/cms
+            registry: ${SolodevRegistry}
+            repository: ${SolodevRepo}
             tag: ${AppVersion}
             pullPolicy: IfNotPresent
           settings:
@@ -229,9 +261,28 @@ Resources:
           pullSecret: solodev
           domainName: ${DomainName}
           clusterZone: ${ClusterZone}
+        ui:
+          image:
+            registry: ${SolodevRegistry}
+            repository: ${ApacheRepo}
+            tag: ${AppVersion}
+        mysql:
+          image:
+            registry: ${SolodevRegistry}
+            repository: ${MysqlRepo}
+            tag: ${AppVersion}
         mongo:
+          image:
+            registry: ${SolodevRegistry}
+            repository: ${MongoRepo}
+            tag: ${AppVersion}
           settings:
             password: ${DatabasePassword}
+        redis:
+          image:
+            registry: ${SolodevRegistry}
+            repository: ${RedisRepo}
+            tag: ${AppVersion}
 
 Outputs:
     

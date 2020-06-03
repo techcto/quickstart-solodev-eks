@@ -132,7 +132,7 @@ Parameters:
 
   DefaultCMS:
     Type: String
-    AllowedValues: [ "charts/solodev-cms-aws", "charts/wordpress" ]
+    AllowedValues: [ "charts/solodev-cms", "charts/wordpress" ]
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
 
@@ -149,7 +149,7 @@ Conditions:
   AddWebsite:
       "Fn::Not":
         - Condition: cleanInstall
-  InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms-aws']
+  InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms']
   InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
 
 Resources:

@@ -416,7 +416,7 @@ Parameters:
     Description: "Choose Enabled to enable Solodev CMS"
   DefaultCMS:
     Type: String
-    AllowedValues: [ "", "charts/solodev-cms-aws", "charts/wordpress" ]
+    AllowedValues: [ "", "charts/solodev-cms", "charts/wordpress" ]
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
   AdminEmail:

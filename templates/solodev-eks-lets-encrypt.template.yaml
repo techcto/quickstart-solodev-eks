@@ -46,15 +46,13 @@ Resources:
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref CertManagerRepoUrl
       Chart: jetstack/cert-manager
-      Name: !Join [ '-', [ 'cert', !Ref 'AWS::StackName' ] ]
+      Name: cert-manager
       Namespace: cert-manager
       ValueYaml: !Sub |
         installCRDs: true
-        webhook:
-          hostNetwork: true
 
   # LetsEncrypt:
-  #   # DependsOn: CertManager
+  #   DependsOn: CertManager
   #   Type: "Custom::Helm"
   #   Version: '1.0'
   #   Properties:

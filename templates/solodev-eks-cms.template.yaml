@@ -284,18 +284,6 @@ Resources:
             repository: ${RedisRepo}
             tag: ${AppVersion}
 
-  # CMSBackupStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: 'https://solodev-quickstarts.s3.us-east-1.${AWS::URLSuffix}/eks/templates/solodev-eks-cms-backup.template.yaml'
-  #     Parameters:
-  #       CreateNewBackupVault: true
-  #       BackupVaultName: !Ref WebsiteUrl
-  #       BackupPlanName: daily-backup
-  #       BackupSelectionName: daily-backup
-  #       BackupPolicy: BackupTwiceDaily
-  #       DeleteAfterDays: 30
-
 Outputs:
     
     AdminUsername: 

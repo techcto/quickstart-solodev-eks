@@ -27,6 +27,7 @@ Metadata:
           - AdminEmail
           - AdminPassword
           - WebsiteUrl
+          - WebsiteThemeUrl
           - AppVersion
       - 
         Label: 
@@ -68,6 +69,11 @@ Parameters:
   WebsiteUrl:
     Type: String
     Default: ""
+
+  WebsiteThemeUrl:
+    Type: String
+    Default: ""
+    Description: "Initial Website Theme URL"
 
   DatabaseName:
       Description: The solodev database name
@@ -181,6 +187,7 @@ Conditions:
   AddWebsite:
       "Fn::Not":
         - Condition: cleanInstall
+  installTheme: !Equals [!Ref WebsiteThemeUrl, '']
   InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms']
   InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
 
@@ -223,6 +230,7 @@ Resources:
             appPassword: ${AdminPassword}
             appEmail: ${AdminEmail}
             websiteUrl: "${AWS::StackName}.${ClusterZone}"
+            websiteTheme: ${WebsiteThemeUrl}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
           domainName: ${DomainName}
@@ -254,6 +262,7 @@ Resources:
             appPassword: ${AdminPassword}
             appEmail: ${AdminEmail}
             websiteUrl: ${WebsiteUrl}
+            websiteTheme: ${WebsiteThemeUrl}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
             clientId: ${ClientId}
@@ -302,3 +311,8 @@ Outputs:
         Condition: AddWebsite
         Description: The public website address
         Value: !Ref WebsiteUrl
+
+    WebsiteThemeUrl: 
+        Condition: installTheme
+        Description: Installed website theme url
+        Value: !Ref WebsiteThemeUrl

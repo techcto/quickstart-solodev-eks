@@ -233,8 +233,8 @@ Resources:
             websiteTheme: ${WebsiteThemeUrl}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
-          domainName: ${DomainName}
-          clusterZone: ${ClusterZone}
+          domainName: "${DomainName}"
+          clusterZone: "${ClusterZone}"
 
   SolodevCMS:
     Condition: InstallSolodev

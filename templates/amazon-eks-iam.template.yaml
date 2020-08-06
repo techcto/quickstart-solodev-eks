@@ -416,8 +416,26 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - "s3:GetObject"
+                Resource: !Sub 'arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/functions/packages/*'
+        - PolicyName: ResourceTypePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
                   - "cloudformation:*"
                   - "iam:PassRole"
+                  - "iam:CreateRole"
+                  - "iam:CreatePolicy"
+                  - "iam:ListPolicyVersions"
+                  - "iam:DeletePolicyVersion"
+                  - "iam:CreatePolicyVersion"
+                  - "iam:AttachRolePolicy"
+                  - "ssm:GetParameter"
+                  - "ssm:PutParameter"
+                  - "sts:GetCallerIdentity"
+                  - "s3:GetObject"
                 Resource: "*"
   ExecutionRole:
     Type: AWS::IAM::Role

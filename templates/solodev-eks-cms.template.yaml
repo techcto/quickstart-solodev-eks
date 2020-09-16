@@ -28,6 +28,7 @@ Metadata:
           - AdminPassword
           - WebsiteUrl
           - WebsiteThemeUrl
+          - WebsiteThemeValues 
           - AppVersion
       - 
         Label: 
@@ -74,6 +75,11 @@ Parameters:
     Type: String
     Default: ""
     Description: "Initial Website Theme URL"
+
+  WebsiteThemeValues:
+    Type: String
+    Default: ""
+    Description: "Initial Website Theme Values"
 
   DatabaseName:
       Description: The solodev database name
@@ -231,6 +237,7 @@ Resources:
             appEmail: ${AdminEmail}
             websiteUrl: "${AWS::StackName}.${ClusterZone}"
             websiteTheme: ${WebsiteThemeUrl}
+            websiteThemeValues: ${WebsiteThemeValues}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
           domainName: "${DomainName}"
@@ -263,6 +270,7 @@ Resources:
             appEmail: ${AdminEmail}
             websiteUrl: ${WebsiteUrl}
             websiteTheme: ${WebsiteThemeUrl}
+            websiteThemeValues: ${WebsiteThemeValues}
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
             clientId: ${ClientId}
@@ -316,3 +324,8 @@ Outputs:
         Condition: installTheme
         Description: Installed website theme url
         Value: !Ref WebsiteThemeUrl
+
+    WebsiteThemeValues: 
+        Condition: installTheme
+        Description: Installed website theme values
+        Value: !Ref WebsiteThemeValues

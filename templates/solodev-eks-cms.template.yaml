@@ -237,7 +237,7 @@ Resources:
             appEmail: ${AdminEmail}
             websiteUrl: "${AWS::StackName}.${ClusterZone}"
             websiteTheme: ${WebsiteThemeUrl}
-            websiteThemeValues: ${WebsiteThemeValues}
+            websiteThemeValues: "${WebsiteThemeValues}"
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
           domainName: "${DomainName}"

@@ -8,11 +8,11 @@ init(){
     git submodule add https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git ./functions/source/EksClusterResource
 }
 
-pullMaster() {
+merge() {
     git pull https://github.com/aws-quickstart/quickstart-amazon-eks.git master --allow-unrelated-histories
     git fetch upstream
-    git checkout master
-    git merge upstream/master
+    git checkout tags/3.0.0
+    git merge 3.0.0
 }
 
 update(){

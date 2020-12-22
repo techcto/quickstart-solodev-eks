@@ -1,11 +1,18 @@
 #!/bin/bash
-
 args=("$@")
 
 init(){
-    git submodule init
-    git remote add upstream https://github.com/aws-quickstart/quickstart-amazon-eks.git
-    git submodule add https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git ./functions/source/EksClusterResource
+    # git submodule init
+    # git remote add upstream https://github.com/aws-quickstart/quickstart-amazon-eks.git
+    git submodule add -f https://github.com/aws-quickstart/quickstart-aws-vpc.git ./submodules/quickstart-aws-vpc
+    git submodule add -f https://github.com/aws-quickstart/quickstart-linux-bastion.git ./submodules/quickstart-linux-bastion
+    git submodule add -f https://github.com/aws-quickstart/quickstart-amazon-eks-cluster-resource-provider.git ./functions/source/EksClusterResource
+    git submodule add -f https://github.com/aws-quickstart/quickstart-helm-resource-provider.git ./functions/source/HelmReleaseResource
+    git submodule add -f https://github.com/aws-quickstart/quickstart-eks-snyk.git ./submodules/quickstart-eks-snyk
+    git submodule add -f https://github.com/aws-quickstart/quickstart-eks-newrelic-infrastructure.git ./submodules/quickstart-eks-newrelic-infrastructure
+    git submodule add -f https://github.com/aws-quickstart/quickstart-kubernetes-resource-provider.git ./functions/source/kubernetesResources
+    git submodule add -f https://github.com/aws-quickstart/quickstart-documentation-base-common.git ./docs/boilerplate
+    git submodule add -f https://github.com/aws-quickstart/quickstart-amazon-eks-nodegroup.git ./submodules/quickstart-amazon-eks-nodegroup
 }
 
 merge() {

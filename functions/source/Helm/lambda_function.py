@@ -153,7 +153,7 @@ def helm_init(event):
         raise Exception("KubeConfigPath must be a valid s3 URI (eg.: s3://my-bucket/my-key.txt")
     bucket, key, kms_context = get_config_details(event)
     create_kubeconfig(bucket, key, kms_context)
-    run_command("helm --home /tmp/.helm init --client-only")
+    run_command("helm --home /tmp/.helm init --stable-repo-url=https://charts.helm.sh/stable --client-only")
     repo_name = ''
     if 'Chart' in event['ResourceProperties'].keys():
         repo_name = event['ResourceProperties']['Chart'].split('/')[0]

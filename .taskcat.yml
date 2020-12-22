@@ -1,0 +1,26 @@
+general:
+  auth:
+    default: dev
+project:
+  name: quickstart-solodev-eks
+  owner: help@solodev.com
+  regions:
+  - us-east-1
+  template: templates/solodev-eks.yaml
+  parameters:
+    QSS3BucketName: "$[taskcat_autobucket]"
+    AvailabilityZone: "$[taskcat_genaz_2]"
+    InstanceCount: "1"
+    DatabasePassword: "$[taskcat_genpass_32]"
+    AdminPassword: "$[taskcat_genpass_32]"
+    GPGPW: "$[taskcat_genpass_32]"
+    FQDN: ""
+    CertificateArn: ""
+    DeletionPolicy: "Delete"
+  lambda_source_path: functions/source
+  lambda_zip_path: functions/packages
+  build_submodules: true
+tests:
+  defaults:
+    parameters:
+      AvailabilityZones: $[taskcat_genaz_3]

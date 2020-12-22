@@ -2,6 +2,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Deploys an EKS cluster in a new VPC (qs-1p7nknoht)
 Metadata:
   LintSpellExclude:
+    - https://support.snyk.io/hc/en-us/articles/360003916158-Install-the-Snyk-controller-with-Helm
     - Kubernetes
     - ARNs
     - Resource Names
@@ -15,6 +16,10 @@ Metadata:
     - Disabled
     - Prometheus
     - Encrypt
+    - Fargate
+    - namespace
+    - Snyk
+    - Security
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -38,6 +43,7 @@ Metadata:
       - Label:
           default: Amazon EKS configuration
         Parameters:
+          - EKSClusterName
           - NodeInstanceType
           - NumberOfNodes
           - MaxNumberOfNodes
@@ -45,6 +51,7 @@ Metadata:
           - NodeVolumeSize
           - ManagedNodeGroup
           - ManagedNodeGroupAMIType
+          - MangedNodeGroupLabel
           - AdditionalEKSAdminUserArn
           - AdditionalEKSAdminRoleArn
           - KubernetesVersion
@@ -54,9 +61,23 @@ Metadata:
           - EKSClusterLoggingTypes
           - EKSEncryptSecrets
           - EKSEncryptSecretsKmsKeyArn
+          - FargateNamespaces
+          - FargateLabels
+          - IamOidcProvider
+      - Label:
+          default: Snyk monitor [APN security partner]
+        Parameters:
+          - SnykIntegration
+          - SnykIntegrationId
+      - Label:
+          default: New Relic infrastructure [APN monitoring partner]
+        Parameters:
+          - NewRelicIntegration
+          - NewRelicLicenseKey
       - Label:
           default: Optional Kubernetes add-ins
         Parameters:
+          - ALBIngressController
           - ClusterAutoScaler
           - EfsStorageClass
           - EfsPerformanceMode
@@ -111,6 +132,8 @@ Metadata:
         default: Managed node group
       ManagedNodeGroupAMIType:
         default: Managed node group AMI type
+      MangedNodeGroupLabel:
+        default: Managed node group label
       AdditionalEKSAdminUserArn:
         default: Additional EKS admin ARN (IAM user)
       AdditionalEKSAdminRoleArn:
@@ -147,6 +170,24 @@ Metadata:
         default: Encrypt EKS secrets
       EKSEncryptSecretsKmsKeyArn:
         default: Encrypt EKS secrets KMS key ARN
+      ALBIngressController:
+        default: ALB ingress controller
+      FargateNamespaces:
+        default: Fargate namespaces
+      FargateLabels:
+        default: Fargate labels
+      IamOidcProvider:
+        default: IAM OIDC provider
+      EKSClusterName:
+        default: EKS cluster name
+      SnykIntegrationId:
+        default: Snyk integration ID
+      SnykIntegration:
+        default: Snyk integration
+      NewRelicIntegration:
+        default: New Relic integration
+      NewRelicLicenseKey:
+        default: New Relic license key
 Parameters:
   AvailabilityZones:
     Description: The list of Availability Zones to use for the subnets in the VPC. Three
@@ -285,18 +326,37 @@ Parameters:
       - t3.large
       - t3.xlarge
       - t3.2xlarge
+      - t3a.nano
+      - t3a.micro
+      - t3a.small
+      - t3a.medium
+      - t3a.large
+      - t3a.xlarge
+      - t3a.2xlarge
       - m5.large
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
       - m5.12xlarge
       - m5.24xlarge
+      - m5a.large
+      - m5a.xlarge
+      - m5a.2xlarge
+      - m5a.4xlarge
+      - m5a.12xlarge
+      - m5a.24xlarge
       - c5.large
       - c5.xlarge
       - c5.2xlarge
       - c5.4xlarge
       - c5.9xlarge
       - c5.18xlarge
+      - c5a.large
+      - c5a.xlarge
+      - c5a.2xlarge
+      - c5a.4xlarge
+      - c5a.12xlarge
+      - c5a.24xlarge
       - i3.large
       - i3.xlarge
       - i3.2xlarge
@@ -314,6 +374,12 @@ Parameters:
       - r5.4xlarge
       - r5.12xlarge
       - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.12xlarge
+      - r5a.24xlarge
       - r5d.large
       - r5d.xlarge
       - r5d.2xlarge
@@ -355,10 +421,14 @@ Parameters:
     AllowedValues: [ "AL2_x86_64", "AL2_x86_64_GPU", ""]
     Default: "AL2_x86_64"
     Type: String
+  MangedNodeGroupLabel:
+    Description: Add a custom name label to the managed node group nodes. If you dont do this then a default one will be added for you.
+    Type: String
+    Default: ''
   KubernetesVersion:
     Type: String
-    AllowedValues: [ "1.13", "1.14", "1.15" ]
-    Default: "1.15"
+    AllowedValues: [ "1.13", "1.14", "1.15", "1.16" ]
+    Default: "1.16"
     Description: The Kubernetes control plane version.
   LambdaZipsBucketName:
     Description: '[OPTIONAL] The name of the S3 bucket where the Lambda zip files should be placed. If you leave this parameter blank, an S3 bucket will be created.'
@@ -387,8 +457,9 @@ Parameters:
   EfsProvisionedThroughputInMibps:
     Type: Number
     MinValue: 0
+    MaxValue: 1024
     Default: 0
-    Description: Set to 0 if EfsThroughputMode is set to bursting. Only has an effect when EfsStorageClass is enabled.
+    Description: Set to 0 if EfsThroughputMode is set to bursting. Only has an effect when EfsStorageClass is enabled. If using provisioned throughput, value must be between 0-1024.
   MonitoringStack:
     Type: String
     AllowedValues: [ "Prometheus + Grafana", "None" ]
@@ -404,21 +475,66 @@ Parameters:
     AllowedValues: [ "Enabled", "Disabled" ]
     Default: "Enabled"
     Description: "Skip creating a bastion host by setting this is set to Disabled."
+  ALBIngressController:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
+    Description: "Set this to Enabled to deploy the ALB ingress controller."
+  FargateNamespaces:
+    Type: String
+    Default: ""
+    Description: "[OPTIONAL] Comma separated list of namespaces that Fargate should be enabled for."
+  FargateLabels:
+    Type: String
+    Default: ""
+    Description: >-
+      [OPTIONAL] Comma separated list of key=value pod labels. Requires at least one Fargate namespace to be specified.
+      For a pod to be run on Fargate, all labels must match and it must be running in a namespace included in
+      FargateNamespaces.
+  IamOidcProvider:
+    Type: String
+    AllowedValues: [ "Enabled", "Disabled" ]
+    Default: "Disabled"
+    Description: Enables IAM roles for Kubernetes service accounts.
+  EKSClusterName:
+    Type: String
+    Default: ""
+    Description: "[OPTIONAL] Name for the EKS cluster, if left blank one will be auto-generated. Must be unique within the AWS Region."
+  SnykIntegrationId:
+    Type: String
+    AllowedPattern: '^[a-z0-9-]{36}$|^$'
+    Default: ""
+    Description: '[Optional] Snyk Kubernetes integration ID. If Snyk is enabled, this must be provided. For more information see https://support.snyk.io/hc/en-us/articles/360003916158-Install-the-Snyk-controller-with-Helm .'
+  SnykIntegration:
+    Type: String
+    AllowedValues: [Enabled, Disabled]
+    Default: Disabled
+    Description: "Snyk security monitor integration. For more information see https://github.com/aws-quickstart/quickstart-eks-snyk/ ."
+  NewRelicLicenseKey:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: '[Optional] New Relic infrastructure license key. If New Relic is enabled, this must be provided. For more information see https://docs.newrelic.com/docs/accounts/install-new-relic/account-setup/license-key .'
+  NewRelicIntegration:
+    Type: String
+    AllowedValues: [Enabled, Disabled]
+    Default: Disabled
+    Description: "New Relic infrastructure monitoring integration. For more information see https://github.com/aws-quickstart/quickstart-eks-newrelic-infrastructure/ ."
 Rules:
+  LablesNeedNamespaces:
+    RuleCondition: !Not
+      - !Equals [ !Ref FargateLabels, "" ]
+    Assertions:
+      - AssertDescription: You must specify at least one Fargate namespace in order to enable fargate.
+        Assert: !Not
+          - !Equals [ !Ref FargateNamespaces, "" ]
   EKSVersion_ManagedNodeGroup:
     RuleCondition: !Equals [ !Ref 'ManagedNodeGroup', 'yes' ]
     Assertions:
       - AssertDescription: To use Managed Node Groups you must use EKS version 1.14 or higher
         Assert: !Contains
-          - [ '1.15', '1.14' ]
+          - [ '1.16', '1.15', '1.14' ]
           - !Ref 'KubernetesVersion'
-  ClusterAutoScalerVerification:
-    RuleCondition: !Equals [ !Ref 'ManagedNodeGroup', 'yes' ]
-    Assertions:
-      - AssertDescription: To use Cluster AutoScaler you should not use Managed Node Groups
-        Assert: !Contains
-          - - 'Disabled'
-          - !Ref 'ClusterAutoScaler'
 Conditions:
   3AZDeployment: !Equals [!Ref NumberOfAZs, "3"]
   2AZDeployment: !Or
@@ -486,6 +602,7 @@ Resources:
         NodeVolumeSize: !Ref NodeVolumeSize
         ManagedNodeGroup: !Ref ManagedNodeGroup
         ManagedNodeGroupAMIType: !Ref ManagedNodeGroupAMIType
+        MangedNodeGroupLabel: !Ref MangedNodeGroupLabel
         LambdaZipsBucketName: !Ref LambdaZipsBucketName
         NodeInstanceType: !Ref NodeInstanceType
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
@@ -506,13 +623,16 @@ Resources:
         EKSClusterLoggingTypes: !Join [ ',', !Ref 'EKSClusterLoggingTypes' ]
         EKSEncryptSecrets: !Ref EKSEncryptSecrets
         EKSEncryptSecretsKmsKeyArn: !Ref EKSEncryptSecretsKmsKeyArn
+        ProvisionALBIngressController: !Ref ALBIngressController
+        FargateLabels: !Ref FargateLabels
+        FargateNamespaces: !Ref FargateNamespaces
+        IamOidcProvider: !Ref IamOidcProvider
+        EKSClusterName: !Ref EKSClusterName
+        SnykIntegrationId: !Ref SnykIntegrationId
+        SnykIntegration: !Ref SnykIntegration
+        NewRelicLicenseKey: !Ref NewRelicLicenseKey
+        NewRelicIntegration: !Ref NewRelicIntegration
 Outputs:
-  HelmLambdaArn:
-    Value: !GetAtt EKSStack.Outputs.HelmLambdaArn
-  KubeManifestLambdaArn:
-    Value: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
-  KubeGetLambdaArn:
-    Value: !GetAtt EKSStack.Outputs.KubeGetLambdaArn
   EKSClusterName:
     Value: !GetAtt EKSStack.Outputs.EKSClusterName
   BastionIP:

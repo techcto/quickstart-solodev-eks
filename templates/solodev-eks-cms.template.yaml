@@ -221,7 +221,6 @@ Resources:
       Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
-      Version: !Ref AppVersion
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         solodev:

@@ -192,7 +192,7 @@ Resources:
       Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
-      Version: ${AppVersion}
+      Version: !Ref AppVersion
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         wordpress:
@@ -221,7 +221,7 @@ Resources:
       Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
-      Version: ${AppVersion}
+      Version: !Ref AppVersion
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         solodev:

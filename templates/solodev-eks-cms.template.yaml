@@ -224,6 +224,11 @@ Resources:
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         solodev:
+          image:
+            registry: "docker.io"
+            repository: "solodev/cms"
+            tag: latest
+            pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}
             appUser: ${AdminUser}

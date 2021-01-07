@@ -53,6 +53,7 @@ Metadata:
           - ProvisionAccessToken
           - ProvisionCMS
           - DefaultCMS
+          - AppVersion
           - WebsiteUrl
       - Label:
           default: Optional Kubernetes add-ins
@@ -130,6 +131,8 @@ Metadata:
         default: Website URL
       DefaultCMS:
         default: Default CMS
+      AppVersion:
+        default: App Version
 Parameters:
   KeyPairName:
     Description: The name of an existing public/private key pair, which allows you
@@ -387,6 +390,10 @@ Parameters:
     AllowedValues: [ "", "charts/solodev-cms", "charts/wordpress" ]
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
+  AppVersion:
+    Type: String
+    Default: ""
+    Description: "App version"
   AdminEmail:
     Type: String
     Default: ""
@@ -576,6 +583,7 @@ Resources:
         DefaultCMS: !Ref DefaultCMS
         AdminEmail: !Ref AdminEmail
         WebsiteUrl: !Ref WebsiteUrl
+        AppVersion: !Ref AppVersion
   LetsEncryptStack:
     Condition: EnableCMS
     Type: AWS::CloudFormation::Stack

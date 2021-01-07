@@ -143,6 +143,7 @@ Resources:
                   - ec2:DescribeSubnets
                   - ec2:DescribeVpcs
                   - lambda:InvokeFunction
+                  - s3:GetObject
                 Resource: "*"
               - Effect: Allow
                 Action:
@@ -341,6 +342,34 @@ Resources:
                   - 'ec2:DetachNetworkInterface'
                 Effect: Allow
                 Resource: "*"
+  CleanupLambdasRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: ['sts:AssumeRole']
+            Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: LambdaRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Effect: Allow
+                Resource: !Sub "arn:${AWS::Partition}:logs:*:*:*"
+              - Action:
+                  - 'lambda:ListFunctions'
+                  - 'lambda:UpdateFunctionConfiguration'
+                  - 'lambda:DeleteFunction'
+                Effect: Allow
+                Resource: "*"
   GetCallerArnRole:
     Type: AWS::IAM::Role
     Properties:
@@ -367,34 +396,6 @@ Resources:
                   - 'cloudformation:DescribeStacks'
                   - 'cloudtrail:LookupEvents'
                 Effect: Allow
-                Resource: "*"
-  LogDeliveryRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-              - cloudformation.amazonaws.com
-              - resources.cloudformation.amazonaws.com
-            Action: sts:AssumeRole
-      Path: "/"
-      Policies:
-        - PolicyName: ResourceTypePolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - "logs:CreateLogGroup"
-                  - "logs:CreateLogStream"
-                  - "logs:DescribeLogGroups"
-                  - "logs:DescribeLogStreams"
-                  - "logs:PutLogEvents"
-                  - "cloudwatch:ListMetrics"
-                  - "cloudwatch:PutMetricData"
                 Resource: "*"
   RegisterTypeRole:
     Type: AWS::IAM::Role
@@ -437,18 +438,94 @@ Resources:
                   - "sts:GetCallerIdentity"
                   - "s3:GetObject"
                 Resource: "*"
-  ExecutionRole:
+  RegisterCustomResourceRole:
     Type: AWS::IAM::Role
     Properties:
-      MaxSessionDuration: 8400
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
-              Service: resources.cloudformation.amazonaws.com
+              Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Path: "/"
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: S3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                Resource: !Sub 'arn:${AWS::Partition}:s3:::${LambdaZipsBucketName}/functions/packages/*'
+        - PolicyName: ResourceTypePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "lambda:*"
+                  - "iam:PassRole"
+                  - "iam:CreateRole"
+                  - "iam:CreatePolicy"
+                  - "iam:ListPolicyVersions"
+                  - "iam:DeletePolicyVersion"
+                  - "iam:CreatePolicyVersion"
+                  - "iam:AttachRolePolicy"
+                  - "ssm:GetParameter"
+                  - "ssm:PutParameter"
+                  - "sts:GetCallerIdentity"
+                  - "s3:GetObject"
+                Resource: "*"
+  NodeSGRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: lambda-copier
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - eks:DescribeNodeGroup
+                Resource: '*'
+  FargateExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: eks-fargate-pods.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy'
+  FargateProfileRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       Policies:
         - PolicyName: ResourceTypePolicy
           PolicyDocument:
@@ -456,16 +533,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - "ec2:*"
-                  - "eks:CreateCluster"
-                  - "eks:DeleteCluster"
-                  - "eks:DescribeCluster"
-                  - "eks:ListClusters"
-                  - "eks:UpdateClusterConfig"
-                  - "eks:UpdateClusterVersion"
-                  - "iam:*"
-                  - "kms:*"
-                  - "lambda:*"
+                  - "eks:*"
+                  - "iam:PassRole"
+                  - "iam:GetRole"
+                  - "iam:CreateServiceLinkedRole"
+                  - "ec2:DescribeSubnets"
                 Resource: "*"
 Outputs:
   DeleteBucketContentsRoleArn:
@@ -488,13 +560,19 @@ Outputs:
     Value: !GetAtt CleanupLoadBalancersRole.Arn
   CleanupSecurityGroupDependenciesRoleArn:
     Value: !GetAtt CleanupSecurityGroupDependenciesRole.Arn
+  CleanupLambdasRoleArn:
+    Value: !GetAtt CleanupLambdasRole.Arn
   GetCallerArnRoleArn:
     Value: !GetAtt GetCallerArnRole.Arn
   CreateVpcRoleRoleArn:
     Value: !GetAtt CreateVpcRoleRole.Arn
-  ExecutionRoleArn:
-    Value: !GetAtt ExecutionRole.Arn
   RegisterTypeRoleArn:
     Value: !GetAtt RegisterTypeRole.Arn
-  LogDeliveryRoleArn:
-    Value: !GetAtt LogDeliveryRole.Arn
+  RegisterCustomResourceRoleArn:
+    Value: !GetAtt RegisterCustomResourceRole.Arn
+  NodeSGRoleArn:
+    Value: !GetAtt NodeSGRole.Arn
+  FargateExecutionRoleArn:
+    Value: !GetAtt FargateExecutionRole.Arn
+  FargateProfileRoleArn:
+    Value: !GetAtt FargateProfileRole.Arn

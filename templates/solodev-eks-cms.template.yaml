@@ -151,38 +151,8 @@ Parameters:
 
   AppVersion:
     Type: String
-    Default: "latest"
+    Default: ""
     Description: "CMS version"
-
-  SolodevRegistry:
-    Type: String
-    Default: "117940112483.dkr.ecr.us-east-1.amazonaws.com/0c908dc0-e52e-4d48-bf4c-9e883d405d92/cg-1018795255"
-    Description: "Solodev Registry"
-
-  SolodevRepo:
-    Type: String
-    Default: "solodev-cms"
-    Description: "Solodev Repo"
-
-  ApacheRepo:
-    Type: String
-    Default: "solodev-apache"
-    Description: "Apache Repo"
-
-  MysqlRepo:
-    Type: String
-    Default: "mariadb"
-    Description: "Mysql Repo"
-
-  MongoRepo:
-    Type: String
-    Default: "techcto/mongo"
-    Description: "Mongo Repo"
-
-  RedisRepo:
-    Type: String
-    Default: "techcto/redis"
-    Description: "Redis Repo"
 
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
@@ -222,14 +192,10 @@ Resources:
       Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
+      Version: !Ref AppVersion
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         wordpress:
-          image:
-            registry: docker.io
-            repository: solodev/wordpress
-            tag: ${AppVersion}
-            pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}
             appUser: ${AdminUser}
@@ -259,9 +225,9 @@ Resources:
         serviceAccountName: "${ServiceRoleName}"
         solodev:
           image:
-            registry: ${SolodevRegistry}
-            repository: ${SolodevRepo}
-            tag: ${AppVersion}
+            registry: "docker.io"
+            repository: "solodev/cms"
+            tag: latest
             pullPolicy: IfNotPresent
           settings:
             appSecret: ${AppSecret}
@@ -270,7 +236,7 @@ Resources:
             appEmail: ${AdminEmail}
             websiteUrl: ${WebsiteUrl}
             websiteTheme: ${WebsiteThemeUrl}
-            websiteThemeValues: ${WebsiteThemeValues}
+            websiteThemeValues: "${WebsiteThemeValues}"
             dbName: ${DatabaseName}
             dbPassword: ${DatabasePassword}
             clientId: ${ClientId}
@@ -278,28 +244,6 @@ Resources:
           pullSecret: solodev
           domainName: ${DomainName}
           clusterZone: ${ClusterZone}
-        ui:
-          image:
-            registry: ${SolodevRegistry}
-            repository: ${ApacheRepo}
-            tag: ${AppVersion}
-        mysql:
-          image:
-            registry: ${SolodevRegistry}
-            repository: ${MysqlRepo}
-            tag: ${AppVersion}
-        mongo:
-          image:
-            registry: ${SolodevRegistry}
-            repository: ${MongoRepo}
-            tag: ${AppVersion}
-          settings:
-            password: ${DatabasePassword}
-        redis:
-          image:
-            registry: ${SolodevRegistry}
-            repository: ${RedisRepo}
-            tag: ${AppVersion}
 
 Outputs:
     

@@ -21,13 +21,15 @@ try:
 except Exception as init_exception:
     helper.init_failure(init_exception)
 
+
 def s3_get(url):
     try:
-        return str(s3_client.get_object(
+        return s3_client.get_object(
             Bucket=url.split('/')[2], Key="/".join(url.split('/')[3:])
-        )['Body'].read())
+        )['Body'].read().decode('utf8')
     except Exception as e:
         raise RuntimeError(f"Failed to fetch CustomValueYaml {url} from S3. {e}")
+
 
 def http_get(url):
     try:
@@ -40,6 +42,7 @@ def http_get(url):
             f"{response.reason}"
         )
     return response.text
+
 
 def run_command(command):
     retries = 0
@@ -236,6 +239,18 @@ def handler_init(event):
     return physical_resource_id, manifest_file
 
 
+def stabilize_job(namespace, name):
+    while True:
+        response = json.loads(run_command(f"kubectl get job/{name} -n {namespace} -o json"))
+        for condition in response.get('status', {}).get('conditions', []):
+            if condition.get("status") == "True":
+                if condition.get('type') == "Complete":
+                    return
+                if condition.get('type') == "Failed":
+                    raise Exception(f"Job failed {condition.get('reason')} {condition.get('message')}")
+        sleep(5)
+
+
 @helper.create
 def create_handler(event, _):
     physical_resource_id,  manifest_file = handler_init(event)
@@ -243,6 +258,8 @@ def create_handler(event, _):
         return physical_resource_id
     outp = run_command("kubectl create --save-config -o json -f %s" % manifest_file)
     helper.Data = build_output(json.loads(outp))
+    if helper.Data["selfLink"].startswith('/apis/batch') and 'cronjobs' not in helper.Data["selfLink"]:
+        stabilize_job(helper.Data["namespace"], helper.Data["name"])
     return helper.Data["selfLink"]
 
 

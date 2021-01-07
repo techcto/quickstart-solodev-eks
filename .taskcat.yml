@@ -5,6 +5,8 @@ project:
   name: quickstart-solodev-eks
   owner: help@solodev.com
   regions:
+  - eu-north-1
+  - me-south-1
   - us-east-1
   template: templates/solodev-eks-master-existing-vpc.template.yaml
   parameters:

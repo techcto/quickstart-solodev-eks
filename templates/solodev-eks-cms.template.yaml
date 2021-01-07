@@ -244,6 +244,11 @@ Resources:
           pullSecret: solodev
           domainName: ${DomainName}
           clusterZone: ${ClusterZone}
+        ui:
+          image:
+            registry: "docker.io"
+            repository: "solodev/cms-apache"
+            tag: latest
 
 Outputs:
     

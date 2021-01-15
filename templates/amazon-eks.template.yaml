@@ -740,8 +740,6 @@ Resources:
       Weave:
         Enable: "true"
 Outputs:
-  HelmLambdaArn:
-    Value: !GetAtt FunctionStack.Outputs.HelmLambdaArn
   KubeManifestLambdaArn:
     Value: !GetAtt FunctionStack.Outputs.KubeManifestLambdaArn
   KubeGetLambdaArn:

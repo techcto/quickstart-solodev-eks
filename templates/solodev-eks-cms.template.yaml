@@ -12,7 +12,6 @@ Metadata:
         Parameters: 
           - ClusterName
           - WebStackArn
-          - HelmLambdaArn
       - 
         Label: 
           default: "Optional: DNS"
@@ -107,9 +106,6 @@ Parameters:
   WebStackArn:
     Type: String
 
-  HelmLambdaArn:
-    Type: String
-
   ClusterName:
     Type: String
 
@@ -186,7 +182,7 @@ Resources:
     Type: "Custom::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref HelmLambdaArn
+      ServiceToken: !Ref WebStackArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
       Chart: !Ref DefaultCMS
@@ -215,7 +211,7 @@ Resources:
     Type: "Custom::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref HelmLambdaArn
+      ServiceToken: !Ref WebStackArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
       Chart: !Ref DefaultCMS

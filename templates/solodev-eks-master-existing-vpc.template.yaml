@@ -550,7 +550,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   ExternalDNSStack:
     Condition: EnableExternalDNS
     Type: AWS::CloudFormation::Stack
@@ -561,7 +561,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
   ExternalDNSWaitHandle: 
     Condition: EnableExternalDNS
     DependsOn: ExternalDNSStack
@@ -577,7 +577,6 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
         AdminPassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DatabasePassword: !GetAtt EKSStack.Outputs.EKSClusterName
         DefaultCMS: !Ref DefaultCMS
@@ -594,7 +593,7 @@ Resources:
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
         AdminEmail: !Ref AdminEmail
   DashboardWaitHandle: 
     Type: "AWS::CloudFormation::WaitConditionHandle"
@@ -616,7 +615,6 @@ Resources:
       Parameters:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
-        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
   AccessTokenStack:
     DependsOn: DashboardStack
     Condition: EnableAccessToken
@@ -630,8 +628,6 @@ Resources:
         ClusterName: !GetAtt EKSStack.Outputs.EKSClusterName
         WebStackArn: !GetAtt EKSStack.Outputs.WebStackArn
 Outputs:
-  HelmLambdaArn:
-    Value: !GetAtt EKSStack.Outputs.HelmLambdaArn
   KubeManifestLambdaArn:
     Value: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
   KubeGetLambdaArn:

@@ -400,17 +400,12 @@ Resources:
           logger = logging.getLogger(__name__)
           def copy_objects(source_bucket, dest_bucket, prefix, objects):
               s3 = boto3.client('s3')
-              try:
-                logging.info(f'source_bucket: {source_bucket}\ndest_bucket: {dest_bucket}\prefix: {prefix}')
-                for o in objects:
-                    key = prefix + o
-                    copy_source = {'Bucket': source_bucket, 'Key': key}
-                    logging.info(f'copy_source: {copy_source}\ndest_bucket: {dest_bucket}\nkey: {key}')
-                    s3.copy_object(CopySource=copy_source, Bucket=dest_bucket, Key=key)
-              except Exception:
-                logging.error('Error', exc_info=True)
-                logging.info(f'source_bucket: {source_bucket}\ndest_bucket: {dest_bucket}\prefix: {prefix}')
-                pass
+              logging.info(f'source_bucket: {source_bucket}\ndest_bucket: {dest_bucket}\prefix: {prefix}')
+              for o in objects:
+                  key = prefix + o
+                  copy_source = {'Bucket': source_bucket, 'Key': key}
+                  logging.info(f'copy_source: {copy_source}\ndest_bucket: {dest_bucket}\nkey: {key}')
+                  s3.copy_object(CopySource=copy_source, Bucket=dest_bucket, Key=key)
           def delete_objects(bucket, prefix, objects):
               s3 = boto3.client('s3')
               objects = {'Objects': [{'Key': prefix + o} for o in objects]}
@@ -429,6 +424,7 @@ Resources:
                       copy_objects(event['ResourceProperties']['SourceBucket'], event['ResourceProperties']['DestBucket'],
                                    event['ResourceProperties']['Prefix'], event['ResourceProperties']['Objects'])
               except Exception:
+                  logger.debug(event) 
                   logging.error('Unhandled exception', exc_info=True)
                   status = cfnresponse.FAILED
               finally:

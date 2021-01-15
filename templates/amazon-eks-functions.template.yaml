@@ -415,11 +415,7 @@ Resources:
           def handler(event, context):
               logger.debug(event)
               status = cfnresponse.SUCCESS
-              except Exception:
-                  logging.error('Unhandled exception', exc_info=True)
-                  status = cfnresponse.FAILED
-              finally:
-                  cfnresponse.send(event, context, status, {}, None)
+              cfnresponse.send(event, context, status, {}, None)
   NodeSGFunction:
     Type: AWS::Lambda::Function
     Properties:

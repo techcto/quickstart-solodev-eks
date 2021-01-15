@@ -414,6 +414,7 @@ Resources:
                   pass
           def handler(event, context):
               logger.debug(event)
+              logger.debug(context)
               status = cfnresponse.SUCCESS
               cfnresponse.send(event, context, status, {}, None)
   NodeSGFunction:

@@ -400,7 +400,6 @@ Resources:
           logger = logging.getLogger(__name__)
           def copy_objects(source_bucket, dest_bucket, prefix, objects):
               s3 = boto3.client('s3')
-              logging.info(f'source_bucket: {source_bucket}\ndest_bucket: {dest_bucket}\prefix: {prefix}')
               for o in objects:
                   key = prefix + o
                   copy_source = {'Bucket': source_bucket, 'Key': key}
@@ -416,15 +415,7 @@ Resources:
           def handler(event, context):
               logger.debug(event)
               status = cfnresponse.SUCCESS
-              try:
-                  if event['RequestType'] == 'Delete':
-                      delete_objects(event['ResourceProperties']['DestBucket'], event['ResourceProperties']['Prefix'],
-                                     event['ResourceProperties']['Objects'])
-                  else:
-                      copy_objects(event['ResourceProperties']['SourceBucket'], event['ResourceProperties']['DestBucket'],
-                                   event['ResourceProperties']['Prefix'], event['ResourceProperties']['Objects'])
               except Exception:
-                  logger.debug(event) 
                   logging.error('Unhandled exception', exc_info=True)
                   status = cfnresponse.FAILED
               finally:

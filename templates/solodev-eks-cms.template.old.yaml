@@ -1,9 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
-
 Description: "Deploys the Solodev CMS helm chart into an existing kubernetes cluster (qs-1qde66ffn)"
-
 Metadata: 
-
   AWS::CloudFormation::Interface: 
     ParameterGroups: 
       - 
@@ -12,6 +9,7 @@ Metadata:
         Parameters: 
           - ClusterName
           - WebStackArn
+          - HelmLambdaArn
       - 
         Label: 
           default: "Optional: DNS"
@@ -44,16 +42,13 @@ Metadata:
         Parameters: 
           - RepoUrl
           - DefaultCMS
-
 Parameters:
-
   AdminUser:
       Description: The solodev admin username
       Type: String
       Default: 'solodev'
       AllowedPattern: .+
       ConstraintDescription: Please set admin username
-
   AdminPassword: 
       NoEcho: true
       Description: The solodev admin password
@@ -62,24 +57,19 @@ Parameters:
       MaxLength: 41
       AllowedPattern: .+
       ConstraintDescription: Please set admin password
-
   AdminEmail:
     Type: String
-
   WebsiteUrl:
     Type: String
     Default: ""
-
   WebsiteThemeUrl:
     Type: String
     Default: ""
     Description: "Initial Website Theme URL"
-
   WebsiteThemeValues:
     Type: String
     Default: ""
     Description: "Initial Website Theme Values"
-
   DatabaseName:
       Description: The solodev database name
       Type: String
@@ -88,7 +78,6 @@ Parameters:
       AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
       ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
       Default: 'solodev'
-
   DatabasePassword:
       NoEcho: true
       Description: The database root password
@@ -97,40 +86,33 @@ Parameters:
       MaxLength: 41
       AllowedPattern: .+
       ConstraintDescription: Please set database root password
-
   AppSecret:
     Type: String
     Description: Secret Key for App Encryption
     Default: 'c5d3adbb98f43thc0d12f0cc8fbcd7f8'
-
   WebStackArn:
     Type: String
-
+  HelmLambdaArn:
+    Type: String
   ClusterName:
     Type: String
-
   ServiceRoleName:
     Type: String
     Default: "aws-serviceaccount"
-
   Namespace:
     Type: String
     Default: "solodev"
-
   RepoUrl:
     Type: String
     Default: "https://raw.githubusercontent.com/techcto/charts/master/"
-
   DomainName:
     Description: This is the DNS Zone for all clusters
     Type: String
     Default: ""
-
   ClusterZone:
     Description: This is the DNS Zone that for a single cluster
     Type: String
     Default: ""
-
   ClientId:
     Type: String
     Default: ""
@@ -138,18 +120,15 @@ Parameters:
   ClientSecret:
     Type: String
     Default: ""
-
   DefaultCMS:
     Type: String
     AllowedValues: [ "charts/solodev-cms", "charts/wordpress" ]
     Default: "charts/wordpress"
     Description: "Choose preferred CMS"
-
   AppVersion:
     Type: String
     Default: ""
     Description: "CMS version"
-
 Conditions:
   IsDefault: !Equals [!Ref DomainName, '']
   NotDefault:
@@ -162,9 +141,7 @@ Conditions:
   installTheme: !Equals [!Ref WebsiteThemeUrl, '']
   InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms']
   InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
-
 Resources:
-
   Marketplace:
     Type: "Custom::WebStack"
     Version: '1.0'
@@ -175,13 +152,13 @@ Resources:
       ServiceRoleName: !Ref ServiceRoleName
       Marketplace:
         Enable: "true"
-
   Wordpress:
     Condition: InstallWordpress
     DependsOn: Marketplace
-    Type: "AWSQS::Kubernetes::Helm"
+    Type: "Custom::Helm"
     Version: '1.0'
     Properties:
+      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
       Chart: !Ref DefaultCMS
@@ -203,13 +180,13 @@ Resources:
             dbPassword: ${DatabasePassword}
           domainName: "${DomainName}"
           clusterZone: "${ClusterZone}"
-
   SolodevCMS:
     Condition: InstallSolodev
     DependsOn: Marketplace
-    Type: "AWSQS::Kubernetes::Helm"
+    Type: "Custom::Helm"
     Version: '1.0'
     Properties:
+      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
       Chart: !Ref DefaultCMS
@@ -243,31 +220,25 @@ Resources:
             registry: "docker.io"
             repository: "solodev/cms-apache"
             tag: latest
-
 Outputs:
     
     AdminUsername: 
         Description: Solodev admin username.
         Value: !Ref AdminUser
-    
     AdminPassword: 
         Description: Solodev admin password.
         Value: !Ref AdminPassword
-
     AdminUrl: 
         Description: Point your DNS to this CNAME.
         Value: !Join ["", [ !Ref "AWS::StackName", ".", !Ref ClusterZone ]]
-
     WebsiteUrl: 
         Condition: AddWebsite
         Description: The public website address
         Value: !Ref WebsiteUrl
-
     WebsiteThemeUrl: 
         Condition: installTheme
         Description: Installed website theme url
         Value: !Ref WebsiteThemeUrl
-
     WebsiteThemeValues: 
         Condition: installTheme
         Description: Installed website theme values

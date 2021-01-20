@@ -12,14 +12,10 @@ Metadata:
         Parameters: 
           - ClusterName
           - WebStackArn
-          - HelmLambdaArn
 
 Parameters:
 
   WebStackArn:
-    Type: String
-
-  HelmLambdaArn:
     Type: String
 
   ClusterName:
@@ -28,10 +24,9 @@ Parameters:
 Resources:
 
   MetricsServer:
-    Type: "Custom::Helm"
+    Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       Namespace: metrics
       Chart: stable/metrics-server

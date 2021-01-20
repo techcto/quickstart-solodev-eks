@@ -11,16 +11,12 @@ Metadata:
           default: "Config"
         Parameters: 
         Parameters: 
-          - HelmLambdaArn
           - ClusterName
           - CertManagerRepoUrl
           - LetsEncryptRepoUrl
           - AdminEmail
 
 Parameters:
-
-  HelmLambdaArn:
-    Type: String
 
   ClusterName:
     Type: String
@@ -39,10 +35,9 @@ Parameters:
 Resources:
 
   CertManager:
-    Type: "Custom::Helm"
+    Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref CertManagerRepoUrl
       Chart: jetstack/cert-manager
@@ -53,10 +48,9 @@ Resources:
 
   # LetsEncrypt:
   #   DependsOn: CertManager
-  #   Type: "Custom::Helm"
+  #   Type: "AWSQS::Kubernetes::Helm"
   #   Version: '1.0'
   #   Properties:
-  #     ServiceToken: !Ref HelmLambdaArn
   #     ClusterName: !Ref ClusterName
   #     RepoUrl: !Ref LetsEncryptRepoUrl
   #     Chart: charts/lets-encrypt

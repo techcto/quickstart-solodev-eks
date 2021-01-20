@@ -10,13 +10,9 @@ Metadata:
         Label: 
           default: "EKS Cluster"
         Parameters: 
-          - HelmLambdaArn
           - ClusterName
 
 Parameters:
-
-  HelmLambdaArn:
-    Type: String
 
   ClusterName:
     Type: String
@@ -24,10 +20,9 @@ Parameters:
 Resources:
 
   ExternalDNS:
-    Type: "Custom::Helm"
+    Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       Namespace: external-dns
       Chart: stable/external-dns

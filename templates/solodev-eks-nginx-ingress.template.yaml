@@ -11,13 +11,9 @@ Metadata:
           default: "Lambda Function"
         Parameters: 
         Parameters: 
-          - HelmLambdaArn
           - ClusterName
 
 Parameters:
-
-  HelmLambdaArn:
-    Type: String
 
   ClusterName:
     Type: String
@@ -25,10 +21,9 @@ Parameters:
 Resources:
 
   NginxIngress:
-    Type: "Custom::Helm"
+    Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       Namespace: nginx-ingress
       Chart: stable/nginx-ingress

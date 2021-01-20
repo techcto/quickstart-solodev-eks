@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Deploys the Solodev CMS helm chart into an existing kubernetes cluster (qs-1qde66ffn)"
+Description: "Deploys the Solodev CMS helm chart into an existing kubernetes cluster"
 Metadata: 
   AWS::CloudFormation::Interface: 
     ParameterGroups: 

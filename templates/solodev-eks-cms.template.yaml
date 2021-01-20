@@ -182,7 +182,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ClusterName: !Ref ClusterName
+      ClusterID: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
       Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName
@@ -210,7 +210,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ClusterName: !Ref ClusterName
+      ClusterID: !Ref ClusterName
       RepoUrl: !Ref RepoUrl
       Chart: !Ref DefaultCMS
       Name: !Ref AWS::StackName

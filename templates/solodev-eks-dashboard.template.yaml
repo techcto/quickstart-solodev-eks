@@ -27,7 +27,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ClusterName: !Ref ClusterName
+      ClusterID: !Ref ClusterName
       Namespace: metrics
       Chart: stable/metrics-server
       Name: metrics-server

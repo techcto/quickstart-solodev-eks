@@ -23,7 +23,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ClusterName: !Ref ClusterName
+      ClusterID: !Ref ClusterName
       Namespace: external-dns
       Chart: stable/external-dns
       Name: external-dns

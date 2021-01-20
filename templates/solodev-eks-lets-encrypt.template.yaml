@@ -38,7 +38,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Version: '1.0'
     Properties:
-      ClusterName: !Ref ClusterName
+      ClusterID: !Ref ClusterName
       RepoUrl: !Ref CertManagerRepoUrl
       Chart: jetstack/cert-manager
       Name: cert-manager
@@ -51,7 +51,7 @@ Resources:
   #   Type: "AWSQS::Kubernetes::Helm"
   #   Version: '1.0'
   #   Properties:
-  #     ClusterName: !Ref ClusterName
+  #     ClusterID: !Ref ClusterName
   #     RepoUrl: !Ref LetsEncryptRepoUrl
   #     Chart: charts/lets-encrypt
   #     Name: !Join [ '-', [ 'enc', !Ref 'AWS::StackName' ] ]

@@ -31,6 +31,7 @@ tests:
   # cms:
   #   parameters:      
   #     WebStackArn: $[WebStackArn]
+  #     HelmLambdaArn: $[HelmLambdaArn]
   #     ClusterName: $[ClusterName]
   #     AdminPassword: $[AdminPassword]
   #     DatabasePassword: $[DatabasePassword]

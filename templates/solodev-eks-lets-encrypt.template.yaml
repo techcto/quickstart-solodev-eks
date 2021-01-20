@@ -11,7 +11,7 @@ Metadata:
           default: "Config"
         Parameters: 
         Parameters: 
-          - WebStackArn
+          - HelmLambdaArn
           - ClusterName
           - CertManagerRepoUrl
           - LetsEncryptRepoUrl
@@ -19,7 +19,7 @@ Metadata:
 
 Parameters:
 
-  WebStackArn:
+  HelmLambdaArn:
     Type: String
 
   ClusterName:
@@ -42,7 +42,7 @@ Resources:
     Type: "Custom::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref WebStackArn
+      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       RepoUrl: !Ref CertManagerRepoUrl
       Chart: jetstack/cert-manager
@@ -56,7 +56,7 @@ Resources:
   #   Type: "Custom::Helm"
   #   Version: '1.0'
   #   Properties:
-  #     ServiceToken: !Ref WebStackArn
+  #     ServiceToken: !Ref HelmLambdaArn
   #     ClusterName: !Ref ClusterName
   #     RepoUrl: !Ref LetsEncryptRepoUrl
   #     Chart: charts/lets-encrypt

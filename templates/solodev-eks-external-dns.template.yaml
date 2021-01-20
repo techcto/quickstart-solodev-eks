@@ -10,12 +10,12 @@ Metadata:
         Label: 
           default: "EKS Cluster"
         Parameters: 
-          - WebStackArn
+          - HelmLambdaArn
           - ClusterName
 
 Parameters:
 
-  WebStackArn:
+  HelmLambdaArn:
     Type: String
 
   ClusterName:
@@ -27,7 +27,7 @@ Resources:
     Type: "Custom::Helm"
     Version: '1.0'
     Properties:
-      ServiceToken: !Ref WebStackArn
+      ServiceToken: !Ref HelmLambdaArn
       ClusterName: !Ref ClusterName
       Namespace: external-dns
       Chart: stable/external-dns

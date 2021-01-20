@@ -34,6 +34,10 @@ The following parameters must be configured to launch your Kubernetes Web UI (Da
 		<td>WebStackArn</td>
 		<td>The "WebStackArn" as found in your Solodev Managed Kubernetes for EKS CloudFormation stack output.</td>
 	</tr>
+	<tr>
+		<td>HelmLambdaArn</td>
+		<td>The "HelmLambdaArn" as found in your Solodev Managed Kubernetes for EKS CloudFormation stack output.</td>
+	</tr>  
 </table>
 
 ---

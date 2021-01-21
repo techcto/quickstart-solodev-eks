@@ -147,7 +147,7 @@ Parameters:
 
   AppVersion:
     Type: String
-    Default: ""
+    Default: "9.3.1"
     Description: "CMS version"
 
 Conditions:

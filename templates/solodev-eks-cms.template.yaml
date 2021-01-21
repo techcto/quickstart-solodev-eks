@@ -180,11 +180,9 @@ Resources:
     Condition: InstallWordpress
     DependsOn: Marketplace
     Type: "AWSQS::Kubernetes::Helm"
-    Version: '1.0'
     Properties:
       ClusterID: !Ref ClusterName
-      RepoUrl: !Ref RepoUrl
-      Chart: !Ref DefaultCMS
+      Chart: !Join [ '.', !Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion
@@ -208,11 +206,9 @@ Resources:
     Condition: InstallSolodev
     DependsOn: Marketplace
     Type: "AWSQS::Kubernetes::Helm"
-    Version: '1.0'
     Properties:
       ClusterID: !Ref ClusterName
-      RepoUrl: !Ref RepoUrl
-      Chart: !Ref DefaultCMS
+      Chart: !Join [ '.', !Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       ValueYaml: !Sub |

@@ -182,7 +182,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Properties:
       ClusterID: !Ref ClusterName
-      Chart: !Join [ '.', [!Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]]
+      Chart: !Join [ '.', [!Join [ '/', [!Ref RepoUrl, !Join [ '-', [!Ref DefaultCMS, !Ref AppVersion]]]], 'tgz' ]]
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion
@@ -208,7 +208,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Properties:
       ClusterID: !Ref ClusterName
-      Chart: !Join [ '.', [!Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]]
+      Chart: !Join [ '.', [!Join [ '/', [!Ref RepoUrl, !Join [ '-', [!Ref DefaultCMS, !Ref AppVersion]]]], 'tgz' ]]
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion

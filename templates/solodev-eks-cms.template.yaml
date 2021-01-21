@@ -182,7 +182,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Properties:
       ClusterID: !Ref ClusterName
-      Chart: !Join [ '.', !Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]
+      Chart: !Join [ '.', [!Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]]
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion
@@ -208,9 +208,10 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Properties:
       ClusterID: !Ref ClusterName
-      Chart: !Join [ '.', !Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]
+      Chart: !Join [ '.', [!Ref RepoUrl, !Ref DefaultCMS, 'tgz' ]]
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
+      Version: !Ref AppVersion
       ValueYaml: !Sub |
         serviceAccountName: "${ServiceRoleName}"
         solodev:

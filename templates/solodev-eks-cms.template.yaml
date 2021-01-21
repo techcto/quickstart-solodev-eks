@@ -160,8 +160,8 @@ Conditions:
       "Fn::Not":
         - Condition: cleanInstall
   installTheme: !Equals [!Ref WebsiteThemeUrl, '']
-  InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms']
-  InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
+  InstallSolodev: !Equals [!Ref DefaultCMS, 'solodev-cms']
+  InstallWordpress: !Equals [!Ref DefaultCMS, 'wordpress']
 
 Resources:
 

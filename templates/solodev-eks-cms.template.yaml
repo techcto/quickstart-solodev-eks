@@ -119,7 +119,7 @@ Parameters:
 
   RepoUrl:
     Type: String
-    Default: "https://raw.githubusercontent.com/techcto/charts/master/"
+    Default: "https://raw.githubusercontent.com/techcto/charts/master"
 
   DomainName:
     Description: This is the DNS Zone for all clusters
@@ -141,8 +141,8 @@ Parameters:
 
   DefaultCMS:
     Type: String
-    AllowedValues: [ "charts/solodev-cms", "charts/wordpress" ]
-    Default: "charts/wordpress"
+    AllowedValues: [ "solodev-cms", "wordpress" ]
+    Default: "wordpress"
     Description: "Choose preferred CMS"
 
   AppVersion:

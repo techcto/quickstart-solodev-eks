@@ -1,0 +1,32 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5RENDQWJDZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeE1ERXlNREl4TlRrME5sb1hEVE14TURFeE9ESXhOVGswTmxvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTmFMClY3RnhWSXhmNmh1Z1c2MjNwWHBDSHVBM0FqUE01dDdTaHR0cVY1Yzg0VlRkOW5YTzhPY2I4YkdNemlrNkJFaWMKZXpIS0k5blF5Y2FrYWtwOGdhWXJwSFJsSlo4MFVNd1pzNnp4bDlMM002bmFNZTVob0d1VmM5M2gwZ2pMVG82VgpUWmJKZDNFakltVlZoWHlrdzE1Uk4xZThibHhpTnRlVFlwS3JWbzZ0Z2tIT205SU4zbkY5NUJTeTlQVFBQdDROCjRaeUNQUGVpRW9od1hiNGxYUzhwb0VNMnRIelA2UVp1T1RtSndmbUQ4eVJqUGFpV2NYNmZJaFN5YWtTT05RQWkKODRiSTFRTlBhT3RIdEgxT05YUzluNkVUK0piZDNTQm91U3Y2NkpKWUFHSEtyQWtXckVUdFh6SUlDdUhCeWVwcwphUTQ5TUROS0pzOXB6N3UzQzJrQ0F3RUFBYU1qTUNFd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0RRWUpLb1pJaHZjTkFRRUxCUUFEZ2dFQkFEcXFqZm9TNnFvQWJybU5NMHdLanhhVUJTTnoKYTNXaUF1Y0psemkwSDRSTDE3TExsc2FxMXprOW1YRkI3b2g0N1l4RmwxZlczQXU5YllmdkR5d2hENTBzK0tUVQp6a1RuTGtqc0RObzFIZWZncHQ3YlhJYkc1QnBIUEMxY2k5V2RrNzE4ODFyTnUwejczTGRKa3Z1cVYydWNMbExkCldCeGwrTHp3TTlwRm1KVFlhMHZ3RUVpSkZCUVNqV1VIUWsyQWtUcDFTbHc4b21lUmQzUmMwRElhay9oRWx1Q3cKalFzN2FHUFBzUkNYczZkSHlBUTZLcGE5TlU3QVlkTlc0azBnMm9YYk55bDV0aURPTFN5ZmxnVjl6RkZmTzg4YQpjMWRiRWhDYXVVR2ZpanRSYmZHYldka3I2bjk1STlrQTk3S0cwMjNBc0UzZ2ltZ1l2UllmaHhKUzB0Yz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+    server: https://BFA273FA3AF76BAF9922D5D26513B67E.gr7.us-east-1.eks.amazonaws.com
+  name: arn:aws:eks:us-east-1:501911125390:cluster/EKS-Y5Q1PEMW
+contexts:
+- context:
+    cluster: arn:aws:eks:us-east-1:501911125390:cluster/EKS-Y5Q1PEMW
+    user: arn:aws:eks:us-east-1:501911125390:cluster/EKS-Y5Q1PEMW
+  name: arn:aws:eks:us-east-1:501911125390:cluster/EKS-Y5Q1PEMW
+current-context: arn:aws:eks:us-east-1:501911125390:cluster/EKS-Y5Q1PEMW
+kind: Config
+preferences: {}
+users:
+- name: arn:aws:eks:us-east-1:501911125390:cluster/EKS-Y5Q1PEMW
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - --region
+      - us-east-1
+      - eks
+      - get-token
+      - --cluster-name
+      - EKS-Y5Q1PEMW
+      - --role
+      - arn:aws:iam::501911125390:role/eks3-SysOpsAdminRole-1UO277OWDGWVD
+      command: aws
+      env:
+      - name: AWS_PROFILE
+        value: cloud

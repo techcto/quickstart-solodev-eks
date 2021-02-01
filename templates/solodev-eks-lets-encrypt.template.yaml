@@ -36,27 +36,30 @@ Resources:
 
   CertManager:
     Type: "AWSQS::Kubernetes::Helm"
-    Version: '1.0'
+    Version: '1.1'
     Properties:
       ClusterID: !Ref ClusterName
-      RepoUrl: !Ref CertManagerRepoUrl
+      Repository: !Ref CertManagerRepoUrl
       Chart: jetstack/cert-manager
       Name: cert-manager
       Namespace: cert-manager
       ValueYaml: !Sub |
         installCRDs: true
+        webhook:
+          securePort: 10251
+          hostNetwork: true
 
-  # LetsEncrypt:
-  #   DependsOn: CertManager
-  #   Type: "AWSQS::Kubernetes::Helm"
-  #   Version: '1.0'
-  #   Properties:
-  #     ClusterID: !Ref ClusterName
-  #     RepoUrl: !Ref LetsEncryptRepoUrl
-  #     Chart: charts/lets-encrypt
-  #     Name: !Join [ '-', [ 'enc', !Ref 'AWS::StackName' ] ]
-  #     Namespace: cert-manager
-  #     ValueYaml: !Sub |
-  #       ssl:
-  #         email: ${AdminEmail}
+  LetsEncrypt:
+    DependsOn: CertManager
+    Type: "AWSQS::Kubernetes::Helm"
+    Version: '1.2'
+    Properties:
+      ClusterID: !Ref ClusterName
+      Repository: !Ref LetsEncryptRepoUrl
+      Chart: charts/lets-encrypt
+      Name: !Join [ '-', [ 'enc', !Ref 'AWS::StackName' ] ]
+      Namespace: cert-manager
+      ValueYaml: !Sub |
+        ssl:
+          email: ${AdminEmail}
 

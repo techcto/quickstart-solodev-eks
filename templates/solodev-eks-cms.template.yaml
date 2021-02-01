@@ -141,13 +141,13 @@ Parameters:
 
   DefaultCMS:
     Type: String
-    AllowedValues: [ "solodev-cms", "wordpress" ]
-    Default: "wordpress"
+    AllowedValues: [ "charts/solodev-cms", "charts/wordpress" ]
+    Default: ""
     Description: "Choose preferred CMS"
 
   AppVersion:
     Type: String
-    Default: "9.3.1"
+    Default: "latest"
     Description: "CMS version"
 
 Conditions:
@@ -160,8 +160,8 @@ Conditions:
       "Fn::Not":
         - Condition: cleanInstall
   installTheme: !Equals [!Ref WebsiteThemeUrl, '']
-  InstallSolodev: !Equals [!Ref DefaultCMS, 'solodev-cms']
-  InstallWordpress: !Equals [!Ref DefaultCMS, 'wordpress']
+  InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms']
+  InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
 
 Resources:
 
@@ -182,7 +182,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Properties:
       ClusterID: !Ref ClusterName
-      Chart: !Join [ '.', [!Join [ '/', [!Ref RepoUrl, !Join [ '-', [!Ref DefaultCMS, !Ref AppVersion]]]], 'tgz' ]]
+      Repository: !Ref RepoUrl
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion
@@ -208,7 +208,7 @@ Resources:
     Type: "AWSQS::Kubernetes::Helm"
     Properties:
       ClusterID: !Ref ClusterName
-      Chart: !Join [ '.', [!Join [ '/', [!Ref RepoUrl, !Join [ '-', [!Ref DefaultCMS, !Ref AppVersion]]]], 'tgz' ]]
+      Repository: !Ref RepoUrl
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion

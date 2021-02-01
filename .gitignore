@@ -6,7 +6,7 @@ eks/bin/*
 eks/bin/!kcmd.sh
 eks/bin/!setService.sh
 
-ci/bin
+ci/*
 /.idea
 /taskcat_outputs
 /venv

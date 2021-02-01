@@ -141,7 +141,7 @@ Parameters:
 
   DefaultCMS:
     Type: String
-    AllowedValues: [ "charts/solodev-cms", "charts/wordpress" ]
+    AllowedValues: [ "solodev-cms", "wordpress" ]
     Default: ""
     Description: "Choose preferred CMS"
 
@@ -160,8 +160,8 @@ Conditions:
       "Fn::Not":
         - Condition: cleanInstall
   installTheme: !Equals [!Ref WebsiteThemeUrl, '']
-  InstallSolodev: !Equals [!Ref DefaultCMS, 'charts/solodev-cms']
-  InstallWordpress: !Equals [!Ref DefaultCMS, 'charts/wordpress']
+  InstallSolodev: !Equals [!Ref DefaultCMS, 'solodev-cms']
+  InstallWordpress: !Equals [!Ref DefaultCMS, 'wordpress']
 
 Resources:
 
@@ -183,6 +183,7 @@ Resources:
     Properties:
       ClusterID: !Ref ClusterName
       Repository: !Ref RepoUrl
+      Chart: charts/wordpress
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion
@@ -209,6 +210,7 @@ Resources:
     Properties:
       ClusterID: !Ref ClusterName
       Repository: !Ref RepoUrl
+      Chart: charts/solodev-cms
       Name: !Ref AWS::StackName
       Namespace: !Ref Namespace
       Version: !Ref AppVersion

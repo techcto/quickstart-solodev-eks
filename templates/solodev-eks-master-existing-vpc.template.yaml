@@ -387,8 +387,8 @@ Parameters:
     Description: "Choose Enabled to enable Solodev CMS"
   DefaultCMS:
     Type: String
-    AllowedValues: [ "", "charts/solodev-cms", "charts/wordpress" ]
-    Default: "charts/wordpress"
+    AllowedValues: [ "solodev-cms", "wordpress" ]
+    Default: "wordpress"
     Description: "Choose preferred CMS"
   AppVersion:
     Type: String

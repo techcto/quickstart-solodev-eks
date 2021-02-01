@@ -52,7 +52,7 @@ Resources:
   LetsEncrypt:
     DependsOn: CertManager
     Type: "AWSQS::Kubernetes::Helm"
-    Version: '1.2'
+    Version: '1.3'
     Properties:
       ClusterID: !Ref ClusterName
       Repository: !Ref LetsEncryptRepoUrl

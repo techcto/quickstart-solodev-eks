@@ -142,7 +142,6 @@ Parameters:
   DefaultCMS:
     Type: String
     AllowedValues: [ "solodev-cms", "wordpress" ]
-    Default: ""
     Description: "Choose preferred CMS"
 
   AppVersion:
